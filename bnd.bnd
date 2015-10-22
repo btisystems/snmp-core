@@ -1,3 +1,5 @@
 -exportcontents: \
-	com.btisystems
--sources: true
+	com.btisystems.pronx.ems.core.exception,com.btisystems.pronx.ems.core.model, \
+	com.btisystems.pronx.ems.core.snmp,com.btisystems.pronx.ems.core.snmp.trapreceiver,\
+	com.btisystems.pronx.ems.core.snmp.trapsender,com.btisystems.pronx.ems.schemas.meta.notification
+-sources: false

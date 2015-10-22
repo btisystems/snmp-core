@@ -27,9 +27,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.7</java.version>
-        <jaxb2-basics.version>0.6.4</jaxb2-basics.version>
         <powermock.version>1.5.6</powermock.version>
-        <generated.dir>src/generated/java</generated.dir>
     </properties>
     <dependencies>
         <dependency>
@@ -52,11 +50,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jvnet.jaxb2_commons</groupId>
-            <artifactId>jaxb2-basics-runtime</artifactId>
-            <version>${jaxb2-basics.version}</version>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>
@@ -128,82 +121,6 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${generated.dir}</source>
-                                <source>src/main/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.7.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <generateDirectory>${generated.dir}</generateDirectory>
-                    <extension>true</extension>
-                    <args>
-                        <arg>-XtoString</arg>
-                        <arg>-Xequals</arg>
-                        <arg>-XhashCode</arg>
-                        <arg>-Xcopyable</arg>
-                        <arg>-Xfluent-api</arg>
-                        <!--    <arg>-Xcollection-setter-injector</arg> -->
-                    </args>
-                    <schemaDirectory>src/main/resources</schemaDirectory>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics</artifactId>
-                            <version>${jaxb2-basics.version}</version>
-                        </plugin>
-                        <!--       <plugin>
-                                   <groupId>org.jvnet.jaxb2_commons</groupId>
-                                   <artifactId>collection-setter-injector</artifactId>
-                                   <version>1.0</version>
-                               </plugin> -->
-                        <plugin>
-                            <groupId>net.java.dev.jaxb2-commons</groupId>
-                            <artifactId>jaxb-fluent-api</artifactId>
-                            <version>2.1.8</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${generated.dir}</directory>
-                            <includes>
-                                <include>com</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

@@ -18,3 +18,6 @@ settings.xml
 # intellij
 .idea
 snmp-core.iml
+
+# generated code
+src/generated

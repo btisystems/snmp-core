@@ -31,10 +31,8 @@ public class NotificationList implements Serializable {
     protected List<NotificationDefinition> notificationDefinition;
 
     @Override
-    public String toString() {
-        return "NotificationList{" +
-                "notificationDefinition=" + notificationDefinition +
-                '}';
+    public int hashCode() {
+        return notificationDefinition != null ? notificationDefinition.hashCode() : 0;
     }
 
     @Override
@@ -53,8 +51,25 @@ public class NotificationList implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        return notificationDefinition != null ? notificationDefinition.hashCode() : 0;
+    public String toString() {
+        return "NotificationList{" +
+                "notificationDefinition=" + notificationDefinition +
+                '}';
+    }
+
+    /**
+     * With notification definition notification list.
+     *
+     * @param values the values
+     * @return the notification list
+     */
+    public NotificationList withNotificationDefinition(NotificationDefinition... values) {
+        if (values != null) {
+            for (NotificationDefinition value : values) {
+                getNotificationDefinition().add(value);
+            }
+        }
+        return this;
     }
 
     /**
@@ -74,21 +89,6 @@ public class NotificationList implements Serializable {
      */
     public void setNotificationDefinition(List<NotificationDefinition> notificationDefinition) {
         this.notificationDefinition = notificationDefinition;
-    }
-
-    /**
-     * With notification definition notification list.
-     *
-     * @param values the values
-     * @return the notification list
-     */
-    public NotificationList withNotificationDefinition(NotificationDefinition... values) {
-        if (values != null) {
-            for (NotificationDefinition value : values) {
-                getNotificationDefinition().add(value);
-            }
-        }
-        return this;
     }
 
     /**

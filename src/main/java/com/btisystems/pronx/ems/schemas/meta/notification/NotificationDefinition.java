@@ -45,13 +45,12 @@ public class NotificationDefinition implements Serializable {
     protected String description;
 
     @Override
-    public String toString() {
-        return "NotificationDefinition{" +
-                "fieldReference=" + fieldReference +
-                ", oid='" + oid + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                '}';
+    public int hashCode() {
+        int result = fieldReference != null ? fieldReference.hashCode() : 0;
+        result = 31 * result + (oid != null ? oid.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -76,31 +75,13 @@ public class NotificationDefinition implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        int result = fieldReference != null ? fieldReference.hashCode() : 0;
-        result = 31 * result + (oid != null ? oid.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        return result;
-    }
-
-    /**
-     * Gets field reference.
-     *
-     * @return the field reference
-     */
-    public List<FieldReference> getFieldReference() {
-
-        return fieldReference;
-    }
-
-    /**
-     * Sets field reference.
-     *
-     * @param fieldReference the field reference
-     */
-    public void setFieldReference(List<FieldReference> fieldReference) {
-        this.fieldReference = fieldReference;
+    public String toString() {
+        return "NotificationDefinition{" +
+                "fieldReference=" + fieldReference +
+                ", oid='" + oid + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 
     /**
@@ -170,6 +151,25 @@ public class NotificationDefinition implements Serializable {
             }
         }
         return this;
+    }
+
+    /**
+     * Gets field reference.
+     *
+     * @return the field reference
+     */
+    public List<FieldReference> getFieldReference() {
+
+        return fieldReference;
+    }
+
+    /**
+     * Sets field reference.
+     *
+     * @param fieldReference the field reference
+     */
+    public void setFieldReference(List<FieldReference> fieldReference) {
+        this.fieldReference = fieldReference;
     }
 
     /**

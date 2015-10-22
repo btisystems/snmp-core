@@ -33,11 +33,10 @@ public class NotificationMeta implements Serializable {
     protected FieldList fieldList;
 
     @Override
-    public String toString() {
-        return "NotificationMeta{" +
-                "notificationList=" + notificationList +
-                ", fieldList=" + fieldList +
-                '}';
+    public int hashCode() {
+        int result = notificationList != null ? notificationList.hashCode() : 0;
+        result = 31 * result + (fieldList != null ? fieldList.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -56,10 +55,11 @@ public class NotificationMeta implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        int result = notificationList != null ? notificationList.hashCode() : 0;
-        result = 31 * result + (fieldList != null ? fieldList.hashCode() : 0);
-        return result;
+    public String toString() {
+        return "NotificationMeta{" +
+                "notificationList=" + notificationList +
+                ", fieldList=" + fieldList +
+                '}';
     }
 
     /**

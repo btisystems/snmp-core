@@ -21,6 +21,48 @@ import java.io.Serializable;
  */
 public class FieldDescription implements Serializable {
     private static final long serialVersionUID = 1734631453238572681L;
+    /**
+     * The Oid.
+     */
+    protected String oid;
+    /**
+     * The Name.
+     */
+    protected String name;
+    /**
+     * The Description.
+     */
+    protected String description;
+    /**
+     * The Type.
+     */
+    protected FieldType type;
+
+    public FieldDescription() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FieldDescription that = (FieldDescription) o;
+
+        if (oid != null ? !oid.equals(that.oid) : that.oid != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (description != null ? !description.equals(that.description) : that.description != null) return false;
+        return type == that.type;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = oid != null ? oid.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
+    }
 
     @Override
     public String toString() {
@@ -30,33 +72,6 @@ public class FieldDescription implements Serializable {
                 ", description='" + description + '\'' +
                 ", type=" + type +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        FieldDescription that = (FieldDescription) o;
-
-        if (!oid.equals(that.oid)) {
-            return false;
-        }
-        return !(name != null ? !name.equals(that.name) : that.name != null) && !(description != null ? !description.equals(that.description) : that.description != null) && type == that.type;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = oid.hashCode();
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
     }
 
     /**
@@ -131,23 +146,6 @@ public class FieldDescription implements Serializable {
     public void setType(FieldType type) {
         this.type = type;
     }
-
-    /**
-     * The Oid.
-     */
-    protected String oid;
-    /**
-     * The Name.
-     */
-    protected String name;
-    /**
-     * The Description.
-     */
-    protected String description;
-    /**
-     * The Type.
-     */
-    protected FieldType type;
 
     /**
      * With oid field description.

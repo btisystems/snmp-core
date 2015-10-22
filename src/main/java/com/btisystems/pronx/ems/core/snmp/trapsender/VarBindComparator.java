@@ -13,16 +13,18 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapsender;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
  * Used to order Var Binds in accordance with Snmp standards, i.e. in alpha
  * numeric order by OID.
  */
-public class VarBindComparator implements Comparator<String> {
+public class VarBindComparator implements Serializable, Comparator<String> {
 
     private static final int DIGIT_LOWER_BOUND = 48;
     private static final int DIGIT_UPPER_BOUND = 57;
+    private static final long serialVersionUID = -5662537156155610845L;
 
     private boolean isDigit(final char ch) {
         return ch >= DIGIT_LOWER_BOUND && ch <= DIGIT_UPPER_BOUND;

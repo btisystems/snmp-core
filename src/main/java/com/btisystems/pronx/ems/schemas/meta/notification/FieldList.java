@@ -29,10 +29,8 @@ public class FieldList implements Serializable {
     protected List<FieldDescription> fieldDescription;
 
     @Override
-    public String toString() {
-        return "FieldList{" +
-                "fieldDescription=" + fieldDescription +
-                '}';
+    public int hashCode() {
+        return fieldDescription != null ? fieldDescription.hashCode() : 0;
     }
 
     @Override
@@ -51,8 +49,25 @@ public class FieldList implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        return fieldDescription != null ? fieldDescription.hashCode() : 0;
+    public String toString() {
+        return "FieldList{" +
+                "fieldDescription=" + fieldDescription +
+                '}';
+    }
+
+    /**
+     * With field description field list.
+     *
+     * @param values the values
+     * @return the field list
+     */
+    public FieldList withFieldDescription(FieldDescription... values) {
+        if (values!= null) {
+            for (FieldDescription value: values) {
+                getFieldDescription().add(value);
+            }
+        }
+        return this;
     }
 
     /**
@@ -72,22 +87,6 @@ public class FieldList implements Serializable {
      */
     public void setFieldDescription(List<FieldDescription> fieldDescription) {
         this.fieldDescription = fieldDescription;
-    }
-
-
-    /**
-     * With field description field list.
-     *
-     * @param values the values
-     * @return the field list
-     */
-    public FieldList withFieldDescription(FieldDescription... values) {
-        if (values!= null) {
-            for (FieldDescription value: values) {
-                getFieldDescription().add(value);
-            }
-        }
-        return this;
     }
 
     /**

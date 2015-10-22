@@ -29,15 +29,6 @@ public enum FieldType {
     STRING;
 
     /**
-     * Value string.
-     *
-     * @return the string
-     */
-    public String value() {
-        return name();
-    }
-
-    /**
      * From value field type.
      *
      * @param v the v
@@ -45,6 +36,15 @@ public enum FieldType {
      */
     public static FieldType fromValue(String v) {
         return valueOf(v);
+    }
+
+    /**
+     * Value string.
+     *
+     * @return the string
+     */
+    public String value() {
+        return name();
     }
 
 }

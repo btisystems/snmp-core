@@ -27,10 +27,8 @@ public class FieldReference implements Serializable {
     protected Object description;
 
     @Override
-    public String toString() {
-        return "FieldReference{" +
-                "description=" + description +
-                '}';
+    public int hashCode() {
+        return description != null ? description.hashCode() : 0;
     }
 
     @Override
@@ -49,8 +47,10 @@ public class FieldReference implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        return description != null ? description.hashCode() : 0;
+    public String toString() {
+        return "FieldReference{" +
+                "description=" + description +
+                '}';
     }
 
     /**

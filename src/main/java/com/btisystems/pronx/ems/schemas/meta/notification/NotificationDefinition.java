@@ -42,14 +42,21 @@ public class NotificationDefinition {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         NotificationDefinition that = (NotificationDefinition) o;
 
-        if (fieldReference != null ? !fieldReference.equals(that.fieldReference) : that.fieldReference != null)
+        if (fieldReference != null ? !fieldReference.equals(that.fieldReference) : that.fieldReference != null) {
             return false;
-        if (oid != null ? !oid.equals(that.oid) : that.oid != null) return false;
+        }
+        if (oid != null ? !oid.equals(that.oid) : that.oid != null) {
+            return false;
+        }
         return !(name != null ? !name.equals(that.name) : that.name != null) && !(description != null ? !description.equals(that.description) : that.description != null);
 
     }

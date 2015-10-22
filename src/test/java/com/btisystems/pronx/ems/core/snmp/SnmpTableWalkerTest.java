@@ -181,6 +181,7 @@ public class SnmpTableWalkerTest {
                 		      "1.2.3.1.55.66.1", "VALUE1", "1.2.3.2.55.66.1", "VALUE2", "1.2.3.3.55.66.1", "VALUE3",
         					  "1.2.4.1.55.66.1", "VALUE1", "1.2.4.2.55.66.1", "VALUE2", "1.2.4.3.55.66.1", "VALUE3"});
 
+
         final WalkResponse walkResponse = tableWalker.getTableRows(mockVariableHandler, tableIndexes);
 
         verify(mockVariableHandler).addVariable(thatDefinesVariable("1.2.3.1.10.11.12", "VALUE1"));
@@ -316,7 +317,7 @@ public class SnmpTableWalkerTest {
 		return this;
 	}
 
-	private SnmpTableWalkerTest withResponses(final String[] ... responseSets) throws IOException {
+	private synchronized SnmpTableWalkerTest withResponses(final String[] ... responseSets) throws IOException {
 		Stubber stubber = new StubberImpl();
 		for (final String[] responseSet : responseSets) {
 			stubber = stubber.doAnswer(new Answer<Void>() {

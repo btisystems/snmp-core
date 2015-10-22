@@ -18,7 +18,7 @@ import org.snmp4j.smi.OID;
 
 /**
  * The interface supported by an entity for an indexed managed object.
- * <p>
+ * <p/>
  * An indexed managed object is one that is used to populate a table, and
  * the index is used to identify a specific instance of the entity in the
  * table.
@@ -28,11 +28,13 @@ public interface IIndexed {
     /**
      * Set the index of this to values defined by an OID.
      *
-     * @param oid   an OID that ends with the index to be set for this object.
+     * @param oid an OID that ends with the index to be set for this object.
      */
     void _setIndex(OID oid);
 
     /**
+     * Get index string.
+     *
      * @return the index of this entity instance, as a string.
      */
     String _getIndex();

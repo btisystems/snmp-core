@@ -25,9 +25,11 @@ import org.snmp4j.smi.OctetString;
 /**
  * Base class for SNMP Configuration, extended for different versions.
  */
-
 public abstract class SnmpConfiguration implements ISnmpConfiguration {
 
+    /**
+     * The Version.
+     */
     protected int version;
     
     private static final int DEFAULT_TIMEOUT = 1000;
@@ -57,27 +59,74 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
         this.community = new OctetString(community);
     }
 
+    /**
+     * Sets retries.
+     *
+     * @param retries the retries
+     */
     public void setRetries(final int retries) {
         this.retries = retries;
     }
+
+    /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
     public void setTimeout(final int timeout) {
         this.timeout = timeout;
     }
+
+    /**
+     * Sets max repetitions.
+     *
+     * @param maxRepetitions the max repetitions
+     */
     public void setMaxRepetitions(final int maxRepetitions) {
         this.maxRepetitions = maxRepetitions;
     }
+
+    /**
+     * Sets non repeaters.
+     *
+     * @param nonRepeaters the non repeaters
+     */
     public void setNonRepeaters(final int nonRepeaters) {
         this.nonRepeaters = nonRepeaters;
     }
+
+    /**
+     * Sets max size response pdu.
+     *
+     * @param maxSizeResponsePDU the max size response pdu
+     */
     public void setMaxSizeResponsePDU(final int maxSizeResponsePDU) {
         this.maxSizeResponsePDU = maxSizeResponsePDU;
     }
+
+    /**
+     * Sets walk timeout.
+     *
+     * @param walkTimeout the walk timeout
+     */
     public void setWalkTimeout(final int walkTimeout) {
         this.walkTimeout = walkTimeout;
     }
+
+    /**
+     * Gets dispatcher pool size.
+     *
+     * @return the dispatcher pool size
+     */
     public int getDispatcherPoolSize() {
         return dispatcherPoolSize;
     }
+
+    /**
+     * Sets dispatcher pool size.
+     *
+     * @param dispatcherPoolSize the dispatcher pool size
+     */
     public void setDispatcherPoolSize(final int dispatcherPoolSize) {
         this.dispatcherPoolSize = dispatcherPoolSize;
     }
@@ -92,9 +141,20 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
         return walkTimeout;
     }
 
+    /**
+     * Gets retries.
+     *
+     * @return the retries
+     */
     protected int getRetries() {
         return retries;
     }
+
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
     protected int getTimeout() {
         return timeout;
     }
@@ -102,10 +162,21 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
     public int getMaxRepetitions() {
         return maxRepetitions;
     }
-    
+
+    /**
+     * Gets non repeaters.
+     *
+     * @return the non repeaters
+     */
     public int getNonRepeaters() {
         return nonRepeaters;
     }
+
+    /**
+     * Gets max size response pdu.
+     *
+     * @return the max size response pdu
+     */
     public int getMaxSizeResponsePDU() {
         return maxSizeResponsePDU;
     }
@@ -118,6 +189,12 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
     public int getMaximumRowsPerPdu() {
         return maximumRowsPerPdu;
     }
+
+    /**
+     * Sets maximum rows per pdu.
+     *
+     * @param maximumRowsPerPdu the maximum rows per pdu
+     */
     public void setMaximumRowsPerPdu(final int maximumRowsPerPdu) {
 		this.maximumRowsPerPdu = maximumRowsPerPdu;
     }
@@ -125,6 +202,12 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
     public int getMaximumColumnsPerPdu() {
         return maximumColumnsPerPdu;
     }
+
+    /**
+     * Sets maximum columns per pdu.
+     *
+     * @param maximumColumnsPerPdu the maximum columns per pdu
+     */
     public void setMaximumColumnsPerPdu(final int maximumColumnsPerPdu) {
         this.maximumColumnsPerPdu = maximumColumnsPerPdu;
     }

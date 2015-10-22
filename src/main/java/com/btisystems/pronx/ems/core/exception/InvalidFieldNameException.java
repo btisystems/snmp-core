@@ -18,11 +18,16 @@ import com.btisystems.pronx.ems.core.model.DeviceEntity;
 /**
  * Thrown when walk is interrupted by an exception
  */
-
 public class InvalidFieldNameException extends DetailedFaultException {
 
     private static final long serialVersionUID = -2285401779827218734L;
 
+    /**
+     * Instantiates a new Invalid field name exception.
+     *
+     * @param entity    the entity
+     * @param fieldName the field name
+     */
     public InvalidFieldNameException(final DeviceEntity entity, final String fieldName) {
         super("Attempt to access unknown field [%2$s] on entity [%1$s]", entity.getClass().getName(), fieldName);
     }

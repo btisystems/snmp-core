@@ -13,26 +13,64 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapsender;
 
+/**
+ * The type Trap recipient.
+ */
 public class TrapRecipient {
     private String ipAddress = null;
     private int port = 0;
     private String community = null;
-    
+
+	/**
+	 * Gets ip address.
+	 *
+	 * @return the ip address
+	 */
 	public String getIpAddress() {
 		return ipAddress;
 	}
+
+	/**
+	 * Sets ip address.
+	 *
+	 * @param ipAddress the ip address
+	 */
 	public void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
+
+	/**
+	 * Gets port.
+	 *
+	 * @return the port
+	 */
 	public int getPort() {
 		return port;
 	}
+
+	/**
+	 * Sets port.
+	 *
+	 * @param port the port
+	 */
 	public void setPort(int port) {
 		this.port = port;
 	}
+
+	/**
+	 * Gets community.
+	 *
+	 * @return the community
+	 */
 	public String getCommunity() {
 		return community;
 	}
+
+	/**
+	 * Sets community.
+	 *
+	 * @param community the community
+	 */
 	public void setCommunity(String community) {
 		this.community = community;
 	}

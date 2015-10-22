@@ -24,9 +24,8 @@ public interface IVariableBindingHandler {
     /**
      * Adds a variable to the device description.
      *
-     * @param binding   defines the variable to be added to the description.
-     * @return  false only if the binding was not added because the OID was not part
-     *          of the device description
+     * @param binding defines the variable to be added to the description.
+     * @return false only if the binding was not added because the OID was not part          of the device description
      */
     boolean addVariable(VariableBinding binding);
 

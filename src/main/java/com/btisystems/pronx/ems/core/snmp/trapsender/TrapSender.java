@@ -42,6 +42,9 @@ import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescript
 import com.btisystems.pronx.ems.core.snmp.ISnmpNotificationOidLookup;
 import com.btisystems.pronx.ems.core.model.INotification;
 
+/**
+ * The type Trap sender.
+ */
 public class TrapSender implements ITrapSender {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrapSender.class);

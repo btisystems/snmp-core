@@ -42,19 +42,41 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
     @GeneratedValue(strategy = GenerationType.TABLE)
     private int id;
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     public int getId() {
         return id;
     }
 
     private String deviceAddress;
 
+    /**
+     * Gets device address.
+     *
+     * @return the device address
+     */
     public String getDeviceAddress() {
         return deviceAddress;
     }
+
+    /**
+     * Sets device address.
+     *
+     * @param deviceAddress the device address
+     */
     public void setDeviceAddress(final String deviceAddress) {
         this.deviceAddress = deviceAddress;
     }
 
+    /**
+     * Is entity supported boolean.
+     *
+     * @param fieldName the field name
+     * @return the boolean
+     */
     public boolean isEntitySupported(final String fieldName) {
         boolean result = true;
         try {
@@ -69,11 +91,8 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
     /**
      * Returns the entity with the specified OID.
      *
-     * @param oid   the OID of the entity to be returned
-     *
-     * @return  the {@link DeviceEntity} with the specified oid, which may be <code>null</code>
-     *          if the entity has not been instantiated, or if the oid is not registered for
-     *          the device.
+     * @param oid the OID of the entity to be returned
+     * @return the {@link DeviceEntity} with the specified oid, which may be <code>null</code>          if the entity has not been instantiated, or if the oid is not registered for          the device.
      */
     public DeviceEntity getEntity(final OID oid) {
         for (final DeviceEntity root : getRoots()) {
@@ -85,6 +104,12 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
         return null;
     }
 
+    /**
+     * Gets entity.
+     *
+     * @param fieldName the field name
+     * @return the entity
+     */
     public DeviceEntity getEntity(final String fieldName) {
         try {
             final Method method = this.getClass().getMethod(getGetterName(fieldName));
@@ -129,6 +154,12 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
         setObject(childObject.getClass(), childObject);
     }
 
+    /**
+     * Gets object.
+     *
+     * @param clazz the clazz
+     * @return the object
+     */
     @SuppressWarnings("rawtypes")
     public Object getObject(final Class clazz) {
         String sn = null;
@@ -146,6 +177,12 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
         }
     }
 
+    /**
+     * Create entity device entity.
+     *
+     * @param entityName the entity name
+     * @return the device entity
+     */
     public DeviceEntity createEntity(final String entityName) {
         final Class<? extends DeviceEntity> clazz = getEntityType(entityName);
 
@@ -183,8 +220,7 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
     /**
      * Return the root objects for the device
      *
-     * @return  an array of {@link DeviceEntity}s each of which is a root of a
-     *          hierarchy of entities supported by the device
+     * @return an array of {@link DeviceEntity}s each of which is a root of a          hierarchy of entities supported by the device
      */
     public abstract DeviceEntity[] getRoots();
 }

@@ -24,10 +24,21 @@ public class SystemObjectIdException extends DetailedFaultException {
 
     private static final long serialVersionUID = -2285401779827208734L;
 
+    /**
+     * Instantiates a new System object id exception.
+     *
+     * @param address the address
+     */
     public SystemObjectIdException(final Address address) {
         super("Failed to get System Object Id from device [%1$s]", getHostAddress(address));
     }
 
+    /**
+     * Instantiates a new System object id exception.
+     *
+     * @param address   the address
+     * @param throwable the throwable
+     */
     public SystemObjectIdException(final Address address,
                                    final Throwable throwable) {
         super("Failed to get System Object Id from device [%1$s] [%2$s]", getHostAddress(address), throwable.getMessage());

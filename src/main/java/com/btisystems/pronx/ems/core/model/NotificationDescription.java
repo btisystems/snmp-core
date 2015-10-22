@@ -25,7 +25,6 @@ import com.btisystems.pronx.ems.schemas.meta.notification.FieldDescription;
 /**
  * MIB-derived metadata for notifications.
  */
-
 public class NotificationDescription {
 
     // The OID associated with the notification.
@@ -38,6 +37,14 @@ public class NotificationDescription {
     private final String name;
     private final String description;
 
+    /**
+     * Instantiates a new Notification description.
+     *
+     * @param oid         the oid
+     * @param name        the name
+     * @param description the description
+     * @param fields      the fields
+     */
     public NotificationDescription(final OID oid,
                                    final String name,
                                    final String description,
@@ -57,27 +64,59 @@ public class NotificationDescription {
         fieldsByOid.put(description.getOid(), description);
     }
 
+    /**
+     * Gets oid.
+     *
+     * @return the oid
+     */
     public OID getOid() {
         return oid;
     }
 
+    /**
+     * Gets field by name.
+     *
+     * @param name the name
+     * @return the field by name
+     */
     public FieldDescription getFieldByName(final String name) {
         return fieldsByName.get(name);
     }
 
+    /**
+     * Gets field by oid.
+     *
+     * @param oid the oid
+     * @return the field by oid
+     */
     public FieldDescription getFieldByOid(final String oid) {
         final FieldDescription fieldDescription = fieldsByOid.get(oid);
         return fieldDescription;
     }
 
+    /**
+     * Gets fields.
+     *
+     * @return the fields
+     */
     public Collection<FieldDescription> getFields() {
         return fieldsByName.values();
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets description.
+     *
+     * @return the description
+     */
     public String getDescription() {
         return description;
     }

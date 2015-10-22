@@ -15,35 +15,97 @@ package com.btisystems.pronx.ems.core.model;
 
 import java.beans.PropertyChangeListener;
 
+/**
+ * The interface Device entity.
+ */
 public interface IDeviceEntity extends Cloneable {
 
     /**
-     * @return  the description for the device entity
+     * Gets description.
+     *
+     * @return the description for the device entity
      */
     DeviceEntityDescription get_Description();
 
+    /**
+     * Gets string.
+     *
+     * @param fieldName the field name
+     * @return the string
+     */
     String getString(final String fieldName);
 
+    /**
+     * Gets int.
+     *
+     * @param fieldName the field name
+     * @return the int
+     */
     int getInt(final String fieldName);
 
+    /**
+     * Gets long.
+     *
+     * @param fieldName the field name
+     * @return the long
+     */
     long getLong(final String fieldName);
 
+    /**
+     * Set.
+     *
+     * @param fieldName the field name
+     * @param value     the value
+     */
     void set(final String fieldName, final String value);
 
+    /**
+     * Set.
+     *
+     * @param fieldName the field name
+     * @param value     the value
+     */
     void set(final String fieldName, final int value);
 
+    /**
+     * Set.
+     *
+     * @param fieldName the field name
+     * @param value     the value
+     */
     void set(final String fieldName, final long value);
 
+    /**
+     * Add property change listener.
+     *
+     * @param listener the listener
+     */
     void addPropertyChangeListener(final PropertyChangeListener listener);
 
+    /**
+     * Remove property change listener.
+     *
+     * @param listener the listener
+     */
     void removePropertyChangeListener(final PropertyChangeListener listener);
 
+    /**
+     * Clear property change listeners.
+     */
     void clearPropertyChangeListeners();
 
+    /**
+     * Sets parent entity.
+     *
+     * @param parent the parent
+     */
     void set_ParentEntity(final AbstractRootEntity parent);
 
     /**
-     * @return  true/false according to whether named field is supported by the entity.
+     * Is supported boolean.
+     *
+     * @param fieldName the field name
+     * @return true /false according to whether named field is supported by the entity.
      */
     boolean isSupported(String fieldName);
 }

@@ -15,8 +15,19 @@ package com.btisystems.pronx.ems.core.snmp.trapreceiver;
 
 import org.snmp4j.CommandResponder;
 
+/**
+ * The interface Trap receiver.
+ */
 public interface ITrapReceiver extends CommandResponder {
-	void setConfiguration(final ITrapReceiverConfiguration config);
-    
+    /**
+     * Sets configuration.
+     *
+     * @param config the config
+     */
+    void setConfiguration(final ITrapReceiverConfiguration config);
+
+    /**
+     * Start receiving.
+     */
     void startReceiving();
 }

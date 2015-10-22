@@ -13,9 +13,35 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapreceiver;
 
+/**
+ * The interface Trap receiver configuration.
+ */
 public interface ITrapReceiverConfiguration {
+    /**
+     * Gets trap handler service.
+     *
+     * @return the trap handler service
+     */
     ITrapHandlerService getTrapHandlerService();
+
+    /**
+     * Gets address mapper.
+     *
+     * @return the address mapper
+     */
     ITrapSourceMapper getAddressMapper();
+
+    /**
+     * Gets dispatcher thread count.
+     *
+     * @return the dispatcher thread count
+     */
     int getDispatcherThreadCount();
+
+    /**
+     * Gets listening address.
+     *
+     * @return the listening address
+     */
     String getListeningAddress();
 }

@@ -21,7 +21,6 @@ import com.btisystems.pronx.ems.core.snmp.ISnmpConfigurationFactory.AccessType;
 /**
  * Factory for creating and configuring {@link ISnmpSession}s.
  */
-
 public interface ISnmpSessionFactory {
 
     /**
@@ -29,36 +28,30 @@ public interface ISnmpSessionFactory {
      *
      * @param configuration the configuration to be applied to the session
      * @param ipAddress     the ip address of the target device of the session
-     * @return              an {@link ISnmpSession} connected to the host at
-     *                      <code>ipAddress</code> and configured using <code>configuration</code>
-     * @throws IOException  as thrown by the underlying network interface
+     * @return an {@link ISnmpSession} connected to the host at                      <code>ipAddress</code> and configured using <code>configuration</code>
+     * @throws IOException as thrown by the underlying network interface
      */
     ISnmpSession createSession(ISnmpConfiguration configuration, String ipAddress) throws IOException;
 
     /**
      * Creates an SNMP session with a default configuration and an optional community string.
      *
-     * @param ipAddress     the ip address of the target device of the session
-     * @param community     community string to be used for the session, or null if the default is
-     *                      to be used.
-     * @return              an {@link ISnmpSession} connected to the host at
-     *                      <code>ipAddress</code> and configured using the default configuration
-     * @throws IOException  as thrown by the underlying network interface
+     * @param ipAddress the ip address of the target device of the session
+     * @param community community string to be used for the session, or null if the default is                      to be used.
+     * @return an {@link ISnmpSession} connected to the host at                      <code>ipAddress</code> and configured using the default configuration
+     * @throws IOException as thrown by the underlying network interface
      */
     ISnmpSession createSession(String ipAddress, String community) throws IOException;
 
     /**
      * Creates an SNMP session using a named configuration factory and an optional community string
      *
-     * @param ipAddress     the ip address of the target device of the session
-     * @param community     community string to be used for the session, or null if the default is
-     *                      to be used.
-     * @param factoryName   name of the configuration factory used to create the session configuration
-     * @param accessType    type of snmp access required
-     * @return              an {@link ISnmpSession} connected to the host at
-     *                      <code>ipAddress</code> and configured using a configuration delivered by the
-     *                      named factory
-     * @throws IOException  as thrown by the underlying network interface
+     * @param ipAddress   the ip address of the target device of the session
+     * @param community   community string to be used for the session, or null if the default is                      to be used.
+     * @param factoryName name of the configuration factory used to create the session configuration
+     * @param accessType  type of snmp access required
+     * @return an {@link ISnmpSession} connected to the host at                      <code>ipAddress</code> and configured using a configuration delivered by the                      named factory
+     * @throws IOException as thrown by the underlying network interface
      */
     ISnmpSession createSession(String ipAddress, String community, String factoryName, AccessType accessType) throws IOException;
 }

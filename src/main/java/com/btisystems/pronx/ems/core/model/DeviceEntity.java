@@ -32,9 +32,24 @@ import java.util.Set;
 /**
  * Abstract class to be extended by the root entity for each device type.
  */
-
 public abstract class DeviceEntity implements IDeviceEntity, Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(DeviceEntity.class);
+    /**
+     * The constant EMPTY_STRING.
+     */
+    public static final String EMPTY_STRING = "";
+    /**
+     * The constant DOT.
+     */
+    public static final String DOT = ".";
+    /**
+     * The constant S_02X.
+     */
+    public static final String S_02X = "%s%02x";
+    /**
+     * The constant COLON.
+     */
+    public static final String COLON = ":";
 
     private final Set<PropertyChangeListener> changeListeners = new HashSet<>();
 
@@ -100,6 +115,11 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
     }
 
 
+    /**
+     * Gets children.
+     *
+     * @return the children
+     */
     @SuppressWarnings("unchecked")
     Collection<DeviceEntity> getChildren() {
         final Collection<DeviceEntity> children = new ArrayList<>();
@@ -143,18 +163,34 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
         }
     }
 
+    /**
+     * Add child.
+     *
+     * @param child the child
+     */
     protected void addChild(final IDeviceEntity child) {
         for (final PropertyChangeListener listener : changeListeners) {
             child.addPropertyChangeListener(listener);
         }
     }
 
+    /**
+     * Remove child.
+     *
+     * @param child the child
+     */
     protected void removeChild(final DeviceEntity child) {
         for (final PropertyChangeListener listener : changeListeners) {
             child.removePropertyChangeListener(listener);
         }
     }
 
+    /**
+     * Replace child.
+     *
+     * @param oldChild the old child
+     * @param newChild the new child
+     */
     protected void replaceChild(final DeviceEntity oldChild,
                                 final DeviceEntity newChild) {
         if (oldChild != null) {
@@ -165,9 +201,16 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
         }
     }
 
+    /**
+     * Notify change.
+     *
+     * @param fieldId  the field id
+     * @param oldValue the old value
+     * @param newValue the new value
+     */
     protected void notifyChange(final int fieldId, final Object oldValue, final Object newValue) {
         for (final PropertyChangeListener listener : changeListeners) {
-            listener.propertyChange(new PropertyChangeEvent(this, "" + Integer.toString(fieldId), oldValue, newValue));
+            listener.propertyChange(new PropertyChangeEvent(this, EMPTY_STRING + Integer.toString(fieldId), oldValue, newValue));
         }
     }
 
@@ -198,12 +241,24 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
         }
     }
 
-    // Get name for get accessor method.
+    /**
+     * Gets getter name.
+     *
+     * @param field the field
+     * @return the getter name
+     */
+// Get name for get accessor method.
     protected  String getGetterName(final String field) {
         return "get" + capitalizeFirstCharacter(field);
     }
 
-    // Get name for get accessor method.
+    /**
+     * Gets setter name.
+     *
+     * @param field the field
+     * @return the setter name
+     */
+// Get name for get accessor method.
     protected  String getSetterName(final String field) {
         return "set" + capitalizeFirstCharacter(field);
     }
@@ -225,24 +280,20 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
     /**
      * Deliver an object identifier string from part of an integer array.
      *
-     * @param intArray  the source array
-     * @param offset    the offset of the first integer of the identifier
-     * @param length    the number of sub-identifiers in the identifier
-     *
-     * @return          a string of the form "n1.n2....nn", where n1 is the
-     *                  integer at intArray[offset], n2 is the is the integer at
-     *                  intArray[offset + 1] and nn is the integer at
-     *                  intArray[offset + n - 1]
+     * @param intArray the source array
+     * @param offset   the offset of the first integer of the identifier
+     * @param length   the number of sub-identifiers in the identifier
+     * @return a string of the form "n1.n2....nn", where n1 is the                  integer at intArray[offset], n2 is the is the integer at                  intArray[offset + 1] and nn is the integer at                  intArray[offset + n - 1]
      */
     protected String _getObjectIdentifier(final int[] intArray,
                                           final int   offset,
                                           final int   length) {
         final StringBuilder buffer = new StringBuilder();
 
-        String sepChar = "";
+        String sepChar = EMPTY_STRING;
         for (int x = 0; x < length; x++) {
             buffer.append(sepChar).append(intArray[offset + x]);
-            sepChar = ".";
+            sepChar = DOT;
         }
         return buffer.toString();
     }
@@ -250,24 +301,20 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
     /**
      * Deliver a Mac address string from part of an integer array.
      *
-     * @param intArray  the source array
-     * @param offset    the offset of the first integer of the identifier
-     * @param length    the number of sub-identifiers in the identifier
-     *
-     * @return          a string of the form "n1.n2....nn", where n1 is the
-     *                  integer at intArray[offset], n2 is the is the integer at
-     *                  intArray[offset + 1] and nn is the integer at
-     *                  intArray[offset + n - 1]
+     * @param intArray the source array
+     * @param offset   the offset of the first integer of the identifier
+     * @param length   the number of sub-identifiers in the identifier
+     * @return a string of the form "n1.n2....nn", where n1 is the                  integer at intArray[offset], n2 is the is the integer at                  intArray[offset + 1] and nn is the integer at                  intArray[offset + n - 1]
      */
     protected String _getMacAddress(final int[] intArray,
                                           final int   offset,
                                           final int   length) {
         final StringBuilder buffer = new StringBuilder();
 
-        String sepChar = "";
+        String sepChar = EMPTY_STRING;
         for (int x = 0; x < length; x++) {
-            buffer.append(String.format("%s%02x", sepChar, intArray[offset + x]));
-            sepChar = ":";
+            buffer.append(String.format(S_02X, sepChar, intArray[offset + x]));
+            sepChar = COLON;
         }
         return buffer.toString();
     }
@@ -278,9 +325,11 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
         return null;
     }
 
+
     /**
-     * Used for Junit testing to get the Change Listeners for validating.
-     * User: skoneru@btisystems.com  Date : 16/03/2011 @ 13:13 PM
+     * Get change listeners set.
+     *
+     * @return the set
      */
     Set<PropertyChangeListener> _getChangeListeners() {
         return changeListeners;

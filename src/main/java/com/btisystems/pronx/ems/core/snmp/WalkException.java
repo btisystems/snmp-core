@@ -19,11 +19,15 @@ import com.btisystems.pronx.ems.core.exception.DetailedFaultException;
 /**
  * Thrown when walk is interrupted by an exception
  */
-
 public class WalkException extends DetailedFaultException {
 
     private static final long serialVersionUID = -2285401779827218734L;
 
+    /**
+     * Instantiates a new Walk exception.
+     *
+     * @param message the message
+     */
     public WalkException(final String message) {
         super("Walk terminated [%1$s]", message);
     }

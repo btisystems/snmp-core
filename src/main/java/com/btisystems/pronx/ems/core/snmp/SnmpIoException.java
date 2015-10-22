@@ -27,10 +27,23 @@ public class SnmpIoException extends DetailedFaultException {
      */
     public static final int ADDRESS_INDEX = 0;
 
+    /**
+     * Instantiates a new Snmp io exception.
+     *
+     * @param address the address
+     * @param message the message
+     */
     public SnmpIoException(final String address, final String message) {
         super("SNMP Error [%1$s] : [%2$s]", address, message);
     }
 
+    /**
+     * Instantiates a new Snmp io exception.
+     *
+     * @param address     the address
+     * @param code        the code
+     * @param description the description
+     */
     public SnmpIoException(final String address, final String code, final String description) {
         super("SNMP Error [%1$s] : [%2$s] [%3$s]", address, code, description);
     }

@@ -24,7 +24,6 @@ import org.snmp4j.smi.OID;
 /**
  * Metadata for device entities.
  */
-
 public class DeviceEntityDescription implements Serializable {
 
     // The OID associated with the managed object.
@@ -34,33 +33,111 @@ public class DeviceEntityDescription implements Serializable {
     private final Map<String, FieldDescription> fieldsByName = new TreeMap<String, FieldDescription>();
     private final Map<Integer, FieldDescription> fieldsById = new TreeMap<Integer, FieldDescription>();
 
-    public enum FieldType { INTEGER, STRING, UNSIGNED32, UNSIGNED64, IP_ADDRESS, DATE_AND_TIME, BITS, TABLE, ENTITY, FIXED_X10, FIXED_X100, FIXED_X1000, OID };
+    /**
+     * The enum Field type.
+     */
+    public enum FieldType {
+        /**
+         * Integer field type.
+         */
+        INTEGER, /**
+         * String field type.
+         */
+        STRING, /**
+         * Unsigned 32 field type.
+         */
+        UNSIGNED32, /**
+         * Unsigned 64 field type.
+         */
+        UNSIGNED64, /**
+         * Ip address field type.
+         */
+        IP_ADDRESS, /**
+         * Date and time field type.
+         */
+        DATE_AND_TIME, /**
+         * Bits field type.
+         */
+        BITS, /**
+         * Table field type.
+         */
+        TABLE, /**
+         * Entity field type.
+         */
+        ENTITY, /**
+         * Fixed x 10 field type.
+         */
+        FIXED_X10, /**
+         * Fixed x 100 field type.
+         */
+        FIXED_X100, /**
+         * Fixed x 1000 field type.
+         */
+        FIXED_X1000, /**
+         * Oid field type.
+         */
+        OID };
 
+    /**
+     * Instantiates a new Device entity description.
+     *
+     * @param oid the oid
+     */
     public DeviceEntityDescription(final OID oid) {
         this.oid = oid;
     }
 
+    /**
+     * Add field.
+     *
+     * @param description the description
+     */
     public void addField(final FieldDescription description) {
         fieldsByName.put(description.getName(), description);
         fieldsById.put(description.getId(), description);
     }
 
+    /**
+     * Gets oid.
+     *
+     * @return the oid
+     */
     public OID getOid() {
         return oid;
     }
 
+    /**
+     * Gets field by name.
+     *
+     * @param name the name
+     * @return the field by name
+     */
     public FieldDescription getFieldByName(final String name) {
         return fieldsByName.get(name);
     }
 
+    /**
+     * Gets field by id.
+     *
+     * @param id the id
+     * @return the field by id
+     */
     public FieldDescription getFieldById(final int id) {
         return fieldsById.get(id);
     }
 
+    /**
+     * Gets fields.
+     *
+     * @return the fields
+     */
     public Collection<FieldDescription> getFields() {
         return fieldsByName.values();
     }
 
+    /**
+     * The type Field description.
+     */
     public static class FieldDescription implements Serializable {
         // The OID subidentifier value for the field.
         // If the managed object's OID is 1.2.3, the field with the OID 1.2.3.4 will have id 4.
@@ -69,6 +146,14 @@ public class DeviceEntityDescription implements Serializable {
         private final FieldType type;
         private final int maximumLength; // Only for string types, otherwise -1.
 
+        /**
+         * Instantiates a new Field description.
+         *
+         * @param id            the id
+         * @param name          the name
+         * @param type          the type
+         * @param maximumLength the maximum length
+         */
         public FieldDescription(final int id, final String name, final FieldType type, final int maximumLength) {
             super();
             this.id = id;
@@ -77,15 +162,38 @@ public class DeviceEntityDescription implements Serializable {
             this.maximumLength = maximumLength;
         }
 
+        /**
+         * Gets id.
+         *
+         * @return the id
+         */
         public int getId() {
             return id;
         }
+
+        /**
+         * Gets name.
+         *
+         * @return the name
+         */
         public String getName() {
             return name;
         }
+
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
         public FieldType getType() {
             return type;
         }
+
+        /**
+         * Gets maximum length.
+         *
+         * @return the maximum length
+         */
         public int getMaximumLength() {
             return maximumLength;
         }

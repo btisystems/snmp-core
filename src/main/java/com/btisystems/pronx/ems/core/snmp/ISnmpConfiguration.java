@@ -26,62 +26,65 @@ import org.snmp4j.smi.Address;
 /**
  * A configuration to be applied to an Snmp Session.
  */
-
 public interface ISnmpConfiguration extends Serializable {
 
     /**
      * Deliver a {@link Target} built from the configuration
      *
-     * @param address   the address of the device with which the target is to be associated
-     * @return  a {@link Target} from the configuration
+     * @param address the address of the device with which the target is to be associated
+     * @return a {@link Target} from the configuration
      */
     Target createTarget(Address address);
 
     /**
      * Deliver a {@link PDU} built from the configuration
      *
-     * @param type  the request type
-     * @return  a {@link PDU}, built from the configuration with the specified request type
+     * @param type the request type
+     * @return a {@link PDU}, built from the configuration with the specified request type
      */
     PDU createPDU(int type);
 
     /**
      * Deliver a {@link Session} for the specified transport mapping
      *
-     * @param transportMapping  the initial transport mapping
+     * @param transportMapping the initial transport mapping
      * @return a {@link Session} instance
-     * @throws IOException
+     * @throws IOException the io exception
      */
     Session createSnmpSession(TransportMapping transportMapping) throws IOException;
 
     /**
+     * Gets version.
+     *
      * @return the SNMP version supported by the configuration.
      */
     int getVersion();
 
     /**
+     * Gets walk timeout.
+     *
      * @return the total walk timeout.
      */
     int getWalkTimeout();
 
     /**
-     * 
-     * @param community 
+     * Sets community.
+     *
+     * @param community the community
      */
     void setCommunity(String community);
 
     /**
-     * 
+     * Gets community.
+     *
      * @return the Community string used to connect to the remote SNMP agent.
      */
     String getCommunity();
 
     /**
-     * 
-     * @return the number of objects that should be returned for all
-     * the repeating OIDs. Agent's must truncate the list to something 
-     * shorter if it won't fit within the max-message size supported by 
-     * the command generator or the agent.
+     * Gets max repetitions.
+     *
+     * @return the number of objects that should be returned for all the repeating OIDs. Agent's must truncate the list to something  shorter if it won't fit within the max-message size supported by  the command generator or the agent.
      */
     int getMaxRepetitions();
 
@@ -95,19 +98,21 @@ public interface ISnmpConfiguration extends Serializable {
     /**
      * Gets the remote agent connection port.
      *
-     * @return port
+     * @return port port
      */
     int getPort();
 
     /**
-     * @return the maximum number of columns to be retrieved per PDU, when executing a row-wise table walk.
-     * See org.snmp4j.util.TableUtils.
+     * Gets maximum columns per pdu.
+     *
+     * @return the maximum number of columns to be retrieved per PDU, when executing a row-wise table walk. See org.snmp4j.util.TableUtils.
      */
     int getMaximumColumnsPerPdu();
 
     /**
-     * @return the maximum number of rows to be retrieved per PDU, when executing a row-wise table walk.
-     * See org.snmp4j.util.TableUtils.
+     * Gets maximum rows per pdu.
+     *
+     * @return the maximum number of rows to be retrieved per PDU, when executing a row-wise table walk. See org.snmp4j.util.TableUtils.
      */
     int getMaximumRowsPerPdu();
 }

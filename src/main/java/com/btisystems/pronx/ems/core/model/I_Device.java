@@ -16,6 +16,9 @@ package com.btisystems.pronx.ems.core.model;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/**
+ * The type Device.
+ */
 @Entity(name = "com.btisystems.pronx.ems.core.model.I_Device")
 @Table(name = "I_Device", schema="ems")
 @SuppressWarnings("checkstyle:typename")

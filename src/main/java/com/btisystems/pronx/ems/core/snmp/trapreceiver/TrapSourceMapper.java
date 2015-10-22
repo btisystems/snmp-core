@@ -25,6 +25,10 @@ import org.slf4j.LoggerFactory;
  */
 public class TrapSourceMapper implements ITrapSourceMapper {
 
+    /**
+     * The constant REGEX.
+     */
+    public static final String REGEX = "\\.";
     private static Logger log = LoggerFactory.getLogger(TrapSourceMapper.class);
 
     private String mapSourceAddress = null;
@@ -35,6 +39,11 @@ public class TrapSourceMapper implements ITrapSourceMapper {
     private static final String RANGE_DELIMETER = "-";
     private static final int IP_TOKENS = 4;
 
+    /**
+     * Instantiates a new Trap source mapper.
+     *
+     * @param sourceMapping the source mapping
+     */
     public TrapSourceMapper(final String sourceMapping) {
         log.info("Apply trap source mapping:{}", sourceMapping);
 
@@ -82,7 +91,7 @@ public class TrapSourceMapper implements ITrapSourceMapper {
     private List<String> getAddressesInRange(final String rangeDescription) {
         log.debug("getAddressesInRange from {}", rangeDescription);
         final List<String> rangeAddresses = new ArrayList<>();
-        final String[] tokens = rangeDescription.split("\\.");
+        final String[] tokens = rangeDescription.split(REGEX);
         if (tokens.length == IP_TOKENS) {
             final String[] startEndTokens = tokens[IP_END_TOKEN].split(RANGE_DELIMETER);
             if (startEndTokens.length == 2) {

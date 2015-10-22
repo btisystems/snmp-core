@@ -18,6 +18,9 @@ import java.util.List;
 import com.btisystems.pronx.ems.core.model.INotification;
 import com.btisystems.pronx.ems.core.snmp.ISnmpNotificationOidLookup;
 
+/**
+ * The interface Trap sender.
+ */
 public interface ITrapSender {
 
     /**

@@ -18,11 +18,17 @@ import com.btisystems.pronx.ems.core.model.DeviceEntity;
 /**
  * Thrown when walk is interrupted by an exception
  */
-
 public class FieldAccessMethodException extends DetailedFaultException {
 
     private static final long serialVersionUID = -2285401779827218734L;
 
+    /**
+     * Instantiates a new Field access method exception.
+     *
+     * @param entity    the entity
+     * @param fieldName the field name
+     * @param message   the message
+     */
     public FieldAccessMethodException(final DeviceEntity entity, final String fieldName, final String message) {
         super("Unexpected exception accessing field [%2$s] on entity [%1$s] - [%3$s]",
                 entity.getClass().getName(), fieldName, message);

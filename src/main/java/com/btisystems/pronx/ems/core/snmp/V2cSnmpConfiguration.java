@@ -35,7 +35,6 @@ import org.snmp4j.util.ThreadPool;
 /**
  * V2c SNMP Configuration
  */
-
 public class V2cSnmpConfiguration extends SnmpConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(V2cSnmpConfiguration.class);
 

@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for all service exceptions.
  */
-
 public abstract class DetailedFaultException extends RuntimeException {
 
     private static final long serialVersionUID = 3666677767195443650L;
@@ -39,10 +38,8 @@ public abstract class DetailedFaultException extends RuntimeException {
     /**
      * Construct and log a service exception
      *
-     * @param text
-     *            the error text
-     * @param variables
-     *            variable for the text.
+     * @param text      the error text
+     * @param variables variable for the text.
      */
     public DetailedFaultException(final String text, final String... variables) {
         super(format(text, variables));
@@ -55,11 +52,9 @@ public abstract class DetailedFaultException extends RuntimeException {
     /**
      * Construct and log a service exception
      *
-     * @param cause
-     * @param text
-     *            the error text
-     * @param variables
-     *            variable for the text.
+     * @param cause     the cause
+     * @param text      the error text
+     * @param variables variable for the text.
      */
     public DetailedFaultException(final Throwable cause, final String text, final String... variables) {
         super(format(text, variables), cause);
@@ -70,10 +65,20 @@ public abstract class DetailedFaultException extends RuntimeException {
         }
     }
 
+    /**
+     * Gets text.
+     *
+     * @return the text
+     */
     public String getText() {
         return text;
     }
 
+    /**
+     * Get variables string [ ].
+     *
+     * @return the string [ ]
+     */
     public String[] getVariables() {
         return variables;
     }

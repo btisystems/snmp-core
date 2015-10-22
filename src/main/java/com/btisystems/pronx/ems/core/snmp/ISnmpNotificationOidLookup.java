@@ -23,7 +23,8 @@ import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescript
 public interface ISnmpNotificationOidLookup {
 
     /**
-     * 
+     * Lookup oid for field oid.
+     *
      * @param field to be converted to OID
      * @return the OID value of the field.
      */

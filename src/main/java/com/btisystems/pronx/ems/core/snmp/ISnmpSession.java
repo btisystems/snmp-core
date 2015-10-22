@@ -40,8 +40,7 @@ public interface ISnmpSession extends AutoCloseable {
      * Deliver the string value of a specified managed object variable.
      *
      * @param oid the identifier of the variable to be returned
-     * @return string representation of the variable value or <code>null</code>
-     * if the variabled could not be retrieved
+     * @return string representation of the variable value or <code>null</code> if the variabled could not be retrieved
      */
     String getVariable(String oid);
 
@@ -56,12 +55,10 @@ public interface ISnmpSession extends AutoCloseable {
     /**
      * Walk managed objects of a device.
      *
-     * @param networkDevice an {@link IVariableBindingHandler} which will handle
-     * the values retrieved from the device
-     * @param oids ordered list of OIDs to be retrieved
-     * @return a {@link WalkResponse} describing the completion status of the
-     * walk
-     * @throws IOException
+     * @param networkDevice an {@link IVariableBindingHandler} which will handle the values retrieved from the device
+     * @param oids          ordered list of OIDs to be retrieved
+     * @return a {@link WalkResponse} describing the completion status of the walk
+     * @throws IOException the io exception
      */
     WalkResponse walkDevice(final IVariableBindingHandler networkDevice, List<OID> oids) throws IOException;
 
@@ -69,17 +66,16 @@ public interface ISnmpSession extends AutoCloseable {
      * Gets the contents of each of the rows with specified index values for a
      * set of tables.
      *
-     * @param networkDevice an {@link IVariableBindingHandler} which will handle
-     * the values retrieved from the device
-     * @param tableIndexes map of the tables to be updated, each with a list of
-     * indexes of the rows to be updated
-     * @return a {@link WalkResponse} describing the completion status of the
-     * retrieval
-     * @throws IOException
+     * @param networkDevice an {@link IVariableBindingHandler} which will handle the values retrieved from the device
+     * @param tableIndexes  map of the tables to be updated, each with a list of indexes of the rows to be updated
+     * @return a {@link WalkResponse} describing the completion status of the retrieval
+     * @throws IOException the io exception
      */
     WalkResponse getTableRows(final IVariableBindingHandler networkDevice, Map<DeviceEntityDescription, List<OID>> tableIndexes) throws IOException;
 
     /**
+     * Gets address.
+     *
      * @return the Inet Address of the device associated with the session
      */
     InetAddress getAddress();
@@ -95,14 +91,14 @@ public interface ISnmpSession extends AutoCloseable {
     /**
      * Sets the provided varbinds on the device.
      *
-     * @param bindings
+     * @param bindings the bindings
      */
     void setVariables(VariableBinding[] bindings);
 
     /**
      * Throws an exception providing the error code and/or description values
      * for the device.
-     *
+     * <p/>
      * Some network devices provide a way of getting a more specific error code
      * and description after a failed 'set' operation on one or many OIDs. This
      * method provides a way for vendor specific SnmpSessions to be implemented,
@@ -111,7 +107,7 @@ public interface ISnmpSession extends AutoCloseable {
      * providing any error code or description available which in turn gives a
      * better
      *
-     * @throws SnmpIoException
+     * @throws SnmpIoException the snmp io exception
      */
     void checkErrorCodeAndDescription() throws SnmpIoException;
 }

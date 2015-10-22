@@ -43,7 +43,6 @@ import org.snmp4j.util.DefaultPDUFactory;
 /**
  * A {@link ISnmpSession}.
  */
-
 public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
 
     private static final String SYSTEM_OBJECT_ID_OID = "1.3.6.1.2.1.1.2.0";
@@ -63,6 +62,10 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
      * Fine grained logger for walk requests.
      */
     protected static final Logger WALKER_LOG = LoggerFactory.getLogger(ISnmpSession.class.getName() + ".walk");
+    /**
+     * The constant SPACE.
+     */
+    public static final String SPACE = " ";
 
     private final ISnmpConfiguration snmpConfiguration;
     private final Target target;
@@ -174,6 +177,11 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
         return tableWalker.getTableRows(networkDevice, tableIndexes);
     }
 
+    /**
+     * Gets host address.
+     *
+     * @return the host address
+     */
     protected String getHostAddress() {
         return ((IpAddress) address).getInetAddress().getHostAddress();
     }
@@ -229,7 +237,7 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
         if (bindingIndex > -1) {
             error = response.getVariableBindings().get(bindingIndex);
         }
-        return response.getErrorStatusText() + " " + error;
+        return response.getErrorStatusText() + SPACE + error;
     }
 
     @Override
@@ -292,6 +300,12 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
     }
 
 
+    /**
+     * Is invalid boolean.
+     *
+     * @param value the value
+     * @return the boolean
+     */
     protected boolean isInvalid(final String value) {
         return value == null || value.equals(NULL) || value.equals(NO_SUCH_OBJECT);
     }
@@ -309,6 +323,13 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
         private final TreeUtils treeUtils;
         private OID lastProcessedOid;
 
+        /**
+         * Instantiates a new Tree response listener.
+         *
+         * @param networkDevice the network device
+         * @param oids          the oids
+         * @param treeUtils     the tree utils
+         */
         public TreeResponseListener(final IVariableBindingHandler networkDevice,
                                     final List<OID> oids,
                                     final TreeUtils treeUtils) {
@@ -319,6 +340,11 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
             finished = false;
         }
 
+        /**
+         * Gets response.
+         *
+         * @return the response
+         */
         public WalkResponse getResponse() {
             return (response == null) ? new WalkResponse(new WalkException("Walk interrupted")) : response;
         }
@@ -405,6 +431,9 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
             return false;
         }
 
+        /**
+         * Stop walk.
+         */
         public void stopWalk(){
             finished = true;
         }

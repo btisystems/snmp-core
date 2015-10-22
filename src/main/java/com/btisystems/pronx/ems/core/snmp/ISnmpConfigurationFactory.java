@@ -19,13 +19,23 @@ package com.btisystems.pronx.ems.core.snmp;
  */
 public interface ISnmpConfigurationFactory {
     /**
-     * Delivers an {@link ISnmpConfiguration}. These may differ based on the 
+     * Delivers an {@link ISnmpConfiguration}. These may differ based on the
      * {@link AccessType} by using, for example, different Community values.
      *
-     * @param accessType    defines type of access required
-     * @return  the configuration
+     * @param accessType defines type of access required
+     * @return the configuration
      */
     ISnmpConfiguration getConfiguration(AccessType accessType);
 
-    public enum AccessType {READ_ONLY, READ_WRITE};
+    /**
+     * The enum Access type.
+     */
+    public enum AccessType {
+        /**
+         * Read only access type.
+         */
+        READ_ONLY, /**
+         * Read write access type.
+         */
+        READ_WRITE};
 }

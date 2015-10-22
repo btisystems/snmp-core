@@ -24,15 +24,15 @@ public interface IObjectSetter {
     /**
      * Set a field to a specified object.
      *
-     * @param clazz         the class of object to be set.
-     * @param childObject   the value to which the field defined by childOid is to be set
+     * @param clazz       the class of object to be set.
+     * @param childObject the value to which the field defined by childOid is to be set
      */
     void setObject(Class<DeviceEntity> clazz, Object childObject);
 
     /**
      * Sets a specified object on an entity
      *
-     * @param childObject   the object to be set. This must not be null
+     * @param childObject the object to be set. This must not be null
      */
     void setObject(Object childObject);
 }

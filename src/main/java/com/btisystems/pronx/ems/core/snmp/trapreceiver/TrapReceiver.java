@@ -38,15 +38,41 @@ import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.ThreadPool;
 
+/**
+ * The type Trap receiver.
+ */
 public class TrapReceiver implements ITrapReceiver {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrapReceiver.class);
+    /**
+     * The constant SLASH.
+     */
+    public static final char SLASH = '/';
+    /**
+     * The constant PORT.
+     */
+    public static final String PORT = "/161";
     private static OctetString localEngineID = new OctetString(MPv3.createLocalEngineID());
     private OctetString authoritativeEngineID;
+    /**
+     * The Config.
+     */
     protected ITrapReceiverConfiguration config;
+    /**
+     * The Address mapper.
+     */
     protected ITrapSourceMapper addressMapper;
+    /**
+     * The Listening address.
+     */
     protected Address listeningAddress;
+    /**
+     * The Trap handler service.
+     */
     protected ITrapHandlerService trapHandlerService;
+    /**
+     * The Dispatcher thread count.
+     */
     protected int dispatcherThreadCount;
 
     @Override
@@ -130,6 +156,12 @@ public class TrapReceiver implements ITrapReceiver {
         trapHandlerService.handle(timeNow, resolvedAddress, command);
     }
 
+    /**
+     * Gets address.
+     *
+     * @param transportAddress the transport address
+     * @return the address
+     */
     protected Address getAddress(final String transportAddress) {
         String transport = UDP_TRANSPORT;
         String modifiedAddress = transportAddress;
@@ -140,8 +172,8 @@ public class TrapReceiver implements ITrapReceiver {
             modifiedAddress = modifiedAddress.substring(colon + 1);
         }
         // set default port
-        if (modifiedAddress.indexOf('/') < 0) {
-            modifiedAddress += "/161";
+        if (modifiedAddress.indexOf(SLASH) < 0) {
+            modifiedAddress += PORT;
         }
         if (transport.equalsIgnoreCase(UDP_TRANSPORT)) {
             return new UdpAddress(modifiedAddress);

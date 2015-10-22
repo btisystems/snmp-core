@@ -18,12 +18,12 @@ package com.btisystems.pronx.ems.core.snmp.trapreceiver;
  * Maps a trap source address to another.
  * For use in testing when generating synthetic notifications.
  */
-
 public interface ITrapSourceMapper {
 
     /**
-     * 
-     * @param sourceAddress
+     * Map address string.
+     *
+     * @param sourceAddress the source address
      * @return the alternative address to use as the source addresses for a trap.
      */
     String mapAddress(final String sourceAddress);

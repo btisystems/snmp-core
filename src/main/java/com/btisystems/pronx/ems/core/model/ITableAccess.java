@@ -18,16 +18,16 @@ import java.util.Map;
 
 /**
  * Interface supported by auto-generated objects that implement methods to access a table
+ *
+ * @param <T> the type parameter
  */
 public interface ITableAccess<T extends IDeviceEntity> {
 
     /**
      * Deliver table entry with the specified index
      *
-     * @param index     the index of the entry whose value is to be returned
-     *
-     * @return          the value to which the specified index is mapped, or null if this map
-     *                  contains no mapping for the key
+     * @param index the index of the entry whose value is to be returned
+     * @return the value to which the specified index is mapped, or null if this map                  contains no mapping for the key
      */
     T getEntry(String index);
 
@@ -35,17 +35,22 @@ public interface ITableAccess<T extends IDeviceEntity> {
      * Associates the specified entry with the specified index in the table.
      * If the map previously contained a mapping for the index, the old entry is replaced.
      *
-     * @param index     the index with which the specified entry is to be associated
-     * @param entry     entry to be associated with the specified index
+     * @param index the index with which the specified entry is to be associated
+     * @param entry entry to be associated with the specified index
      */
     void setEntry(String index, T entry);
 
     /**
-     * @return  the map used to contain the table entries
+     * Gets entries.
+     *
+     * @return the map used to contain the table entries
      */
     Map<String, T> getEntries();
 
     /**
+     * Create entry t.
+     *
+     * @param index the index
      * @return a new instance of a table entry.
      */
     T createEntry(String index);

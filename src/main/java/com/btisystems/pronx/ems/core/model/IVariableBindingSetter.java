@@ -25,9 +25,7 @@ public interface IVariableBindingSetter {
     /**
      * Set a field in the object from a VariableBinding
      *
-     * @param binding
-     *        defines the {@link org.snmp4j.smi.OID} of the field to be set
-     *        and the value to which it is to be set.
+     * @param binding defines the {@link org.snmp4j.smi.OID} of the field to be set        and the value to which it is to be set.
      */
     void set(VariableBinding binding);
 }

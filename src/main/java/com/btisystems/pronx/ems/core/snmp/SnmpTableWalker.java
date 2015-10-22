@@ -45,7 +45,6 @@ import org.snmp4j.util.DefaultPDUFactory;
 /**
  * Understands how to retrieval specific rows from a set of tables.
  */
-
 public class SnmpTableWalker extends DefaultPDUFactory {
 
     private static final Logger log = LoggerFactory.getLogger(SnmpTableWalker.class);
@@ -76,6 +75,14 @@ public class SnmpTableWalker extends DefaultPDUFactory {
         this.target = target;
     }
 
+    /**
+     * Gets table rows.
+     *
+     * @param networkDevice the network device
+     * @param tableIndexes  the table indexes
+     * @return the table rows
+     * @throws IOException the io exception
+     */
     public WalkResponse getTableRows(final IVariableBindingHandler networkDevice,
                                      final Map<DeviceEntityDescription, List<OID>> tableIndexes) throws IOException {
 
@@ -192,11 +199,21 @@ public class SnmpTableWalker extends DefaultPDUFactory {
         private WalkResponse response;
         private final IVariableBindingHandler networkDevice;
 
+        /**
+         * Instantiates a new Table response listener.
+         *
+         * @param networkDevice the network device
+         */
         public TableResponseListener(final IVariableBindingHandler networkDevice) {
             this.networkDevice = networkDevice;
             finished = false;
         }
 
+        /**
+         * Gets response.
+         *
+         * @return the response
+         */
         public WalkResponse getResponse() {
         	if (response != null) {
         		return response;
@@ -266,20 +283,36 @@ public class SnmpTableWalker extends DefaultPDUFactory {
             return finished;
         }
 
+        /**
+         * Stop walk.
+         */
         public void stopWalk(){
             finished = true;
         }
 
+        /**
+         * Had error boolean.
+         *
+         * @return the boolean
+         */
         public boolean hadError() {
         	return response != null;
         }
 
+        /**
+         * Reset.
+         */
         public void reset() {
         	finished = false;
         }
     }
 
     private class TableIndexRetrievalDescriptor {
+        /**
+         * Instantiates a new Table index retrieval descriptor.
+         *
+         * @param indexOid the index oid
+         */
         public TableIndexRetrievalDescriptor(final OID indexOid) {
             if (indexOid.last() == 0) {
                 lowIndex = indexOid.trim();
@@ -292,12 +325,26 @@ public class SnmpTableWalker extends DefaultPDUFactory {
             columnOids = new TreeSet<OID>();
         }
 
+        /**
+         * Get column oids oid [ ].
+         *
+         * @return the oid [ ]
+         */
         public OID[] getColumnOids() {
             return columnOids.toArray(new OID[columnOids.size()]);
         }
 
+        /**
+         * The Low index.
+         */
         protected OID lowIndex;
+        /**
+         * The High index.
+         */
         protected OID highIndex;
+        /**
+         * The Column oids.
+         */
         protected Set<OID> columnOids;
     }
 }

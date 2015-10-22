@@ -23,6 +23,13 @@ import org.snmp4j.PDU;
  */
 public interface ITrapHandlerService {
 
+    /**
+     * Handle.
+     *
+     * @param timeRaised the time raised
+     * @param address    the address
+     * @param trap       the trap
+     */
     void handle(Date timeRaised, String address, PDU trap);
 
 

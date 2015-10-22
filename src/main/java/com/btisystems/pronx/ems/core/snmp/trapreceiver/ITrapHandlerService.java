@@ -14,9 +14,9 @@
 
 package com.btisystems.pronx.ems.core.snmp.trapreceiver;
 
-import java.util.Date;
-
 import org.snmp4j.PDU;
+
+import java.util.Date;
 
 /**
  * Trap handling service

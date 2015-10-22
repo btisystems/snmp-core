@@ -13,13 +13,9 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapsender;
 
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import com.btisystems.pronx.ems.core.model.INotification;
+import com.btisystems.pronx.ems.core.snmp.ISnmpNotificationOidLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommunityTarget;
@@ -38,9 +34,12 @@ import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
-import com.btisystems.pronx.ems.core.snmp.ISnmpNotificationOidLookup;
-import com.btisystems.pronx.ems.core.model.INotification;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * The type Trap sender.
@@ -84,9 +83,30 @@ public class TrapSender implements ITrapSender {
         }
     }
 
+    private void sendTrap(final TrapRecipient trapReceiver, final PDU trap) {
+
+        try {
+            // Specify receiver
+            final Address targetaddress = new UdpAddress(InetAddress.getByName(trapReceiver.getIpAddress()), trapReceiver.getPort());
+            final CommunityTarget target = new CommunityTarget();
+            target.setCommunity(new OctetString(trapReceiver.getCommunity()));
+            target.setVersion(SnmpConstants.version2c);
+            target.setAddress(targetaddress);
+
+            createSnmpSession();
+
+            LOG.trace("Sending trap:{} to {} ...", trap, trapReceiver);
+
+            snmp.send(trap, target);
+
+        } catch (IOException ex) {
+            LOG.error("Error sending trap:" + trap + " to receiver:" + trapReceiver, ex);
+        }
+    }
+
     private Variable buildVarBind(final FieldDescription fieldDescription, final INotification notification) {
         Variable result = null;
-        switch(fieldDescription.getType()) {
+        switch (fieldDescription.getType()) {
             case FIXED_X10:
             case FIXED_X100:
             case FIXED_X1000:
@@ -116,16 +136,22 @@ public class TrapSender implements ITrapSender {
 
     }
 
-    private Variable buildUnsigned(final INotification notification, final FieldDescription fieldDescription) {
+    private void createSnmpSession() throws IOException {
+        if (snmp == null) {
+            snmp = new Snmp(new DefaultUdpTransportMapping());
+        }
+    }
+
+    private Variable buildNumber(final INotification notification, final FieldDescription fieldDescription) {
         Variable result;
-        result = new UnsignedInteger32(notification.getInt(fieldDescription.getName()));
+        result = new Integer32(notification.getInt(fieldDescription.getName()));
         return result;
     }
 
-    private Variable buildIPAddress(final INotification notification, final FieldDescription fieldDescription) {
+    private Variable buildString(final INotification notification, final FieldDescription fieldDescription) {
         Variable result = null;
         if (notification.getString(fieldDescription.getName()) != null) {
-            result = new IpAddress(notification.getString(fieldDescription.getName()));
+            result = new OctetString(notification.getString(fieldDescription.getName()));
         }
         return result;
     }
@@ -138,44 +164,17 @@ public class TrapSender implements ITrapSender {
         return result;
     }
 
-    private Variable buildString(final INotification notification, final FieldDescription fieldDescription) {
+    private Variable buildIPAddress(final INotification notification, final FieldDescription fieldDescription) {
         Variable result = null;
         if (notification.getString(fieldDescription.getName()) != null) {
-            result = new OctetString(notification.getString(fieldDescription.getName()));
+            result = new IpAddress(notification.getString(fieldDescription.getName()));
         }
         return result;
     }
 
-    private Variable buildNumber(final INotification notification, final FieldDescription fieldDescription) {
+    private Variable buildUnsigned(final INotification notification, final FieldDescription fieldDescription) {
         Variable result;
-        result = new Integer32(notification.getInt(fieldDescription.getName()));
+        result = new UnsignedInteger32(notification.getInt(fieldDescription.getName()));
         return result;
-    }
-
-    private void sendTrap(final TrapRecipient trapReceiver, final PDU trap) {
-
-        try {
-            // Specify receiver
-            final Address targetaddress = new UdpAddress(InetAddress.getByName(trapReceiver.getIpAddress()), trapReceiver.getPort());
-            final CommunityTarget target = new CommunityTarget();
-            target.setCommunity(new OctetString(trapReceiver.getCommunity()));
-            target.setVersion(SnmpConstants.version2c);
-            target.setAddress(targetaddress);
-
-            createSnmpSession();
-
-            LOG.trace("Sending trap:{} to {} ...", trap, trapReceiver);
-
-            snmp.send(trap, target);
-
-        } catch (IOException ex) {
-            LOG.error("Error sending trap:" + trap + " to receiver:" + trapReceiver, ex);
-        }
-    }
-
-    private void createSnmpSession() throws IOException {
-        if (snmp == null){
-            snmp = new Snmp(new DefaultUdpTransportMapping());
-        }
     }
 }

@@ -33,7 +33,6 @@ import java.util.Set;
  * Abstract class to be extended by the root entity for each device type.
  */
 public abstract class DeviceEntity implements IDeviceEntity, Serializable {
-    private static final Logger LOG = LoggerFactory.getLogger(DeviceEntity.class);
     /**
      * The constant EMPTY_STRING.
      */
@@ -50,70 +49,8 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
      * The constant COLON.
      */
     public static final String COLON = ":";
-
+    private static final Logger LOG = LoggerFactory.getLogger(DeviceEntity.class);
     private final Set<PropertyChangeListener> changeListeners = new HashSet<>();
-
-    @Override
-    public String toString() {
-        return "DeviceEntity{" + "changeListeners=" + changeListeners + ", get_Description()=" + get_Description() + '}';
-    }
-
-    @Override
-    public abstract DeviceEntityDescription get_Description();
-
-
-    @Override
-    public boolean isSupported(final String fieldName) {
-        final DeviceEntityDescription description = get_Description();
-        return description.getFieldByName(fieldName) != null;
-    }
-
-    @Override
-    public String getString(final String fieldName) {
-        return (String) invokeGetter(fieldName);
-    }
-
-    @Override
-    public int getInt(final String fieldName) {
-        return (Integer) invokeGetter(fieldName);
-    }
-
-    @Override
-    public long getLong(final String fieldName) {
-        return (Long) invokeGetter(fieldName);
-    }
-
-    @Override
-    public void set(final String fieldName, final String value) {
-        invokeSetter(fieldName, value, String.class);
-    }
-
-    @Override
-    public void set(final String fieldName, final int value) {
-        invokeSetter(fieldName, value, int.class);
-    }
-
-    @Override
-    public void set(final String fieldName, final long value) {
-        invokeSetter(fieldName, value, long.class);
-    }
-
-    @Override
-    public void addPropertyChangeListener(final PropertyChangeListener listener) {
-        changeListeners.add(listener);
-        for (final DeviceEntity child : getChildren()) {
-            child.addPropertyChangeListener(listener);
-        }
-    }
-
-    @Override
-    public void clearPropertyChangeListeners() {
-        changeListeners.clear();
-        for (final DeviceEntity child : getChildren()) {
-            child.clearPropertyChangeListeners();
-        }
-    }
-
 
     /**
      * Gets children.
@@ -123,7 +60,7 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
     @SuppressWarnings("unchecked")
     Collection<DeviceEntity> getChildren() {
         final Collection<DeviceEntity> children = new ArrayList<>();
-        if (get_Description() != null){
+        if (get_Description() != null) {
             addFields(children);
         }
         return children;
@@ -142,6 +79,7 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
             addTable(children);
         }
     }
+
     @SuppressWarnings("unchecked")
     private void addTable(final Collection<DeviceEntity> children) {
         final ITableAccess tableAccess = (ITableAccess) this;
@@ -152,14 +90,6 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
         final Object obj = invokeGetter(field.getName());
         if (obj instanceof DeviceEntity) {
             children.add((DeviceEntity) obj);
-        }
-    }
-
-    @Override
-    public void removePropertyChangeListener(final PropertyChangeListener listener) {
-        changeListeners.remove(listener);
-        for (final DeviceEntity child : getChildren()) {
-            child.removePropertyChangeListener(listener);
         }
     }
 
@@ -214,69 +144,6 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
         }
     }
 
-    private Object invokeGetter(final String fieldName) {
-        try {
-            final Method method = this.getClass().getMethod(getGetterName(fieldName));
-            return method.invoke(this, (Object[]) null);
-        } catch (final NoSuchMethodException e) {
-            LOG.warn("Exception on getMethod", e);
-            throw new InvalidFieldNameException(this, fieldName);
-        } catch (final Exception e) {
-            LOG.warn("Exception on get", e);
-            throw new FieldAccessMethodException(this, fieldName, e.getMessage());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void invokeSetter(final String fieldName, final Object value, final Class type) {
-        try {
-            final Method method = this.getClass().getMethod(getSetterName(fieldName), type);
-            method.invoke(this, value);
-        } catch (final NoSuchMethodException e) {
-            LOG.warn("Exception on getMethod", e);
-            throw new InvalidFieldNameException(this, fieldName);
-        } catch (final Exception e) {
-            LOG.warn("Exception on set", e);
-            throw new FieldAccessMethodException(this, fieldName, e.getMessage());
-        }
-    }
-
-    /**
-     * Gets getter name.
-     *
-     * @param field the field
-     * @return the getter name
-     */
-// Get name for get accessor method.
-    protected  String getGetterName(final String field) {
-        return "get" + capitalizeFirstCharacter(field);
-    }
-
-    /**
-     * Gets setter name.
-     *
-     * @param field the field
-     * @return the setter name
-     */
-// Get name for get accessor method.
-    protected  String getSetterName(final String field) {
-        return "set" + capitalizeFirstCharacter(field);
-    }
-
-    // Capitalise first character of the specified name.
-    private  String capitalizeFirstCharacter(final String name) {
-        final StringBuilder sb = new StringBuilder(name);
-        final char firstChar = sb.charAt(0);
-        sb.setCharAt(0, Character.toUpperCase(firstChar));
-        return sb.toString();
-    }
-
-    @Override
-    public void set_ParentEntity(final AbstractRootEntity parent) {
-
-    }
-
-
     /**
      * Deliver an object identifier string from part of an integer array.
      *
@@ -286,8 +153,8 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
      * @return a string of the form "n1.n2....nn", where n1 is the                  integer at intArray[offset], n2 is the is the integer at                  intArray[offset + 1] and nn is the integer at                  intArray[offset + n - 1]
      */
     protected String _getObjectIdentifier(final int[] intArray,
-                                          final int   offset,
-                                          final int   length) {
+                                          final int offset,
+                                          final int length) {
         final StringBuilder buffer = new StringBuilder();
 
         String sepChar = EMPTY_STRING;
@@ -307,8 +174,8 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
      * @return a string of the form "n1.n2....nn", where n1 is the                  integer at intArray[offset], n2 is the is the integer at                  intArray[offset + 1] and nn is the integer at                  intArray[offset + n - 1]
      */
     protected String _getMacAddress(final int[] intArray,
-                                          final int   offset,
-                                          final int   length) {
+                                    final int offset,
+                                    final int length) {
         final StringBuilder buffer = new StringBuilder();
 
         String sepChar = EMPTY_STRING;
@@ -325,6 +192,135 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return "DeviceEntity{" + "changeListeners=" + changeListeners + ", get_Description()=" + get_Description() + '}';
+    }
+
+    @Override
+    public abstract DeviceEntityDescription get_Description();
+
+    @Override
+    public String getString(final String fieldName) {
+        return (String) invokeGetter(fieldName);
+    }
+
+    @Override
+    public int getInt(final String fieldName) {
+        return (Integer) invokeGetter(fieldName);
+    }
+
+    @Override
+    public long getLong(final String fieldName) {
+        return (Long) invokeGetter(fieldName);
+    }
+
+    @Override
+    public void set(final String fieldName, final String value) {
+        invokeSetter(fieldName, value, String.class);
+    }
+
+    @Override
+    public void set(final String fieldName, final int value) {
+        invokeSetter(fieldName, value, int.class);
+    }
+
+    @Override
+    public void set(final String fieldName, final long value) {
+        invokeSetter(fieldName, value, long.class);
+    }
+
+    @Override
+    public void addPropertyChangeListener(final PropertyChangeListener listener) {
+        changeListeners.add(listener);
+        for (final DeviceEntity child : getChildren()) {
+            child.addPropertyChangeListener(listener);
+        }
+    }
+
+    @Override
+    public void removePropertyChangeListener(final PropertyChangeListener listener) {
+        changeListeners.remove(listener);
+        for (final DeviceEntity child : getChildren()) {
+            child.removePropertyChangeListener(listener);
+        }
+    }
+
+    @Override
+    public void clearPropertyChangeListeners() {
+        changeListeners.clear();
+        for (final DeviceEntity child : getChildren()) {
+            child.clearPropertyChangeListeners();
+        }
+    }
+
+    @Override
+    public void set_ParentEntity(final AbstractRootEntity parent) {
+
+    }
+
+    @Override
+    public boolean isSupported(final String fieldName) {
+        final DeviceEntityDescription description = get_Description();
+        return description.getFieldByName(fieldName) != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void invokeSetter(final String fieldName, final Object value, final Class type) {
+        try {
+            final Method method = this.getClass().getMethod(getSetterName(fieldName), type);
+            method.invoke(this, value);
+        } catch (final NoSuchMethodException e) {
+            LOG.warn("Exception on getMethod", e);
+            throw new InvalidFieldNameException(this, fieldName);
+        } catch (final Exception e) {
+            LOG.warn("Exception on set", e);
+            throw new FieldAccessMethodException(this, fieldName, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets setter name.
+     *
+     * @param field the field
+     * @return the setter name
+     */
+// Get name for get accessor method.
+    protected String getSetterName(final String field) {
+        return "set" + capitalizeFirstCharacter(field);
+    }
+
+    private Object invokeGetter(final String fieldName) {
+        try {
+            final Method method = this.getClass().getMethod(getGetterName(fieldName));
+            return method.invoke(this, (Object[]) null);
+        } catch (final NoSuchMethodException e) {
+            LOG.warn("Exception on getMethod", e);
+            throw new InvalidFieldNameException(this, fieldName);
+        } catch (final Exception e) {
+            LOG.warn("Exception on get", e);
+            throw new FieldAccessMethodException(this, fieldName, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets getter name.
+     *
+     * @param field the field
+     * @return the getter name
+     */
+// Get name for get accessor method.
+    protected String getGetterName(final String field) {
+        return "get" + capitalizeFirstCharacter(field);
+    }
+
+    // Capitalise first character of the specified name.
+    private String capitalizeFirstCharacter(final String name) {
+        final StringBuilder sb = new StringBuilder(name);
+        final char firstChar = sb.charAt(0);
+        sb.setCharAt(0, Character.toUpperCase(firstChar));
+        return sb.toString();
+    }
 
     /**
      * Get change listeners set.

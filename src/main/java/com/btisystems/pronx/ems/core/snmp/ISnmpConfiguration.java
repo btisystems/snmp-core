@@ -14,14 +14,14 @@
 
 package com.btisystems.pronx.ems.core.snmp;
 
-import java.io.IOException;
-import java.io.Serializable;
-
 import org.snmp4j.PDU;
 import org.snmp4j.Session;
 import org.snmp4j.Target;
 import org.snmp4j.TransportMapping;
 import org.snmp4j.smi.Address;
+
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * A configuration to be applied to an Snmp Session.
@@ -68,18 +68,18 @@ public interface ISnmpConfiguration extends Serializable {
     int getWalkTimeout();
 
     /**
-     * Sets community.
-     *
-     * @param community the community
-     */
-    void setCommunity(String community);
-
-    /**
      * Gets community.
      *
      * @return the Community string used to connect to the remote SNMP agent.
      */
     String getCommunity();
+
+    /**
+     * Sets community.
+     *
+     * @param community the community
+     */
+    void setCommunity(String community);
 
     /**
      * Gets max repetitions.
@@ -89,18 +89,18 @@ public interface ISnmpConfiguration extends Serializable {
     int getMaxRepetitions();
 
     /**
-     * Sets the remote agent connection port.
-     *
-     * @param port on which to connect to the remote SNMP agent.
-     */
-    void setPort(int port);
-
-    /**
      * Gets the remote agent connection port.
      *
      * @return port port
      */
     int getPort();
+
+    /**
+     * Sets the remote agent connection port.
+     *
+     * @param port on which to connect to the remote SNMP agent.
+     */
+    void setPort(int port);
 
     /**
      * Gets maximum columns per pdu.

@@ -33,6 +33,10 @@ public class SystemObjectIdException extends DetailedFaultException {
         super("Failed to get System Object Id from device [%1$s]", getHostAddress(address));
     }
 
+    private static String getHostAddress(final Address address) {
+        return ((IpAddress) address).getInetAddress().getHostAddress();
+    }
+
     /**
      * Instantiates a new System object id exception.
      *
@@ -42,9 +46,5 @@ public class SystemObjectIdException extends DetailedFaultException {
     public SystemObjectIdException(final Address address,
                                    final Throwable throwable) {
         super("Failed to get System Object Id from device [%1$s] [%2$s]", getHostAddress(address), throwable.getMessage());
-    }
-
-    private static String getHostAddress(final Address address) {
-        return ((IpAddress) address).getInetAddress().getHostAddress();
     }
 }

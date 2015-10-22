@@ -14,7 +14,6 @@
 package com.btisystems.pronx.ems.core.snmp;
 
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
-
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
 

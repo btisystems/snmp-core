@@ -13,10 +13,10 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapsender;
 
-import java.util.List;
-
 import com.btisystems.pronx.ems.core.model.INotification;
 import com.btisystems.pronx.ems.core.snmp.ISnmpNotificationOidLookup;
+
+import java.util.List;
 
 /**
  * The interface Trap sender.

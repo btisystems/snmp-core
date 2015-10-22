@@ -20,9 +20,6 @@ package com.btisystems.pronx.ems.core.model;
  */
 public abstract class GeneratedIdentifiers {
 
-    private GeneratedIdentifiers() {
-    }
-
     /**
      * The constant ROOT_CLASS_NAME.
      */
@@ -47,7 +44,6 @@ public abstract class GeneratedIdentifiers {
      * The constant NOTIFICATION_REGISTRY_NAME_MAPNAME.
      */
     public static final String NOTIFICATION_REGISTRY_NAME_MAPNAME = "notificationNameRegistry";
-
     /**
      * The constant METHOD_GET_OBJECT_IDENTIFIER.
      */
@@ -56,7 +52,6 @@ public abstract class GeneratedIdentifiers {
      * The constant METHOD_GET_MACADDRESS.
      */
     public static final String METHOD_GET_MACADDRESS = "_getMacAddress";
-
     /**
      * The constant METHOD_SET_INDEX.
      */
@@ -65,10 +60,12 @@ public abstract class GeneratedIdentifiers {
      * The constant METHOD_SET_TABLE.
      */
     public static final String METHOD_SET_TABLE = "_setTable";
-
     /**
      * The constant NOTIFICATION_METADATA_CONTEXT_PATH.
      */
     public static final String NOTIFICATION_METADATA_CONTEXT_PATH = "com.btisystems.pronx.ems.schemas.meta.notification";
+
+    private GeneratedIdentifiers() {
+    }
 
 }

@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
  * Abstract class to be extended by the root entity for each device type.
  */
 @Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class AbstractRootEntity extends DeviceEntity implements IObjectSetter {
 
     private static Logger log = LoggerFactory.getLogger(AbstractRootEntity.class);
@@ -41,6 +41,7 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private int id;
+    private String deviceAddress;
 
     /**
      * Gets id.
@@ -50,8 +51,6 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
     public int getId() {
         return id;
     }
-
-    private String deviceAddress;
 
     /**
      * Gets device address.
@@ -97,12 +96,19 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
     public DeviceEntity getEntity(final OID oid) {
         for (final DeviceEntity root : getRoots()) {
             if (root != null && root.get_Description() != null
-                && oid.equals(root.get_Description().getOid())) {
+                    && oid.equals(root.get_Description().getOid())) {
                 return root;
             }
         }
         return null;
     }
+
+    /**
+     * Return the root objects for the device
+     *
+     * @return an array of {@link DeviceEntity}s each of which is a root of a          hierarchy of entities supported by the device
+     */
+    public abstract DeviceEntity[] getRoots();
 
     /**
      * Gets entity.
@@ -127,9 +133,7 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
     @Override
     public DeviceEntityDescription get_Description() {
         return null;
-    }
-
-    @SuppressWarnings({"rawtypes" })
+    }    @SuppressWarnings({"rawtypes"})
     @Override
     public void setObject(final Class clazz, final Object childObject) {
         String sn = null;
@@ -147,11 +151,6 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
             log.warn("Exception in setObject. SimpleName:" + sn, e);
             throw new FieldAccessMethodException(this, sn, e.getMessage());
         }
-    }
-
-    @Override
-    public void setObject(final Object childObject) {
-        setObject(childObject.getClass(), childObject);
     }
 
     /**
@@ -175,6 +174,9 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
             log.warn("Exception in setObject. SimpleName:" + sn, e);
             throw new FieldAccessMethodException(this, sn, e.getMessage());
         }
+    }    @Override
+    public void setObject(final Object childObject) {
+        setObject(childObject.getClass(), childObject);
     }
 
     /**
@@ -217,10 +219,7 @@ public abstract class AbstractRootEntity extends DeviceEntity implements IObject
         return object;
     }
 
-    /**
-     * Return the root objects for the device
-     *
-     * @return an array of {@link DeviceEntity}s each of which is a root of a          hierarchy of entities supported by the device
-     */
-    public abstract DeviceEntity[] getRoots();
+
+
+
 }

@@ -14,11 +14,8 @@
 
 package com.btisystems.pronx.ems.core.snmp;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.List;
-import java.util.Map;
-
+import com.btisystems.pronx.ems.core.exception.SystemObjectIdException;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.PDU;
@@ -31,29 +28,29 @@ import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.util.DefaultPDUFactory;
 import org.snmp4j.util.TreeEvent;
 import org.snmp4j.util.TreeListener;
 import org.snmp4j.util.TreeUtils;
 
-import com.btisystems.pronx.ems.core.exception.SystemObjectIdException;
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
-
-import org.snmp4j.util.DefaultPDUFactory;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A {@link ISnmpSession}.
  */
 public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
 
-    private static final String SYSTEM_OBJECT_ID_OID = "1.3.6.1.2.1.1.2.0";
-    private static final String NO_SUCH_OBJECT = "noSuchObject";
-    private static final String NULL = "Null";
-
+    /**
+     * The constant SPACE.
+     */
+    public static final String SPACE = " ";
     /**
      * Main logger for SNMP session.
      */
     protected static final Logger LOG = LoggerFactory.getLogger(SnmpSession.class);
-
     /**
      * Fine grained logger for var bind set requests.
      */
@@ -62,11 +59,9 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
      * Fine grained logger for walk requests.
      */
     protected static final Logger WALKER_LOG = LoggerFactory.getLogger(ISnmpSession.class.getName() + ".walk");
-    /**
-     * The constant SPACE.
-     */
-    public static final String SPACE = " ";
-
+    private static final String SYSTEM_OBJECT_ID_OID = "1.3.6.1.2.1.1.2.0";
+    private static final String NO_SUCH_OBJECT = "noSuchObject";
+    private static final String NULL = "Null";
     private final ISnmpConfiguration snmpConfiguration;
     private final Target target;
     private final Address address;
@@ -113,7 +108,7 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
         } catch (final IOException e) {
             LOG.debug("Ignoring IOException {}", e.getMessage());
             LOG.trace("IOException {}", e);
-            
+
         }
         return null;
     }
@@ -152,11 +147,11 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
                 // which it might have done if the initial Snmp.send threw an IOException
                 if (!treeListener.isFinished()) {
                     final long startTime = System.currentTimeMillis();
-                    while ((!treeListener.isFinished()) && ((System.currentTimeMillis() - startTime) < snmpConfiguration.getWalkTimeout())){
+                    while ((!treeListener.isFinished()) && ((System.currentTimeMillis() - startTime) < snmpConfiguration.getWalkTimeout())) {
                         treeListener.wait(snmpConfiguration.getWalkTimeout());
                     }
                     //Timed out rather than finished.
-                    if (!treeListener.isFinished()){
+                    if (!treeListener.isFinished()) {
                         treeListener.stopWalk();
                         LOG.error("Walk for device {} timed out.", getHostAddress());
                         return new WalkResponse(new WalkException("Walk timed out"));
@@ -175,6 +170,85 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
                                      final Map<DeviceEntityDescription, List<OID>> tableIndexes) throws IOException {
 
         return tableWalker.getTableRows(networkDevice, tableIndexes);
+    }
+
+    @Override
+    public InetAddress getAddress() {
+        return ((IpAddress) address).getInetAddress();
+    }
+
+    @Override
+    public void close() throws IOException {
+        // Actually nothing to do.
+        // snmpInterface is a singleton and should not be closed.
+    }
+
+    @Override
+    public void setVariables(final VariableBinding[] bindings) {
+        final String hostIp = getHostAddress();
+        SETTER_LOG.debug(">>> setVariable bindings:{}, address {}", bindings, hostIp);
+
+
+        final PDU request = snmpConfiguration.createPDU(PDU.SET);
+        request.addAll(bindings);
+
+        final ResponseEvent responseEvent = send(request, hostIp);
+        processResponseEvent(responseEvent, hostIp);
+    }
+
+    private ResponseEvent send(final PDU request, final String hostIp) throws SnmpIoException {
+        ResponseEvent responseEvent;
+        try {
+            responseEvent = snmpInterface.send(request, target);
+        } catch (final IOException e) {
+            LOG.debug("Failed to set variables:", e);
+            SETTER_LOG.warn("IO Exception sending to host {}, message={}", hostIp, e.getMessage());
+            throw new SnmpIoException(hostIp, e.getMessage());
+        }
+        return responseEvent;
+    }
+
+    private void processResponseEvent(final ResponseEvent responseEvent, final String hostIp) throws SnmpIoException {
+        if (responseEvent.getError() != null) {
+            SETTER_LOG.warn("Response when sending to host {} has error: {}", hostIp, responseEvent.getError().getMessage());
+            throw new SnmpIoException(hostIp, responseEvent.getError().getMessage());
+        }
+
+        final PDU response = responseEvent.getResponse();
+
+        if (response != null) {
+            final int errorStatusId = response.getErrorStatus();
+            if (errorStatusId != SnmpConstants.SNMP_ERROR_SUCCESS) {
+                SETTER_LOG.warn("Response PDU when sending to host {} has error: {}", hostIp, constructErrorMessage(response));
+
+                checkErrorCodeAndDescription();
+
+                if (SnmpConstants.SNMP_ERROR_AUTHORIZATION_ERROR == errorStatusId) {
+                    final String authErrorMsg = "Authorization error occurred; Please confirm that the device is running normally and verify the SNMP community strings.";
+                    throw new SnmpIoException(hostIp, authErrorMsg);
+                }
+
+                throw new SnmpIoException(hostIp, response.getErrorStatusText());
+            }
+            SETTER_LOG.debug("Success");
+        } else {
+            SETTER_LOG.debug("Timed Out");
+            throw new SnmpIoException(hostIp, "Timed out");
+        }
+    }
+
+    private static String constructErrorMessage(final PDU response) {
+        final int bindingIndex = response.getErrorIndex() - 1;
+        Object error = "";
+        if (bindingIndex > -1) {
+            error = response.getVariableBindings().get(bindingIndex);
+        }
+        return response.getErrorStatusText() + SPACE + error;
+    }
+
+    @Override
+    public void checkErrorCodeAndDescription() {
+        //Empty implementation, i.e. no error code handling.
     }
 
     /**
@@ -215,90 +289,10 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
     }
 
     @Override
-    public InetAddress getAddress() {
-        return ((IpAddress) address).getInetAddress();
-    }
-
-    @Override
     public PDU createPDU(final Target target) {
         final PDU request = snmpConfiguration.createPDU(PDU.GETBULK);
         return request;
     }
-
-    @Override
-    public void close() throws IOException {
-        // Actually nothing to do.
-        // snmpInterface is a singleton and should not be closed.
-    }
-
-     private static String constructErrorMessage(final PDU response) {
-        final int bindingIndex = response.getErrorIndex() - 1;
-        Object error = "";
-        if (bindingIndex > -1) {
-            error = response.getVariableBindings().get(bindingIndex);
-        }
-        return response.getErrorStatusText() + SPACE + error;
-    }
-
-    @Override
-    public void setVariables(final VariableBinding[] bindings) {
-        final String hostIp = getHostAddress();
-        SETTER_LOG.debug(">>> setVariable bindings:{}, address {}", bindings, hostIp);
-
-        
-        final PDU request = snmpConfiguration.createPDU(PDU.SET);
-        request.addAll(bindings);
-
-        final ResponseEvent responseEvent = send(request, hostIp);
-        processResponseEvent(responseEvent, hostIp);
-    }
-
-    private void processResponseEvent(final ResponseEvent responseEvent, final String hostIp) throws SnmpIoException {
-        if (responseEvent.getError() != null) {
-            SETTER_LOG.warn("Response when sending to host {} has error: {}", hostIp, responseEvent.getError().getMessage());
-            throw new SnmpIoException(hostIp, responseEvent.getError().getMessage());
-        }
-        
-        final PDU response = responseEvent.getResponse();
-        
-        if (response != null) {
-            final int errorStatusId = response.getErrorStatus();
-            if (errorStatusId != SnmpConstants.SNMP_ERROR_SUCCESS) {
-                SETTER_LOG.warn("Response PDU when sending to host {} has error: {}", hostIp, constructErrorMessage(response));
-
-                checkErrorCodeAndDescription();
-
-                if (SnmpConstants.SNMP_ERROR_AUTHORIZATION_ERROR == errorStatusId) {
-                    final String authErrorMsg = "Authorization error occurred; Please confirm that the device is running normally and verify the SNMP community strings.";
-                    throw new SnmpIoException(hostIp, authErrorMsg);
-                }
-
-                throw new SnmpIoException(hostIp, response.getErrorStatusText());
-            }
-            SETTER_LOG.debug("Success");
-        } else {
-            SETTER_LOG.debug("Timed Out");
-            throw new SnmpIoException(hostIp, "Timed out");
-        }
-    }
-
-    private ResponseEvent send(final PDU request, final String hostIp) throws SnmpIoException {
-        ResponseEvent responseEvent;
-        try {
-            responseEvent = snmpInterface.send(request, target);
-        } catch (final IOException e) {
-            LOG.debug("Failed to set variables:", e);
-            SETTER_LOG.warn("IO Exception sending to host {}, message={}", hostIp, e.getMessage());
-            throw new SnmpIoException(hostIp, e.getMessage());
-        }
-        return responseEvent;
-    }
-
-    @Override
-    public void checkErrorCodeAndDescription() {
-    //Empty implementation, i.e. no error code handling.
-    }
-
 
     /**
      * Is invalid boolean.
@@ -313,14 +307,14 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
     private class TreeResponseListener implements TreeListener {
 
         private final long startTime = System.currentTimeMillis();
+        private final IVariableBindingHandler networkDevice;
+        private final List<OID> oids;
+        private final TreeUtils treeUtils;
         private boolean finished;
         private int requests;
         private int objects;
         private WalkResponse response;
-        private final IVariableBindingHandler networkDevice;
         private int oidIndex;
-        private final List<OID> oids;
-        private final TreeUtils treeUtils;
         private OID lastProcessedOid;
 
         /**
@@ -349,12 +343,17 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
             return (response == null) ? new WalkResponse(new WalkException("Walk interrupted")) : response;
         }
 
-        @Override
+        /**
+         * Stop walk.
+         */
+        public void stopWalk() {
+            finished = true;
+        }        @Override
         public boolean next(final TreeEvent e) {
             requests++;
             final VariableBinding[] vbs = e.getVariableBindings();
             for (int i = 0; i < vbs.length; i++) {
-                if(addVariable(vbs, i)) {
+                if (addVariable(vbs, i)) {
                     objects++;
                 }
             }
@@ -391,7 +390,7 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
             }
 
             final long walkTime = System.currentTimeMillis() - startTime;
-            WALKER_LOG.debug("Element {} walked, requests: {}, objects: {} time: {}.",  getHostAddress(), requests, objects, walkTime);
+            WALKER_LOG.debug("Element {} walked, requests: {}, objects: {} time: {}.", getHostAddress(), requests, objects, walkTime);
 
             if (e.isError()) {
                 LOG.error("Exception while walking " + getHostAddress() + ".", e.getException());
@@ -431,12 +430,7 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
             return false;
         }
 
-        /**
-         * Stop walk.
-         */
-        public void stopWalk(){
-            finished = true;
-        }
+
 
     }
 }

@@ -23,16 +23,11 @@ public abstract class DetailedFaultException extends RuntimeException {
 
     private static final long serialVersionUID = 3666677767195443650L;
 
-    /** Logger - available to sub-classes */
+    /**
+     * Logger - available to sub-classes
+     */
     private static final Logger logger = LoggerFactory.getLogger(DetailedFaultException.class);
-
-    /** Format text and variables */
-    private static String format(final String text, final String... variables) {
-        return String.format(text, (Object[]) variables);
-    }
-
     private final String text;
-
     private final String[] variables;
 
     /**
@@ -47,6 +42,13 @@ public abstract class DetailedFaultException extends RuntimeException {
         this.variables = variables;
 
         logger.error(format(text, variables));
+    }
+
+    /**
+     * Format text and variables
+     */
+    private static String format(final String text, final String... variables) {
+        return String.format(text, (Object[]) variables);
     }
 
     /**

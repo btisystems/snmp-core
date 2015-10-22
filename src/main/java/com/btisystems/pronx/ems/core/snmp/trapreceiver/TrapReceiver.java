@@ -13,9 +13,6 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapreceiver;
 
-import java.io.IOException;
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommandResponderEvent;
@@ -38,12 +35,14 @@ import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.ThreadPool;
 
+import java.io.IOException;
+import java.util.Date;
+
 /**
  * The type Trap receiver.
  */
 public class TrapReceiver implements ITrapReceiver {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrapReceiver.class);
     /**
      * The constant SLASH.
      */
@@ -52,8 +51,10 @@ public class TrapReceiver implements ITrapReceiver {
      * The constant PORT.
      */
     public static final String PORT = "/161";
+    private static final Logger LOG = LoggerFactory.getLogger(TrapReceiver.class);
+    private static final String TCP_TRANSPORT = "tcp";
+    private static final String UDP_TRANSPORT = "udp";
     private static OctetString localEngineID = new OctetString(MPv3.createLocalEngineID());
-    private OctetString authoritativeEngineID;
     /**
      * The Config.
      */
@@ -74,6 +75,7 @@ public class TrapReceiver implements ITrapReceiver {
      * The Dispatcher thread count.
      */
     protected int dispatcherThreadCount;
+    private OctetString authoritativeEngineID;
 
     @Override
     public void setConfiguration(final ITrapReceiverConfiguration config) {
@@ -130,32 +132,6 @@ public class TrapReceiver implements ITrapReceiver {
         }
     }
 
-    @Override
-    public synchronized void processPdu(final CommandResponderEvent e) {
-        final Date timeNow = new Date();
-        final PDU command = e.getPDU();
-        final String remoteAddress = getRemoteAddress(e);
-        final String resolvedAddress = addressMapper.mapAddress(remoteAddress);
-        e.setProcessed(true);
-        if (command != null) {
-            switch (command.getType()) {
-                case PDU.TRAP:
-                case PDU.INFORM:
-                case PDU.V1TRAP:
-                    processNotification(remoteAddress, command, timeNow, resolvedAddress);
-                    break;
-                default:
-                    LOG.warn("Unsupported PDU from:" + remoteAddress + ":" + command.toString());
-            }
-        }
-    }
-
-    private void processNotification(final String remoteAddress, final PDU command, final Date timeNow, final String resolvedAddress) {
-        // log here in case issues when sending it to service
-        LOG.debug("Trap received from address = {} containing command = {}", remoteAddress, command);
-        trapHandlerService.handle(timeNow, resolvedAddress, command);
-    }
-
     /**
      * Gets address.
      *
@@ -183,11 +159,35 @@ public class TrapReceiver implements ITrapReceiver {
 
         throw new IllegalArgumentException("Unknown transport " + transport);
     }
-    private static final String TCP_TRANSPORT = "tcp";
-    private static final String UDP_TRANSPORT = "udp";
+
+    @Override
+    public synchronized void processPdu(final CommandResponderEvent e) {
+        final Date timeNow = new Date();
+        final PDU command = e.getPDU();
+        final String remoteAddress = getRemoteAddress(e);
+        final String resolvedAddress = addressMapper.mapAddress(remoteAddress);
+        e.setProcessed(true);
+        if (command != null) {
+            switch (command.getType()) {
+                case PDU.TRAP:
+                case PDU.INFORM:
+                case PDU.V1TRAP:
+                    processNotification(remoteAddress, command, timeNow, resolvedAddress);
+                    break;
+                default:
+                    LOG.warn("Unsupported PDU from:" + remoteAddress + ":" + command.toString());
+            }
+        }
+    }
 
     private String getRemoteAddress(final CommandResponderEvent e) {
         return ((IpAddress) e.getPeerAddress()).getInetAddress().getHostAddress();
+    }
+
+    private void processNotification(final String remoteAddress, final PDU command, final Date timeNow, final String resolvedAddress) {
+        // log here in case issues when sending it to service
+        LOG.debug("Trap received from address = {} containing command = {}", remoteAddress, command);
+        trapHandlerService.handle(timeNow, resolvedAddress, command);
     }
 
 }

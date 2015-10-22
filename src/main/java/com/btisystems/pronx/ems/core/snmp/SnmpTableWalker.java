@@ -14,16 +14,8 @@
 
 package com.btisystems.pronx.ems.core.snmp;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.PDU;
@@ -33,14 +25,20 @@ import org.snmp4j.smi.Address;
 import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.util.DefaultPDUFactory;
 import org.snmp4j.util.TableEvent;
 import org.snmp4j.util.TableListener;
 import org.snmp4j.util.TableUtils;
 
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
-
-import org.snmp4j.util.DefaultPDUFactory;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Understands how to retrieval specific rows from a set of tables.
@@ -66,7 +64,7 @@ public class SnmpTableWalker extends DefaultPDUFactory {
      * @param address           address of the device associated with the session
      */
     public SnmpTableWalker(final ISnmpConfiguration snmpConfiguration,
-                       	   final Session snmp,
+                           final Session snmp,
                            final Target target,
                            final Address address) {
         this.snmpConfiguration = snmpConfiguration;
@@ -86,48 +84,75 @@ public class SnmpTableWalker extends DefaultPDUFactory {
     public WalkResponse getTableRows(final IVariableBindingHandler networkDevice,
                                      final Map<DeviceEntityDescription, List<OID>> tableIndexes) throws IOException {
 
-    	final Iterator<TableIndexRetrievalDescriptor> retrievalIterator = getTableRetrievalDescriptors(tableIndexes).iterator();
-    	if (retrievalIterator.hasNext()) {
+        final Iterator<TableIndexRetrievalDescriptor> retrievalIterator = getTableRetrievalDescriptors(tableIndexes).iterator();
+        if (retrievalIterator.hasNext()) {
 
-    		final TableUtils tableUtils = newTableUtility();
-    		final TableResponseListener listener = new TableResponseListener(networkDevice);
+            final TableUtils tableUtils = newTableUtility();
+            final TableResponseListener listener = new TableResponseListener(networkDevice);
 
-    		do {
-    			final TableIndexRetrievalDescriptor indexRetrieval = retrievalIterator.next();
-    			final WalkResponse response = retrieveRowsWithIndex(tableUtils, listener, indexRetrieval);
-    			if (response != null) {
-    				return response;
-    			}
-    		} while (!listener.hadError() && retrievalIterator.hasNext());
+            do {
+                final TableIndexRetrievalDescriptor indexRetrieval = retrievalIterator.next();
+                final WalkResponse response = retrieveRowsWithIndex(tableUtils, listener, indexRetrieval);
+                if (response != null) {
+                    return response;
+                }
+            } while (!listener.hadError() && retrievalIterator.hasNext());
 
-    		return listener.getResponse();
-    	}
-    	return new WalkResponse(new WalkException("Nothing to retrieve"));
+            return listener.getResponse();
+        }
+        return new WalkResponse(new WalkException("Nothing to retrieve"));
+    }
+
+    private Collection<TableIndexRetrievalDescriptor> getTableRetrievalDescriptors(final Map<DeviceEntityDescription, List<OID>> tableIndexes) {
+
+        final Map<OID, TableIndexRetrievalDescriptor> descriptorMap = new HashMap<OID, TableIndexRetrievalDescriptor>();
+
+        for (final Entry<DeviceEntityDescription, List<OID>> entry : tableIndexes.entrySet()) {
+            final DeviceEntityDescription deviceEntityDescription = entry.getKey();
+            final Collection<FieldDescription> columnDescriptions = deviceEntityDescription.getFields();
+
+            for (final OID indexOid : entry.getValue()) {
+
+                TableIndexRetrievalDescriptor descriptor = descriptorMap.get(indexOid);
+                if (descriptor == null) {
+                    descriptor = new TableIndexRetrievalDescriptor(indexOid);
+                    descriptorMap.put(indexOid, descriptor);
+                }
+
+                for (final FieldDescription columnDescription : columnDescriptions) {
+                    final OID columnOid = new OID(deviceEntityDescription.getOid());
+                    columnOid.append(columnDescription.getId());
+                    log.debug("Add OID for column:{}", columnOid);
+                    descriptor.columnOids.add(columnOid);
+                }
+            }
+        }
+        return descriptorMap.values();
     }
 
     // Create and configure Table walking utility.
-	private TableUtils newTableUtility() {
-		final TableUtils tableUtils = new TableUtils(snmpInterface, this);
-		if (snmpConfiguration.getMaximumColumnsPerPdu() != 0) {
-			tableUtils.setMaxNumColumnsPerPDU(snmpConfiguration.getMaximumColumnsPerPdu());
-		}
-		if (snmpConfiguration.getMaximumRowsPerPdu() != 0) {
-			tableUtils.setMaxNumRowsPerPDU(snmpConfiguration.getMaximumRowsPerPdu());
-		}
-		return tableUtils;
-	}
+    private TableUtils newTableUtility() {
+        final TableUtils tableUtils = new TableUtils(snmpInterface, this);
+        if (snmpConfiguration.getMaximumColumnsPerPdu() != 0) {
+            tableUtils.setMaxNumColumnsPerPDU(snmpConfiguration.getMaximumColumnsPerPdu());
+        }
+        if (snmpConfiguration.getMaximumRowsPerPdu() != 0) {
+            tableUtils.setMaxNumRowsPerPDU(snmpConfiguration.getMaximumRowsPerPdu());
+        }
+        return tableUtils;
+    }
 
     private WalkResponse retrieveRowsWithIndex(final TableUtils tableUtils,
-			final TableResponseListener listener,
-			final TableIndexRetrievalDescriptor indexRetrieval) {
+                                               final TableResponseListener listener,
+                                               final TableIndexRetrievalDescriptor indexRetrieval) {
 
-    	walkerLog.debug("retrieve columns {} with index {}", indexRetrieval.getColumnOids(), indexRetrieval.lowIndex);
+        walkerLog.debug("retrieve columns {} with index {}", indexRetrieval.getColumnOids(), indexRetrieval.lowIndex);
 
         listener.reset();
         synchronized (listener) {
             tableUtils.getTable(target, indexRetrieval.getColumnOids(), listener, null, indexRetrieval.lowIndex, indexRetrieval.highIndex);
             try {
-				// Allow for possibility that listener has already terminated in this thread,
+                // Allow for possibility that listener has already terminated in this thread,
                 // which it might have done if the initial Snmp.send threw an IOException
                 if (!listener.isFinished()) {
                     final long startTime = System.currentTimeMillis();
@@ -150,35 +175,7 @@ public class SnmpTableWalker extends DefaultPDUFactory {
         return null;
     }
 
-
-	private Collection<TableIndexRetrievalDescriptor> getTableRetrievalDescriptors(final Map<DeviceEntityDescription, List<OID>> tableIndexes) {
-
-    	final Map<OID, TableIndexRetrievalDescriptor> descriptorMap = new HashMap<OID, TableIndexRetrievalDescriptor>();
-
-    	for (final Entry<DeviceEntityDescription, List<OID>> entry : tableIndexes.entrySet()) {
-    		final DeviceEntityDescription deviceEntityDescription = entry.getKey();
-    		final Collection<FieldDescription> columnDescriptions = deviceEntityDescription.getFields();
-
-    		for (final OID indexOid : entry.getValue()) {
-
-    			TableIndexRetrievalDescriptor descriptor = descriptorMap.get(indexOid);
-    			if (descriptor == null) {
-    				descriptor = new TableIndexRetrievalDescriptor(indexOid);
-    				descriptorMap.put(indexOid, descriptor);
-    			}
-
-    			for (final FieldDescription columnDescription : columnDescriptions) {
-    				final OID columnOid = new OID(deviceEntityDescription.getOid());
-    				columnOid.append(columnDescription.getId());
-    				log.debug("Add OID for column:{}", columnOid);
-    				descriptor.columnOids.add(columnOid);
-    			}
-    		}
-    	}
-		return descriptorMap.values();
-	}
-
-	private String getHostAddress() {
+    private String getHostAddress() {
         return ((IpAddress) address).getInetAddress().getHostAddress();
     }
 
@@ -193,11 +190,11 @@ public class SnmpTableWalker extends DefaultPDUFactory {
     private class TableResponseListener implements TableListener {
 
         private final long startTime = System.currentTimeMillis();
+        private final IVariableBindingHandler networkDevice;
         private boolean finished;
         private int requests;
         private int objects;
         private WalkResponse response;
-        private final IVariableBindingHandler networkDevice;
 
         /**
          * Instantiates a new Table response listener.
@@ -215,26 +212,31 @@ public class SnmpTableWalker extends DefaultPDUFactory {
          * @return the response
          */
         public WalkResponse getResponse() {
-        	if (response != null) {
-        		return response;
-        	}
-        	if (!finished) {
-        		return new WalkResponse(new WalkException("Walk interrupted"));
-        	}
+            if (response != null) {
+                return response;
+            }
+            if (!finished) {
+                return new WalkResponse(new WalkException("Walk interrupted"));
+            }
 
 
-        	final long walkTime = System.currentTimeMillis() - startTime;
-        	walkerLog.debug("requests:{}, objects:{}", requests, objects);
-        	walkerLog.debug("time:{}", walkTime);
+            final long walkTime = System.currentTimeMillis() - startTime;
+            walkerLog.debug("requests:{}, objects:{}", requests, objects);
+            walkerLog.debug("time:{}", walkTime);
 
-        	response = new WalkResponse(true);
-        	response.setObjectCount(objects);
-        	response.setRequestCount(requests);
-        	response.setWalkTime(walkTime);
-        	return response;
+            response = new WalkResponse(true);
+            response.setObjectCount(objects);
+            response.setRequestCount(requests);
+            response.setWalkTime(walkTime);
+            return response;
         }
 
-        @Override
+        /**
+         * Stop walk.
+         */
+        public void stopWalk() {
+            finished = true;
+        }        @Override
         public boolean next(final TableEvent e) {
             requests++;
             final VariableBinding[] vbs = e.getColumns();
@@ -247,7 +249,14 @@ public class SnmpTableWalker extends DefaultPDUFactory {
             return !finished;
         }
 
-        private boolean addVariable(final VariableBinding binding) {
+        /**
+         * Had error boolean.
+         *
+         * @return the boolean
+         */
+        public boolean hadError() {
+            return response != null;
+        }        private boolean addVariable(final VariableBinding binding) {
             walkerLog.debug(">>> addVariable:{}", binding);
             try {
                 final boolean wasAdded = networkDevice.addVariable(binding);
@@ -260,7 +269,12 @@ public class SnmpTableWalker extends DefaultPDUFactory {
             return true;
         }
 
-        @Override
+        /**
+         * Reset.
+         */
+        public void reset() {
+            finished = false;
+        }        @Override
         public void finished(final TableEvent e) {
             walkerLog.debug("Finished table request");
             if ((e.getColumns() != null) && (e.getColumns().length > 0)) {
@@ -283,31 +297,26 @@ public class SnmpTableWalker extends DefaultPDUFactory {
             return finished;
         }
 
-        /**
-         * Stop walk.
-         */
-        public void stopWalk(){
-            finished = true;
-        }
 
-        /**
-         * Had error boolean.
-         *
-         * @return the boolean
-         */
-        public boolean hadError() {
-        	return response != null;
-        }
 
-        /**
-         * Reset.
-         */
-        public void reset() {
-        	finished = false;
-        }
+
+
+
     }
 
     private class TableIndexRetrievalDescriptor {
+        /**
+         * The Low index.
+         */
+        protected OID lowIndex;
+        /**
+         * The High index.
+         */
+        protected OID highIndex;
+        /**
+         * The Column oids.
+         */
+        protected Set<OID> columnOids;
         /**
          * Instantiates a new Table index retrieval descriptor.
          *
@@ -333,18 +342,5 @@ public class SnmpTableWalker extends DefaultPDUFactory {
         public OID[] getColumnOids() {
             return columnOids.toArray(new OID[columnOids.size()]);
         }
-
-        /**
-         * The Low index.
-         */
-        protected OID lowIndex;
-        /**
-         * The High index.
-         */
-        protected OID highIndex;
-        /**
-         * The Column oids.
-         */
-        protected Set<OID> columnOids;
     }
 }

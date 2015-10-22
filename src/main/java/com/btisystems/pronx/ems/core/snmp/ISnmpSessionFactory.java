@@ -13,9 +13,9 @@
  */
 package com.btisystems.pronx.ems.core.snmp;
 
-import java.io.IOException;
-
 import com.btisystems.pronx.ems.core.snmp.ISnmpConfigurationFactory.AccessType;
+
+import java.io.IOException;
 
 
 /**

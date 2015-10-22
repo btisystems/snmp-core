@@ -14,12 +14,12 @@
 
 package com.btisystems.pronx.ems.core.model;
 
+import org.snmp4j.smi.OID;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.snmp4j.smi.OID;
 
 /**
  * Metadata for device entities.
@@ -34,51 +34,6 @@ public class DeviceEntityDescription implements Serializable {
     private final Map<Integer, FieldDescription> fieldsById = new TreeMap<Integer, FieldDescription>();
 
     /**
-     * The enum Field type.
-     */
-    public enum FieldType {
-        /**
-         * Integer field type.
-         */
-        INTEGER, /**
-         * String field type.
-         */
-        STRING, /**
-         * Unsigned 32 field type.
-         */
-        UNSIGNED32, /**
-         * Unsigned 64 field type.
-         */
-        UNSIGNED64, /**
-         * Ip address field type.
-         */
-        IP_ADDRESS, /**
-         * Date and time field type.
-         */
-        DATE_AND_TIME, /**
-         * Bits field type.
-         */
-        BITS, /**
-         * Table field type.
-         */
-        TABLE, /**
-         * Entity field type.
-         */
-        ENTITY, /**
-         * Fixed x 10 field type.
-         */
-        FIXED_X10, /**
-         * Fixed x 100 field type.
-         */
-        FIXED_X100, /**
-         * Fixed x 1000 field type.
-         */
-        FIXED_X1000, /**
-         * Oid field type.
-         */
-        OID };
-
-    /**
      * Instantiates a new Device entity description.
      *
      * @param oid the oid
@@ -86,6 +41,8 @@ public class DeviceEntityDescription implements Serializable {
     public DeviceEntityDescription(final OID oid) {
         this.oid = oid;
     }
+
+    ;
 
     /**
      * Add field.
@@ -133,6 +90,52 @@ public class DeviceEntityDescription implements Serializable {
      */
     public Collection<FieldDescription> getFields() {
         return fieldsByName.values();
+    }
+
+    /**
+     * The enum Field type.
+     */
+    public enum FieldType {
+        /**
+         * Integer field type.
+         */
+        INTEGER, /**
+         * String field type.
+         */
+        STRING, /**
+         * Unsigned 32 field type.
+         */
+        UNSIGNED32, /**
+         * Unsigned 64 field type.
+         */
+        UNSIGNED64, /**
+         * Ip address field type.
+         */
+        IP_ADDRESS, /**
+         * Date and time field type.
+         */
+        DATE_AND_TIME, /**
+         * Bits field type.
+         */
+        BITS, /**
+         * Table field type.
+         */
+        TABLE, /**
+         * Entity field type.
+         */
+        ENTITY, /**
+         * Fixed x 10 field type.
+         */
+        FIXED_X10, /**
+         * Fixed x 100 field type.
+         */
+        FIXED_X100, /**
+         * Fixed x 1000 field type.
+         */
+        FIXED_X1000, /**
+         * Oid field type.
+         */
+        OID
     }
 
     /**

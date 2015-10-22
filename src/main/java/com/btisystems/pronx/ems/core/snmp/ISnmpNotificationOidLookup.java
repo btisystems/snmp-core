@@ -13,9 +13,8 @@
  */
 package com.btisystems.pronx.ems.core.snmp;
 
-import org.snmp4j.smi.OID;
-
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import org.snmp4j.smi.OID;
 
 /**
  * Class able to look up OID from a given {@link FieldDescription}

@@ -19,13 +19,12 @@ import com.btisystems.pronx.ems.core.exception.DetailedFaultException;
  * Thrown when walk is interrupted by an exception
  */
 public class SnmpIoException extends DetailedFaultException {
-    private static final long serialVersionUID = -2285401779827218734L;
-
     /**
      * Holds the index into the DetailedFaultException variables
      * array holding the address associated with this SnmpIoException.
      */
     public static final int ADDRESS_INDEX = 0;
+    private static final long serialVersionUID = -2285401779827218734L;
 
     /**
      * Instantiates a new Snmp io exception.

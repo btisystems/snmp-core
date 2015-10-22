@@ -37,5 +37,8 @@ public interface ISnmpConfigurationFactory {
         READ_ONLY, /**
          * Read write access type.
          */
-        READ_WRITE};
+        READ_WRITE
+    }
+
+    ;
 }

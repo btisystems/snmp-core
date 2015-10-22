@@ -62,8 +62,8 @@ public class FieldList implements Serializable {
      * @return the field list
      */
     public FieldList withFieldDescription(FieldDescription... values) {
-        if (values!= null) {
-            for (FieldDescription value: values) {
+        if (values != null) {
+            for (FieldDescription value : values) {
                 getFieldDescription().add(value);
             }
         }
@@ -96,7 +96,7 @@ public class FieldList implements Serializable {
      * @return the field list
      */
     public FieldList withFieldDescription(Collection<FieldDescription> values) {
-        if (values!= null) {
+        if (values != null) {
             getFieldDescription().addAll(values);
         }
         return this;

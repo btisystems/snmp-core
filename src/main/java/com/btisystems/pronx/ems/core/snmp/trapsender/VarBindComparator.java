@@ -26,50 +26,6 @@ public class VarBindComparator implements Serializable, Comparator<String> {
     private static final int DIGIT_UPPER_BOUND = 57;
     private static final long serialVersionUID = -5662537156155610845L;
 
-    private boolean isDigit(final char ch) {
-        return ch >= DIGIT_LOWER_BOUND && ch <= DIGIT_UPPER_BOUND;
-    }
-
-    private String getChunk(final String s, final int slength, final int marker) {
-        int chunkMarker = marker;
-        final StringBuilder chunk = new StringBuilder();
-        final char c = s.charAt(chunkMarker);
-        chunk.append(c);
-        chunkMarker++;
-        if (isDigit(c)) {
-            orderDigit(chunkMarker, slength, s, chunk);
-        } else {
-            orderNonDigit(chunkMarker, slength, s, chunk);
-        }
-        return chunk.toString();
-    }
-
-    private void orderNonDigit(final int chunkMarker, final int slength, final String s, final StringBuilder chunk) {
-        int cm = chunkMarker;
-        char c;
-        while (cm < slength) {
-            c = s.charAt(chunkMarker);
-            if (isDigit(c)) {
-                break;
-            }
-            chunk.append(c);
-            cm++;
-        }
-    }
-
-    private void orderDigit(final int chunkMarker, final int slength, final String s, final StringBuilder chunk) {
-        int cm = chunkMarker;
-        char c;
-        while (cm < slength) {
-            c = s.charAt(chunkMarker);
-            if (!isDigit(c)) {
-                break;
-            }
-            chunk.append(c);
-            cm++;
-        }
-    }
-
     @Override
     public int compare(final String o1, final String o2) {
         final String s1 = o1;
@@ -111,6 +67,50 @@ public class VarBindComparator implements Serializable, Comparator<String> {
             }
         }
         return s1Length - s2Length;
+    }
+
+    private String getChunk(final String s, final int slength, final int marker) {
+        int chunkMarker = marker;
+        final StringBuilder chunk = new StringBuilder();
+        final char c = s.charAt(chunkMarker);
+        chunk.append(c);
+        chunkMarker++;
+        if (isDigit(c)) {
+            orderDigit(chunkMarker, slength, s, chunk);
+        } else {
+            orderNonDigit(chunkMarker, slength, s, chunk);
+        }
+        return chunk.toString();
+    }
+
+    private boolean isDigit(final char ch) {
+        return ch >= DIGIT_LOWER_BOUND && ch <= DIGIT_UPPER_BOUND;
+    }
+
+    private void orderDigit(final int chunkMarker, final int slength, final String s, final StringBuilder chunk) {
+        int cm = chunkMarker;
+        char c;
+        while (cm < slength) {
+            c = s.charAt(chunkMarker);
+            if (!isDigit(c)) {
+                break;
+            }
+            chunk.append(c);
+            cm++;
+        }
+    }
+
+    private void orderNonDigit(final int chunkMarker, final int slength, final String s, final StringBuilder chunk) {
+        int cm = chunkMarker;
+        char c;
+        while (cm < slength) {
+            c = s.charAt(chunkMarker);
+            if (isDigit(c)) {
+                break;
+            }
+            chunk.append(c);
+            cm++;
+        }
     }
 
 }

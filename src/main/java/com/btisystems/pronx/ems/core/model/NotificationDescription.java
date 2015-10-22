@@ -14,13 +14,12 @@
 
 package com.btisystems.pronx.ems.core.model;
 
+import com.btisystems.pronx.ems.schemas.meta.notification.FieldDescription;
+import org.snmp4j.smi.OID;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
-
-import org.snmp4j.smi.OID;
-
-import com.btisystems.pronx.ems.schemas.meta.notification.FieldDescription;
 
 /**
  * MIB-derived metadata for notifications.

@@ -13,11 +13,11 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapreceiver;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Maps selected trap source address to alternative addresses. For use in
@@ -29,15 +29,14 @@ public class TrapSourceMapper implements ITrapSourceMapper {
      * The constant REGEX.
      */
     public static final String REGEX = "\\.";
-    private static Logger log = LoggerFactory.getLogger(TrapSourceMapper.class);
-
-    private String mapSourceAddress = null;
-    private List<String> targetAddressList;
-    private int mappedAddressIndex = 0;
-    
     private static final String IP_DELIMETER = ".";
     private static final String RANGE_DELIMETER = "-";
     private static final int IP_TOKENS = 4;
+    private static final int IP_END_TOKEN = 3;
+    private static Logger log = LoggerFactory.getLogger(TrapSourceMapper.class);
+    private String mapSourceAddress = null;
+    private List<String> targetAddressList;
+    private int mappedAddressIndex = 0;
 
     /**
      * Instantiates a new Trap source mapper.
@@ -55,20 +54,6 @@ public class TrapSourceMapper implements ITrapSourceMapper {
                 mapSourceAddress = tokens[0];
             }
         }
-    }
-
-    /* (non-Javadoc)
-     * @see com.btisystems.pronx.ems.traphandler.ITrapSourceMapper#mapAddress(java.lang.String)
-     */
-    @Override
-    public String mapAddress(final String remoteAddress) {
-        if (remoteAddress.equals(mapSourceAddress)) {
-            if (mappedAddressIndex == targetAddressList.size()) {
-                mappedAddressIndex = 0;
-            }
-            return targetAddressList.get(mappedAddressIndex++);
-        }
-        return remoteAddress;
     }
 
     private List<String> buildMappedAddressList(final String addressListDefinition) {
@@ -100,7 +85,6 @@ public class TrapSourceMapper implements ITrapSourceMapper {
         }
         return rangeAddresses;
     }
-    private static final int IP_END_TOKEN = 3;
 
     private void addRangeAddresses(final String[] startEndTokens, final String[] tokens, final List<String> rangeAddresses, final String rangeDescription) {
         try {
@@ -117,5 +101,19 @@ public class TrapSourceMapper implements ITrapSourceMapper {
         } catch (NumberFormatException e) {
             log.warn("Ignoring invalid range description {}", rangeDescription);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.btisystems.pronx.ems.traphandler.ITrapSourceMapper#mapAddress(java.lang.String)
+     */
+    @Override
+    public String mapAddress(final String remoteAddress) {
+        if (remoteAddress.equals(mapSourceAddress)) {
+            if (mappedAddressIndex == targetAddressList.size()) {
+                mappedAddressIndex = 0;
+            }
+            return targetAddressList.get(mappedAddressIndex++);
+        }
+        return remoteAddress;
     }
 }

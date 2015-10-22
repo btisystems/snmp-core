@@ -14,8 +14,6 @@
 
 package com.btisystems.pronx.ems.core.snmp;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommunityTarget;
@@ -31,6 +29,8 @@ import org.snmp4j.smi.Address;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.ThreadPool;
+
+import java.io.IOException;
 
 /**
  * V2c SNMP Configuration

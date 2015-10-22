@@ -20,13 +20,19 @@ import javax.persistence.Table;
  * The type Device.
  */
 @Entity(name = "com.btisystems.pronx.ems.core.model.I_Device")
-@Table(name = "I_Device", schema="ems")
+@Table(name = "I_Device", schema = "ems")
 @SuppressWarnings("checkstyle:typename")
 public class I_Device extends AbstractRootEntity {
 
     @Override
     public String toString() {
         return "";
+    }
+
+    @Override
+    @SuppressWarnings("checkstyle:superclone")
+    public I_Device clone() {
+        return new I_Device();
     }
 
     @Override
@@ -37,12 +43,6 @@ public class I_Device extends AbstractRootEntity {
     @Override
     public boolean equals(final Object obj) {
         return true;
-    }
-
-    @Override
-    @SuppressWarnings("checkstyle:superclone")
-    public I_Device clone() {
-        return new I_Device();
     }
 
     @Override

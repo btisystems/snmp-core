@@ -42,6 +42,15 @@ public class FieldDescription implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        int result = oid != null ? oid.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -53,15 +62,6 @@ public class FieldDescription implements Serializable {
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         return type == that.type;
 
-    }
-
-    @Override
-    public int hashCode() {
-        int result = oid != null ? oid.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
     }
 
     @Override

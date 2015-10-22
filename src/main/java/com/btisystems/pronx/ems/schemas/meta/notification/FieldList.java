@@ -14,13 +14,15 @@
 package com.btisystems.pronx.ems.schemas.meta.notification;
 
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * The type Field list.
  */
-public class FieldList {
+public class FieldList implements Serializable {
+    private static final long serialVersionUID = -263065358323362154L;
     /**
      * The Field description.
      */

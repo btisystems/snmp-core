@@ -14,10 +14,14 @@
 package com.btisystems.pronx.ems.schemas.meta.notification;
 
 
+import java.io.Serializable;
+
 /**
  * The type Field description.
  */
-public class FieldDescription {
+public class FieldDescription implements Serializable {
+    private static final long serialVersionUID = 1734631453238572681L;
+
     @Override
     public String toString() {
         return "FieldDescription{" +

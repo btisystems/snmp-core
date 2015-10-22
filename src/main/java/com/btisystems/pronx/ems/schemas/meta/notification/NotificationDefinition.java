@@ -14,15 +14,16 @@
 package com.btisystems.pronx.ems.schemas.meta.notification;
 
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * The type Notification definition.
  */
-public class NotificationDefinition {
+public class NotificationDefinition implements Serializable {
 
-
+    private static final long serialVersionUID = 5123538049407565227L;
     /**
      * The Field reference.
      */

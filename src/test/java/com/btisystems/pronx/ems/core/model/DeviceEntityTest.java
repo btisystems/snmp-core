@@ -13,32 +13,40 @@
  */
 package com.btisystems.pronx.ems.core.model;
 
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.beans.PropertyChangeListener;
+
 import static org.easymock.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.beans.PropertyChangeListener;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
 
 /**
- *
- * @author skoneru
+ * The type Device entity test.
  */
 public class DeviceEntityTest {
 
     private DeviceEntityImpl deviceEntity;
     private DeviceEntityImpl device_1;
+    /**
+     * The Property change listener mock.
+     */
     PropertyChangeListener propertyChangeListenerMock;
 
+    /**
+     * Instantiates a new Device entity test.
+     */
     public DeviceEntityTest() {
     }
 
+    /**
+     * Sets up.
+     */
     @Before
     public void setUp() {
 
@@ -47,6 +55,9 @@ public class DeviceEntityTest {
         propertyChangeListenerMock = createMock(PropertyChangeListener.class);
     }
 
+    /**
+     * Tear down.
+     */
     @After
     public void tearDown() {
         propertyChangeListenerMock = null;
@@ -54,18 +65,27 @@ public class DeviceEntityTest {
         deviceEntity = null;
     }
 
+    /**
+     * Sets string.
+     */
     @Test
     public void setString() {
         deviceEntity.set("deviceName", "testDevice");
         assertEquals("testDevice", deviceEntity.getString("deviceName"));
     }
 
+    /**
+     * Sets int.
+     */
     @Test
     public void setInt() {
         deviceEntity.set("deviceId", 123);
         assertEquals(123, deviceEntity.getInt("deviceId"));
     }
 
+    /**
+     * Is supported.
+     */
     @Test
     public void isSupported() {
         deviceEntity.set("deviceName", "testDevice");
@@ -73,59 +93,85 @@ public class DeviceEntityTest {
         assertTrue(deviceEntity.isSupported("testDevice"));
     }
 
+    /**
+     * Add property change listener.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void addPropertyChangeListener() throws Exception {
         prepareDeviceEntityFieldTypes();
 
-            assertEquals(0, device_1._getChangeListeners().size());
-            deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
-            assertEquals(1, device_1._getChangeListeners().size());
+        assertEquals(0, device_1._getChangeListeners().size());
+        deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
+        assertEquals(1, device_1._getChangeListeners().size());
     }
 
+    /**
+     * Remove property change listener.
+     *
+     * @throws Exception the exception
+     */
     @Test
-    public void removePropertyChangeListener() throws Exception{
-            prepareDeviceEntityFieldTypes();
-            deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
-            assertEquals(1, device_1._getChangeListeners().size());
-            deviceEntity.removePropertyChangeListener(propertyChangeListenerMock);
-            assertEquals(0, device_1._getChangeListeners().size());
+    public void removePropertyChangeListener() throws Exception {
+        prepareDeviceEntityFieldTypes();
+        deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
+        assertEquals(1, device_1._getChangeListeners().size());
+        deviceEntity.removePropertyChangeListener(propertyChangeListenerMock);
+        assertEquals(0, device_1._getChangeListeners().size());
     }
 
+    /**
+     * Add child.
+     *
+     * @throws Exception the exception
+     */
     @Test
-    public void addChild() throws Exception{
-            prepareDeviceEntityFieldTypes();
-            assertEquals(0, device_1._getChangeListeners().size());
-            deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
-            deviceEntity.addChild(device_1);
-            assertEquals(1, device_1._getChangeListeners().size());
+    public void addChild() throws Exception {
+        prepareDeviceEntityFieldTypes();
+        assertEquals(0, device_1._getChangeListeners().size());
+        deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
+        deviceEntity.addChild(device_1);
+        assertEquals(1, device_1._getChangeListeners().size());
     }
 
+    /**
+     * Remove child.
+     *
+     * @throws Exception the exception
+     */
     @Test
-    public void removeChild() throws Exception{
-            prepareDeviceEntityFieldTypes();
+    public void removeChild() throws Exception {
+        prepareDeviceEntityFieldTypes();
 
-            deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
+        deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
 
-            assertEquals(1, device_1._getChangeListeners().size());
+        assertEquals(1, device_1._getChangeListeners().size());
 
-            deviceEntity.removeChild(device_1);
+        deviceEntity.removeChild(device_1);
 
-            assertEquals(0, device_1._getChangeListeners().size());
+        assertEquals(0, device_1._getChangeListeners().size());
     }
 
+    /**
+     * Replace child.
+     */
     @Test
     public void replaceChild() {
-            final DeviceEntityImpl device_2 = new DeviceEntityImpl("4");
+        final DeviceEntityImpl device_2 = new DeviceEntityImpl("4");
 
-            deviceEntity.get_Description().addField(new FieldDescription(234, "entityObject", DeviceEntityDescription.FieldType.ENTITY, -1));
-            deviceEntity.setEntityObject(device_1);
-            deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
-            deviceEntity.replaceChild(device_1, device_2);
+        deviceEntity.get_Description().addField(new FieldDescription(234, "entityObject", DeviceEntityDescription.FieldType.ENTITY, -1));
+        deviceEntity.setEntityObject(device_1);
+        deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
+        deviceEntity.replaceChild(device_1, device_2);
 
-            assertEquals(0, device_1._getChangeListeners().size());
-            assertEquals(1, device_2._getChangeListeners().size());
+        assertEquals(0, device_1._getChangeListeners().size());
+        assertEquals(1, device_2._getChangeListeners().size());
     }
 
+    /**
+     * Gets mac address.
+     */
     @Test
     public void getMacAddress() {
         final int[] intArray = {80, 00, 69, 02, 01, 33};
@@ -133,26 +179,42 @@ public class DeviceEntityTest {
         assertEquals("50:00:45:02:01:21", deviceEntity._getMacAddress(intArray, 0, 6));
     }
 
+    /**
+     * Gets object identifier.
+     */
     @Test
     public void getObjectIdentifier() {
         final int[] intArray = {80, 00, 69, 02, 01, 33};
         assertEquals("80.0.69.2.1.33", deviceEntity._getObjectIdentifier(intArray, 0, 6));
     }
 
+    /**
+     * Objectclone.
+     */
     @Test
     public void Objectclone() {
         assertNull(deviceEntity.clone());
 
     }
 
-    public void notifyChange() throws Exception{
-            prepareDeviceEntityFieldTypes();
+    /**
+     * Notify change.
+     *
+     * @throws Exception the exception
+     */
+    public void notifyChange() throws Exception {
+        prepareDeviceEntityFieldTypes();
 
-            deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
-            deviceEntity.notifyChange(123, null, "testDevice");
+        deviceEntity.addPropertyChangeListener(propertyChangeListenerMock);
+        deviceEntity.notifyChange(123, null, "testDevice");
 
     }
 
+    /**
+     * Prepare device entity field types device entity.
+     *
+     * @return the device entity
+     */
     public DeviceEntity prepareDeviceEntityFieldTypes() {
         device_1.setDeviceName("testDevice_1");
         device_1.setDeviceId(123);

@@ -14,27 +14,9 @@
 
 package com.btisystems.pronx.ems.core.snmp;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldType;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -57,21 +39,37 @@ import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.VariableBinding;
 
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldType;
-import com.btisystems.pronx.ems.core.snmp.ISnmpConfiguration;
-import com.btisystems.pronx.ems.core.snmp.IVariableBindingHandler;
-import com.btisystems.pronx.ems.core.snmp.SnmpTableWalker;
-import com.btisystems.pronx.ems.core.snmp.WalkResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * The type Snmp table walker test.
+ */
 public class SnmpTableWalkerTest {
 
-	@Mock
+    @Mock
     private ISnmpConfiguration mockConfiguration;
-	@Mock
+    @Mock
     private Session mockSnmpInterface;
-	@Mock
+    @Mock
     private Target mockTarget;
     @Mock
     private IVariableBindingHandler mockVariableHandler;
@@ -84,6 +82,11 @@ public class SnmpTableWalkerTest {
     private Map<DeviceEntityDescription, List<OID>> currentIndexMap;
     private List<OID> currentIndexList;
 
+    /**
+     * Sets up.
+     *
+     * @throws Exception the exception
+     */
     @Before
     public void setUp() throws Exception {
 
@@ -100,23 +103,34 @@ public class SnmpTableWalkerTest {
         when(mockTarget.getMaxSizeRequestPDU()).thenReturn(4096);
     }
 
+    /**
+     * Tear down.
+     *
+     * @throws Exception the exception
+     */
     @After
     public void tearDown() throws Exception {
         executorService.shutdown();
         executorService.awaitTermination(15, TimeUnit.SECONDS);
     }
 
+    /**
+     * Should retrieve single row from single table.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldRetrieveSingleRowFromSingleTable() throws IOException, InterruptedException {
 
         final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
-        																.withTableEntry(newDeviceEntityDescription("1.2.3"))
-        																.withRowIndex("10.11.12")
-        																.buildIndexMap();
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .withRowIndex("10.11.12")
+                .buildIndexMap();
 
         configureSnmpInterface().withResponses(
-        		new String[] {"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3",
-        				      "1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3"});
+                new String[]{"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3",
+                        "1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3"});
 
         final WalkResponse walkResponse = tableWalker.getTableRows(mockVariableHandler, tableIndexes);
 
@@ -128,21 +142,27 @@ public class SnmpTableWalkerTest {
         assertThat(walkResponse.getObjectCount(), is(3));
     }
 
+    /**
+     * Should retrieve single rows from multiple tables.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldRetrieveSingleRowsFromMultipleTables() throws IOException, InterruptedException {
 
-        final Map<DeviceEntityDescription, List<OID>> tableIndexes =  newIndexMap()
-																		.withTableEntry(newDeviceEntityDescription("1.2.3"))
-																		.withRowIndex("10.11.12")
-																		.withTableEntry(newDeviceEntityDescription("1.2.4"))
-																		.withRowIndex("10.11.12")
-																		.buildIndexMap();
+        final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .withRowIndex("10.11.12")
+                .withTableEntry(newDeviceEntityDescription("1.2.4"))
+                .withRowIndex("10.11.12")
+                .buildIndexMap();
 
         configureSnmpInterface().withResponses(
-        		new String[] {"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3",
-        					  "1.2.4.1.10.11.12", "VALUE1", "1.2.4.2.10.11.12", "VALUE2", "1.2.4.3.10.11.12", "VALUE3",
-        		              "1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3",
-                		      "1.2.4.1.10.11.13", "VALUE1", "1.2.4.2.10.11.13", "VALUE2", "1.2.4.3.10.11.13", "VALUE3"});
+                new String[]{"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3",
+                        "1.2.4.1.10.11.12", "VALUE1", "1.2.4.2.10.11.12", "VALUE2", "1.2.4.3.10.11.12", "VALUE3",
+                        "1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3",
+                        "1.2.4.1.10.11.13", "VALUE1", "1.2.4.2.10.11.13", "VALUE2", "1.2.4.3.10.11.13", "VALUE3"});
 
         final WalkResponse walkResponse = tableWalker.getTableRows(mockVariableHandler, tableIndexes);
 
@@ -158,28 +178,34 @@ public class SnmpTableWalkerTest {
         assertThat(walkResponse.getObjectCount(), is(6));
     }
 
+    /**
+     * Should retrieve multiple rows from multiple tables.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldRetrieveMultipleRowsFromMultipleTables() throws IOException, InterruptedException {
 
-        final Map<DeviceEntityDescription, List<OID>> tableIndexes =  newIndexMap()
-																		.withTableEntry(newDeviceEntityDescription("1.2.3"))
-																		.withRowIndex("10.11.12")
-																		.withRowIndex("55.66.0")
-																		.withTableEntry(newDeviceEntityDescription("1.2.4"))
-																		.withRowIndex("10.11.12")
-																		.withRowIndex("55.66.0")
-																		.buildIndexMap();
+        final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .withRowIndex("10.11.12")
+                .withRowIndex("55.66.0")
+                .withTableEntry(newDeviceEntityDescription("1.2.4"))
+                .withRowIndex("10.11.12")
+                .withRowIndex("55.66.0")
+                .buildIndexMap();
 
         // Using 55.66.0 as index to confirm that lower index limit is computed correctly
         configureSnmpInterface().withResponses(
-        		new String[] {"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3",
-        					  "1.2.4.1.10.11.12", "VALUE1", "1.2.4.2.10.11.12", "VALUE2", "1.2.4.3.10.11.12", "VALUE3",
-        		              "1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3",
-                		      "1.2.4.1.10.11.13", "VALUE1", "1.2.4.2.10.11.13", "VALUE2", "1.2.4.3.10.11.13", "VALUE3"},
-                new String[] {"1.2.3.1.55.66.0", "VALUE1", "1.2.3.2.55.66.0", "VALUE2", "1.2.3.3.55.66.0", "VALUE3",
-        					  "1.2.4.1.55.66.0", "VALUE1", "1.2.4.2.55.66.0", "VALUE2", "1.2.4.3.55.66.0", "VALUE3",
-                		      "1.2.3.1.55.66.1", "VALUE1", "1.2.3.2.55.66.1", "VALUE2", "1.2.3.3.55.66.1", "VALUE3",
-        					  "1.2.4.1.55.66.1", "VALUE1", "1.2.4.2.55.66.1", "VALUE2", "1.2.4.3.55.66.1", "VALUE3"});
+                new String[]{"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3",
+                        "1.2.4.1.10.11.12", "VALUE1", "1.2.4.2.10.11.12", "VALUE2", "1.2.4.3.10.11.12", "VALUE3",
+                        "1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3",
+                        "1.2.4.1.10.11.13", "VALUE1", "1.2.4.2.10.11.13", "VALUE2", "1.2.4.3.10.11.13", "VALUE3"},
+                new String[]{"1.2.3.1.55.66.0", "VALUE1", "1.2.3.2.55.66.0", "VALUE2", "1.2.3.3.55.66.0", "VALUE3",
+                        "1.2.4.1.55.66.0", "VALUE1", "1.2.4.2.55.66.0", "VALUE2", "1.2.4.3.55.66.0", "VALUE3",
+                        "1.2.3.1.55.66.1", "VALUE1", "1.2.3.2.55.66.1", "VALUE2", "1.2.3.3.55.66.1", "VALUE3",
+                        "1.2.4.1.55.66.1", "VALUE1", "1.2.4.2.55.66.1", "VALUE2", "1.2.4.3.55.66.1", "VALUE3"});
 
 
         final WalkResponse walkResponse = tableWalker.getTableRows(mockVariableHandler, tableIndexes);
@@ -205,12 +231,18 @@ public class SnmpTableWalkerTest {
         assertThat(walkResponse.getObjectCount(), is(12));
     }
 
+    /**
+     * Should do nothing if no tables defined.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldDoNothingIfNoTablesDefined() throws IOException, InterruptedException {
 
         final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
-        															.withTableEntry(newDeviceEntityDescription("1.2.3"))
-        															.buildIndexMap();
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .buildIndexMap();
 
         final WalkResponse walkResponse = tableWalker.getTableRows(mockVariableHandler, tableIndexes);
 
@@ -218,6 +250,12 @@ public class SnmpTableWalkerTest {
         assertTrue(walkResponse.getThrowable().getMessage().contains("Nothing to retrieve"));
     }
 
+    /**
+     * Should do nothing if no indexes defined.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldDoNothingIfNoIndexesDefined() throws IOException, InterruptedException {
 
@@ -229,13 +267,19 @@ public class SnmpTableWalkerTest {
         assertTrue(walkResponse.getThrowable().getMessage().contains("Nothing to retrieve"));
     }
 
+    /**
+     * Should abort retrieval if snmp times out.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldAbortRetrievalIfSnmpTimesOut() throws IOException, InterruptedException {
 
         final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
-        																.withTableEntry(newDeviceEntityDescription("1.2.3"))
-        																.withRowIndex("10.11.12")
-        																.buildIndexMap();
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .withRowIndex("10.11.12")
+                .buildIndexMap();
 
         configureSnmpInterface().withNoResponseInTimeoutPeriod();
 
@@ -245,13 +289,19 @@ public class SnmpTableWalkerTest {
         assertTrue(walkResponse.getThrowable().getMessage().contains("Walk timed out"));
     }
 
+    /**
+     * Should abort retrieval if snmp throws an excpetion.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldAbortRetrievalIfSnmpThrowsAnExcpetion() throws IOException, InterruptedException {
 
         final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
-        																.withTableEntry(newDeviceEntityDescription("1.2.3"))
-        																.withRowIndex("10.11.12")
-        																.buildIndexMap();
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .withRowIndex("10.11.12")
+                .buildIndexMap();
 
         configureSnmpInterface().withSnmpException("Bad Stuff Happens");
 
@@ -261,23 +311,29 @@ public class SnmpTableWalkerTest {
         assertTrue(walkResponse.getThrowable().getMessage().contains("Bad Stuff Happens"));
     }
 
+    /**
+     * Should apply maximum columns per pdu.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldApplyMaximumColumnsPerPdu() throws IOException, InterruptedException {
 
         when(mockConfiguration.getMaximumColumnsPerPdu()).thenReturn(1);
 
         final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
-        																.withTableEntry(newDeviceEntityDescription("1.2.3"))
-        																.withRowIndex("10.11.12")
-        																.buildIndexMap();
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .withRowIndex("10.11.12")
+                .buildIndexMap();
         configureSnmpInterface().withResponses(
-        		new String[] {"1.2.3.1.10.11.12", "VALUE1"},
-        		new String[] {"1.2.3.2.10.11.12", "VALUE2"},
-        		new String[] {"1.2.3.3.10.11.12", "VALUE3"},
-        		new String[] {"1.2.3.1.10.11.13", "VALUE1"},
-        		new String[] {"1.2.3.2.10.11.13", "VALUE2"},
-        		new String[] {"1.2.3.3.10.11.13", "VALUE3"}
-        		);
+                new String[]{"1.2.3.1.10.11.12", "VALUE1"},
+                new String[]{"1.2.3.2.10.11.12", "VALUE2"},
+                new String[]{"1.2.3.3.10.11.12", "VALUE3"},
+                new String[]{"1.2.3.1.10.11.13", "VALUE1"},
+                new String[]{"1.2.3.2.10.11.13", "VALUE2"},
+                new String[]{"1.2.3.3.10.11.13", "VALUE3"}
+        );
 
         final WalkResponse walkResponse = tableWalker.getTableRows(mockVariableHandler, tableIndexes);
 
@@ -289,19 +345,25 @@ public class SnmpTableWalkerTest {
         assertThat(walkResponse.getObjectCount(), is(3));
     }
 
+    /**
+     * Should apply maximum rows per pdu.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldApplyMaximumRowsPerPdu() throws IOException, InterruptedException {
 
         when(mockConfiguration.getMaximumRowsPerPdu()).thenReturn(1);
 
         final Map<DeviceEntityDescription, List<OID>> tableIndexes = newIndexMap()
-        																.withTableEntry(newDeviceEntityDescription("1.2.3"))
-        																.withRowIndex("10.11.12")
-        																.buildIndexMap();
+                .withTableEntry(newDeviceEntityDescription("1.2.3"))
+                .withRowIndex("10.11.12")
+                .buildIndexMap();
         configureSnmpInterface().withResponses(
-        		new String[] {"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3"},
-        		new String[] {"1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3"}
-        		);
+                new String[]{"1.2.3.1.10.11.12", "VALUE1", "1.2.3.2.10.11.12", "VALUE2", "1.2.3.3.10.11.12", "VALUE3"},
+                new String[]{"1.2.3.1.10.11.13", "VALUE1", "1.2.3.2.10.11.13", "VALUE2", "1.2.3.3.10.11.13", "VALUE3"}
+        );
 
         final WalkResponse walkResponse = tableWalker.getTableRows(mockVariableHandler, tableIndexes);
 
@@ -313,73 +375,73 @@ public class SnmpTableWalkerTest {
         assertThat(walkResponse.getObjectCount(), is(3));
     }
 
-	private SnmpTableWalkerTest configureSnmpInterface() {
-		return this;
-	}
+    private SnmpTableWalkerTest configureSnmpInterface() {
+        return this;
+    }
 
-	private SnmpTableWalkerTest withResponses(final String[] ... responseSets) throws IOException {
-		Stubber stubber = new StubberImpl();
-		for (final String[] responseSet : responseSets) {
-			stubber = stubber.doAnswer(new Answer<Void>() {
-				@Override
-				public Void answer(final InvocationOnMock invocation) throws Throwable {
-					final Object[] args = invocation.getArguments();
-					final ResponseListener listener = (ResponseListener) args[3];
-					final Object userObject = args[2];
-					final PDU requestPdu = (PDU) args[0];
+    private SnmpTableWalkerTest withResponses(final String[]... responseSets) throws IOException {
+        Stubber stubber = new StubberImpl();
+        for (final String[] responseSet : responseSets) {
+            stubber = stubber.doAnswer(new Answer<Void>() {
+                @Override
+                public Void answer(final InvocationOnMock invocation) throws Throwable {
+                    final Object[] args = invocation.getArguments();
+                    final ResponseListener listener = (ResponseListener) args[3];
+                    final Object userObject = args[2];
+                    final PDU requestPdu = (PDU) args[0];
 //					System.out.println("Got request:" + requestPdu + " maxrep/non-rep:"
 //												+ requestPdu.getMaxRepetitions() + "/"
 //												+ requestPdu.getNonRepeaters());
-					executorService.execute(new Runnable() {
-						@Override
-						public void run() {
-							PDU responsePdu = null;
-							for (int i = 0; i < responseSet.length; i += 2) {
-								final String responseOid = responseSet[i];
-								final String responseValue = responseSet[i + 1];
-								if (i == 0) {
-									responsePdu = createPdu(responseOid, responseValue);
-								} else {
-									addPdu(responsePdu, responseOid, responseValue);
-								}
-							}
-							final ResponseEvent response = new ResponseEvent(this, address, requestPdu, responsePdu, userObject);
+                    executorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            PDU responsePdu = null;
+                            for (int i = 0; i < responseSet.length; i += 2) {
+                                final String responseOid = responseSet[i];
+                                final String responseValue = responseSet[i + 1];
+                                if (i == 0) {
+                                    responsePdu = createPdu(responseOid, responseValue);
+                                } else {
+                                    addPdu(responsePdu, responseOid, responseValue);
+                                }
+                            }
+                            final ResponseEvent response = new ResponseEvent(this, address, requestPdu, responsePdu, userObject);
 //							System.out.println("respond:" + responsePdu);
-							listener.onResponse(response);
-						}
-					});
-					return null;
-				}
-			});
-		}
-		stubber = stubber.doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(final InvocationOnMock invocation) throws Throwable {
-				final Object[] args = invocation.getArguments();
-				final ResponseListener listener = (ResponseListener) args[3];
-				final Object userObject = args[2];
-				final PDU requestPdu = (PDU) args[0];
-				System.out.println("Got surplus request:" + requestPdu);
-				executorService.execute(new Runnable() {
-					@Override
-					public void run() {
-						final PDU responsePdu = createPdu(null, null);
-						final ResponseEvent response = new ResponseEvent(this, address, requestPdu, responsePdu, userObject);
+                            listener.onResponse(response);
+                        }
+                    });
+                    return null;
+                }
+            });
+        }
+        stubber = stubber.doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(final InvocationOnMock invocation) throws Throwable {
+                final Object[] args = invocation.getArguments();
+                final ResponseListener listener = (ResponseListener) args[3];
+                final Object userObject = args[2];
+                final PDU requestPdu = (PDU) args[0];
+                System.out.println("Got surplus request:" + requestPdu);
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final PDU responsePdu = createPdu(null, null);
+                        final ResponseEvent response = new ResponseEvent(this, address, requestPdu, responsePdu, userObject);
 //						System.out.println("respond:" + responsePdu);
-						listener.onResponse(response);
-					}
-				});
-				return null;
-			}
-		});
-		stubber.when(mockSnmpInterface).send(isA(PDU.class), same(mockTarget), anyObject(), isA(ResponseListener.class));
-		return this;
-	}
+                        listener.onResponse(response);
+                    }
+                });
+                return null;
+            }
+        });
+        stubber.when(mockSnmpInterface).send(isA(PDU.class), same(mockTarget), anyObject(), isA(ResponseListener.class));
+        return this;
+    }
 
     private SnmpTableWalkerTest withNoResponseInTimeoutPeriod() throws IOException {
         doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(final InvocationOnMock invocation) throws Throwable {
+            @Override
+            public Void answer(final InvocationOnMock invocation) throws Throwable {
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -390,56 +452,56 @@ public class SnmpTableWalkerTest {
                         }
                     }
                 });
-				return null;
-			}
+                return null;
+            }
         }).when(mockSnmpInterface).send(isA(PDU.class), same(mockTarget), anyObject(), isA(ResponseListener.class));
         return this;
-	}
+    }
 
     private SnmpTableWalkerTest withSnmpException(final String text) throws IOException {
         doThrow(new IOException(text)).when(mockSnmpInterface).send(isA(PDU.class), same(mockTarget), anyObject(), isA(ResponseListener.class));
         return this;
-	}
+    }
 
-	private VariableBinding thatDefinesVariable(final String variableOid, final String value) {
+    private VariableBinding thatDefinesVariable(final String variableOid, final String value) {
         return argThat(new ArgumentMatcher<VariableBinding>() {
 
             @Override
             public boolean matches(final Object argument) {
                 final boolean result = ((VariableBinding) argument).getOid().equals(new OID(variableOid))
-                    && ((VariableBinding) argument).getVariable().toString().equals(value);
+                        && ((VariableBinding) argument).getVariable().toString().equals(value);
                 return result;
             }
         });
     }
 
     private SnmpTableWalkerTest newIndexMap() {
-    	currentIndexMap = new HashMap<DeviceEntityDescription, List<OID>>();
-    	return this;
+        currentIndexMap = new HashMap<DeviceEntityDescription, List<OID>>();
+        return this;
     }
 
     private SnmpTableWalkerTest withTableEntry(final DeviceEntityDescription entityDescription) {
-    	currentIndexList = new ArrayList<OID>();
-    	currentIndexMap.put(entityDescription, currentIndexList);
-    	return this;
+        currentIndexList = new ArrayList<OID>();
+        currentIndexMap.put(entityDescription, currentIndexList);
+        return this;
     }
 
     private SnmpTableWalkerTest withRowIndex(final String indexOid) {
-    	currentIndexList.add(new OID(indexOid));
-    	return this;
+        currentIndexList.add(new OID(indexOid));
+        return this;
     }
 
     private Map<DeviceEntityDescription, List<OID>> buildIndexMap() {
-    	return currentIndexMap;
+        return currentIndexMap;
     }
 
-	private DeviceEntityDescription newDeviceEntityDescription(final String entityOid) {
-		final DeviceEntityDescription description = new DeviceEntityDescription(new OID(entityOid));
-		description.addField(new FieldDescription(1, "field1", FieldType.STRING, 10));
-		description.addField(new FieldDescription(2, "field2", FieldType.STRING, 10));
-		description.addField(new FieldDescription(3, "field3", FieldType.STRING, 10));
-		return description;
-	}
+    private DeviceEntityDescription newDeviceEntityDescription(final String entityOid) {
+        final DeviceEntityDescription description = new DeviceEntityDescription(new OID(entityOid));
+        description.addField(new FieldDescription(1, "field1", FieldType.STRING, 10));
+        description.addField(new FieldDescription(2, "field2", FieldType.STRING, 10));
+        description.addField(new FieldDescription(3, "field3", FieldType.STRING, 10));
+        return description;
+    }
 
     private PDU createPdu(final String oid, final String value) {
         final PDU responsePdu = new PDU();
@@ -449,7 +511,7 @@ public class SnmpTableWalkerTest {
         return responsePdu;
     }
 
-	private void addPdu(final PDU responsePdu, final String oid, final String value) {
+    private void addPdu(final PDU responsePdu, final String oid, final String value) {
         responsePdu.add(new VariableBinding(new OID(oid), new OctetString(value)));
     }
 }

@@ -13,17 +13,17 @@
  */
 package com.btisystems.pronx.ems.core.model;
 
-import com.btisystems.pronx.ems.core.model.DeviceEntity;
 import org.junit.Ignore;
 
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
-
 /**
- *  Small helper class used by the AbstractRootEntityTest class.
- *  Note that this class itself contains no tests and is ignored by JUnit.
+ * Small helper class used by the AbstractRootEntityTest class.
+ * Note that this class itself contains no tests and is ignored by JUnit.
  */
 @Ignore
 public class MyDeviceEntity extends DeviceEntity {
+    /**
+     * Instantiates a new My device entity.
+     */
     public MyDeviceEntity() {
     }
 

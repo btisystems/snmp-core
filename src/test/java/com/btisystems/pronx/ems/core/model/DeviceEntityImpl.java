@@ -13,22 +13,15 @@
  */
 package com.btisystems.pronx.ems.core.model;
 
+import org.snmp4j.smi.OID;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import com.btisystems.pronx.ems.core.model.DeviceEntity;
-import com.btisystems.pronx.ems.core.model.IDeviceEntity;
-import org.snmp4j.smi.OID;
-
-import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
-import com.btisystems.pronx.ems.core.model.ITableAccess;
-
 /**
  * Exclusivley used for Testing DeviceEntity abstract class.
- *
+ * <p/>
  * All child devices are manipulated (add,remove or replace etc) using propertyChangeListener.
- *
- * @author skoneru
  */
 public class DeviceEntityImpl extends DeviceEntity implements ITableAccess {
 
@@ -39,40 +32,85 @@ public class DeviceEntityImpl extends DeviceEntity implements ITableAccess {
     private DeviceEntityDescription deviceEntityDescription;
     private Map<String, IDeviceEntity> entityMap;
 
+    /**
+     * Instantiates a new Device entity.
+     *
+     * @param oId the o id
+     */
     public DeviceEntityImpl(String oId) {
         OID oid = new OID(oId);
         deviceEntityDescription = new DeviceEntityDescription(oid);
         entityMap = new HashMap<String, IDeviceEntity>();
     }
 
+    /**
+     * Gets entity object.
+     *
+     * @return the entity object
+     */
     public DeviceEntity getEntityObject() {
         return entityObject;
     }
 
+    /**
+     * Sets entity object.
+     *
+     * @param entityObject the entity object
+     */
     public void setEntityObject(DeviceEntity entityObject) {
         this.entityObject = entityObject;
     }
 
+    /**
+     * Gets table device name.
+     *
+     * @return the table device name
+     */
     public String getTableDeviceName() {
         return tableDeviceName;
     }
 
+    /**
+     * Sets table device name.
+     *
+     * @param tableDeviceName the table device name
+     */
     public void setTableDeviceName(String tableDeviceName) {
         this.tableDeviceName = tableDeviceName;
     }
 
+    /**
+     * Gets device id.
+     *
+     * @return the device id
+     */
     public int getDeviceId() {
         return deviceId;
     }
 
+    /**
+     * Sets device id.
+     *
+     * @param deviceId the device id
+     */
     public void setDeviceId(int deviceId) {
         this.deviceId = deviceId;
     }
 
+    /**
+     * Gets device name.
+     *
+     * @return the device name
+     */
     public String getDeviceName() {
         return deviceName;
     }
 
+    /**
+     * Sets device name.
+     *
+     * @param deviceName the device name
+     */
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
     }

@@ -28,42 +28,63 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 
+/**
+ * The type Abstract root entity test.
+ */
 public class AbstractRootEntityTest {
-    private static final String DEVICE_ENTITY_CLASSNAME  = "MyDeviceEntity";
+    private static final String DEVICE_ENTITY_CLASSNAME = "MyDeviceEntity";
     private static final String DUMMY_GETTER_METHOD_NAME = "dummy";
-    private static final String OID_TO_SEARCH_FOR        = "100.0";
-    private static final int    NUMBER_OF_ROOT_ENTITIES  = 3;
+    private static final String OID_TO_SEARCH_FOR = "100.0";
+    private static final int NUMBER_OF_ROOT_ENTITIES = 3;
 
-    private   DeviceEntity[] deviceEntity                = new DeviceEntity[NUMBER_OF_ROOT_ENTITIES];
+    private DeviceEntity[] deviceEntity = new DeviceEntity[NUMBER_OF_ROOT_ENTITIES];
 
-    private   boolean wantNullRootDescription            = false;
-    private   boolean wantNullRoot                       = false;
+    private boolean wantNullRootDescription = false;
+    private boolean wantNullRoot = false;
 
-    protected boolean setterMethodWasCalled              = false;
-    protected boolean getterMethodWasCalled              = false;
+    /**
+     * The Setter method was called.
+     */
+    protected boolean setterMethodWasCalled = false;
+    /**
+     * The Getter method was called.
+     */
+    protected boolean getterMethodWasCalled = false;
 
 
+    /**
+     * Sets up.
+     */
     @Before
     public void setUp() {
         setterMethodWasCalled = false;
         getterMethodWasCalled = false;
     }
 
+    /**
+     * Verify get entity with oid expect null root.
+     */
     @Test
     public void verifyGetEntityWithOid_expectNullRoot() {
         wantNullRoot = true;
         RootEntity rootEntity = new RootEntity();
-        assertNull(rootEntity.getEntity((OID)null));
+        assertNull(rootEntity.getEntity((OID) null));
     }
 
+    /**
+     * Verify get entity with oid expect null description.
+     */
     @Test
     public void verifyGetEntityWithOid_expectNullDescription() {
         wantNullRootDescription = true;
         RootEntity rootEntity = new RootEntity();
-        assertNull(rootEntity.getEntity((OID)null));
+        assertNull(rootEntity.getEntity((OID) null));
         verifyMocks();
     }
 
+    /**
+     * Verify get entity with oid expect success.
+     */
     @Test
     public void verifyGetEntityWithOid_expectSuccess() {
         RootEntity rootEntity = new RootEntity();
@@ -71,6 +92,9 @@ public class AbstractRootEntityTest {
         verifyMocks();
     }
 
+    /**
+     * Verify is entity supported expect false.
+     */
     @Test
     public void verifyIsEntitySupported_expectFalse() {
         RootEntity rootEntity = new RootEntity();
@@ -78,6 +102,9 @@ public class AbstractRootEntityTest {
         assertFalse(result);
     }
 
+    /**
+     * Verify is entity supported expect true.
+     */
     @Test
     public void verifyIsEntitySupported_expectTrue() {
         RootEntity rootEntity = new RootEntity();
@@ -85,6 +112,9 @@ public class AbstractRootEntityTest {
         assertTrue(result);
     }
 
+    /**
+     * Verify get entity with field name expect exception.
+     */
     @Test
     public void verifyGetEntityWithFieldName_expectException() {
         RootEntity rootEntity = new RootEntity();
@@ -101,6 +131,9 @@ public class AbstractRootEntityTest {
         assertTrue(caughtExpectedException);
     }
 
+    /**
+     * Verify get entity with field name expect success.
+     */
     @Test
     public void verifyGetEntityWithFieldName_expectSuccess() {
         RootEntity rootEntity = new RootEntity();
@@ -108,6 +141,9 @@ public class AbstractRootEntityTest {
         assertNull(childObject);
     }
 
+    /**
+     * Verify set object expect exception.
+     */
     @Test
     public void verifySetObject_expectException() {
         RootEntity rootEntity = new RootEntity();
@@ -125,6 +161,9 @@ public class AbstractRootEntityTest {
         assertFalse(setterMethodWasCalled);
     }
 
+    /**
+     * Verify set object expect success.
+     */
     @Test
     public void verifySetObject_expectSuccess() {
         RootEntity rootEntity = new RootEntity();
@@ -132,6 +171,9 @@ public class AbstractRootEntityTest {
         assertTrue(setterMethodWasCalled);
     }
 
+    /**
+     * Verify get object expect exception.
+     */
     @Test
     public void verifyGetObject_expectException() {
         RootEntity rootEntity = new RootEntity();
@@ -149,6 +191,9 @@ public class AbstractRootEntityTest {
         assertFalse(getterMethodWasCalled);
     }
 
+    /**
+     * Verify get object expect success.
+     */
     @Test
     public void verifyGetObject_expectSuccess() {
         RootEntity rootEntity = new RootEntity();
@@ -157,6 +202,9 @@ public class AbstractRootEntityTest {
         assertTrue(getterMethodWasCalled);
     }
 
+    /**
+     * Should fail to create device entity.
+     */
     @Test
     public void shouldFailToCreateDeviceEntity() {
         RootEntity rootEntity = new RootEntity();
@@ -173,6 +221,9 @@ public class AbstractRootEntityTest {
         assertTrue(caughtExpectedException);
     }
 
+    /**
+     * Should create device entity.
+     */
     @Test
     public void shouldCreateDeviceEntity() {
         RootEntity rootEntity = new RootEntity();
@@ -181,6 +232,9 @@ public class AbstractRootEntityTest {
         assertTrue(deviceEntity instanceof MyDeviceEntity);
     }
 
+    /**
+     * Verify get description.
+     */
     @Test
     public void verifyGetDescription() {
         RootEntity rootEntity = new RootEntity();
@@ -189,19 +243,33 @@ public class AbstractRootEntityTest {
 
 
     private void verifyMocks() {
-        for (int i=0; i < NUMBER_OF_ROOT_ENTITIES; i++) {
+        for (int i = 0; i < NUMBER_OF_ROOT_ENTITIES; i++) {
             if (null != deviceEntity[i]) {
                 verify(deviceEntity[i]);
             }
         }
     }
 
+    /**
+     * The type Root entity.
+     */
     public class RootEntity extends AbstractRootEntity {
 
+        /**
+         * Gets my device entity.
+         *
+         * @return the my device entity
+         */
         public MyDeviceEntity getMyDeviceEntity() {
             getterMethodWasCalled = true;
             return null;
         }
+
+        /**
+         * Sets my device entity.
+         *
+         * @param deviceEntity the device entity
+         */
         public void setMyDeviceEntity(MyDeviceEntity deviceEntity) {
             setterMethodWasCalled = true;
         }
@@ -218,7 +286,7 @@ public class AbstractRootEntityTest {
                 return deviceEntity;
             }
 
-            for (int i=0; i < NUMBER_OF_ROOT_ENTITIES; i++) {
+            for (int i = 0; i < NUMBER_OF_ROOT_ENTITIES; i++) {
                 String oidValue = (new Double(Math.pow(10.0, i))).toString();  //  will be the sequence ["1.0", "10.0", "100.0"].
                 OID oid = new OID(oidValue);
 

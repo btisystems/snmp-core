@@ -13,29 +13,7 @@
  */
 package com.btisystems.pronx.ems.core.snmp;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.isNull;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reportMatcher;
-import static org.easymock.EasyMock.same;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+import com.btisystems.pronx.ems.core.exception.SystemObjectIdException;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -46,28 +24,45 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.snmp4j.PDU;
 import org.snmp4j.Session;
+import org.snmp4j.Snmp;
 import org.snmp4j.Target;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
 import org.snmp4j.mp.SnmpConstants;
+import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.VariableBinding;
-import org.snmp4j.Snmp;
 
-import com.btisystems.pronx.ems.core.exception.SystemObjectIdException;
-import com.btisystems.pronx.ems.core.snmp.ISnmpConfiguration;
-import com.btisystems.pronx.ems.core.snmp.IVariableBindingHandler;
-import com.btisystems.pronx.ems.core.snmp.SnmpIoException;
-import com.btisystems.pronx.ems.core.snmp.SnmpSession;
-import com.btisystems.pronx.ems.core.snmp.WalkResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import org.snmp4j.smi.Integer32;
-
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.isNull;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reportMatcher;
+import static org.easymock.EasyMock.same;
+import static org.easymock.EasyMock.verify;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * The type Snmp session test.
+ */
 public class SnmpSessionTest {
 
     private static final String SYSTEM_OBJECT_ID_OID = "1.3.6.1.2.1.1.2.0";
@@ -84,6 +79,11 @@ public class SnmpSessionTest {
     private IpAddress address;
     private SnmpSession session;
 
+    /**
+     * Sets up.
+     *
+     * @throws Exception the exception
+     */
     @Before
     public void setUp() throws Exception {
         configuration = createMock(ISnmpConfiguration.class);
@@ -99,11 +99,19 @@ public class SnmpSessionTest {
         oidList.add(new OID(DUMMY_OID1));
     }
 
+    /**
+     * Should get host address.
+     */
     @Test
     public void shouldGetHostAddress() {
         assertEquals(NE_IP, session.getAddress().getHostAddress());
     }
 
+    /**
+     * Should identify device.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void shouldIdentifyDevice() throws IOException {
 
@@ -124,6 +132,11 @@ public class SnmpSessionTest {
         verifyAll();
     }
 
+    /**
+     * Should throw exception if fail to identify device.
+     *
+     * @throws IOException the io exception
+     */
     @Test(expected = SystemObjectIdException.class)
     public void shouldThrowExceptionIfFailToIdentifyDevice() throws IOException {
 
@@ -140,6 +153,11 @@ public class SnmpSessionTest {
         }
     }
 
+    /**
+     * Should throw exception if exception when identify device.
+     *
+     * @throws IOException the io exception
+     */
     @Test(expected = SystemObjectIdException.class)
     public void shouldThrowExceptionIfExceptionWhenIdentifyDevice() throws IOException {
 
@@ -156,6 +174,11 @@ public class SnmpSessionTest {
         }
     }
 
+    /**
+     * Should get variable by oid.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void shouldGetVariableByOid() throws IOException {
 
@@ -176,6 +199,11 @@ public class SnmpSessionTest {
         verifyAll();
     }
 
+    /**
+     * Should get variable by oid return int.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void shouldGetVariableByOidReturnInt() throws IOException {
         final PDU responsePdu = createPdu("1", 1);
@@ -195,6 +223,11 @@ public class SnmpSessionTest {
         verifyAll();
     }
 
+    /**
+     * Should throw exceptionif fails to get variable by oid.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void shouldThrowExceptionifFailsToGetVariableByOid() throws IOException {
         expect(configuration.createPDU(PDU.GET)).andReturn(new PDU());
@@ -208,6 +241,11 @@ public class SnmpSessionTest {
 
     }
 
+    /**
+     * Should throw exception if fail to get variable.
+     *
+     * @throws IOException the io exception
+     */
     @Test(expected = SystemObjectIdException.class)
     public void shouldThrowExceptionIfFailToGetVariable() throws IOException {
 
@@ -224,6 +262,11 @@ public class SnmpSessionTest {
         }
     }
 
+    /**
+     * Should set variables.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void shouldSetVariables() throws IOException {
 
@@ -244,13 +287,23 @@ public class SnmpSessionTest {
         assertEquals(2, pduCapture.getValue().getVariableBindings().size());
     }
 
+    /**
+     * Should not throw error code excetpion by default.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void shouldNotThrowErrorCodeExcetpionByDefault() throws IOException {
         //Verify the default implementation doesn't throw an exception.
-    	session.checkErrorCodeAndDescription();
+        session.checkErrorCodeAndDescription();
     }
 
-    @Test 
+    /**
+     * Should throw exception if set variables times out.
+     *
+     * @throws IOException the io exception
+     */
+    @Test
     public void shouldThrowExceptionIfSetVariablesTimesOut() throws IOException {
 
         final PDU sendPdu = new PDU();
@@ -278,6 +331,11 @@ public class SnmpSessionTest {
         assertEquals(2, pduCapture.getValue().getVariableBindings().size());
     }
 
+    /**
+     * Should throw exception if set variables responds in error.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void shouldThrowExceptionIfSetVariablesRespondsInError() throws IOException {
 
@@ -294,7 +352,7 @@ public class SnmpSessionTest {
 
             session.setVariables(getVariableBindings("1.2.3", "Value1", "4.5.6", "Value2"));
         } catch (SnmpIoException sioEx) {
-            
+
 
             Assert.assertThat(sioEx.getMessage(),
                     allOf(
@@ -308,6 +366,12 @@ public class SnmpSessionTest {
         assertEquals(2, pduCapture.getValue().getVariableBindings().size());
     }
 
+    /**
+     * Should walk device.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     @Ignore
     public void shouldWalkDevice() throws IOException, InterruptedException {
@@ -347,6 +411,12 @@ public class SnmpSessionTest {
         executorService.awaitTermination(15, TimeUnit.SECONDS);
     }
 
+    /**
+     * Should timout walk device.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldTimoutWalkDevice() throws IOException, InterruptedException {
 
@@ -371,6 +441,12 @@ public class SnmpSessionTest {
         executorService.awaitTermination(15, TimeUnit.SECONDS);
     }
 
+    /**
+     * Should ignore failure to add variable to device.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldIgnoreFailureToAddVariableToDevice() throws IOException, InterruptedException {
 
@@ -399,6 +475,12 @@ public class SnmpSessionTest {
         executorService.awaitTermination(15, TimeUnit.SECONDS);
     }
 
+    /**
+     * Should throw exception if walk interrupted.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldThrowExceptionIfWalkInterrupted() throws IOException, InterruptedException {
 
@@ -422,6 +504,12 @@ public class SnmpSessionTest {
         executorService.awaitTermination(15, TimeUnit.SECONDS);
     }
 
+    /**
+     * Should handle error at end of walk.
+     *
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     @Test
     public void shouldHandleErrorAtEndOfWalk() throws IOException, InterruptedException {
 
@@ -444,8 +532,8 @@ public class SnmpSessionTest {
     }
 
     private void expectToGetBulkAndSendResponses(final ExecutorService exec,
-            final String getOid,
-            final String... responses) throws IOException {
+                                                 final String getOid,
+                                                 final String... responses) throws IOException {
         snmpInterface.send(isGetBulkPdu(getOid), same(target), isNull(), isA(ResponseListener.class));
         expectLastCall().andAnswer(new IAnswer<Void>() {
             @Override
@@ -478,7 +566,7 @@ public class SnmpSessionTest {
     }
 
     private void expectToGetBulkAndGenerateInterrupt(final ExecutorService exec,
-            final String getOid) throws IOException {
+                                                     final String getOid) throws IOException {
         final Thread waitingThread = Thread.currentThread();
         snmpInterface.send(isGetBulkPdu(getOid), same(target), isNull(), isA(ResponseListener.class));
         expectLastCall().andAnswer(new IAnswer<Void>() {
@@ -498,7 +586,7 @@ public class SnmpSessionTest {
     }
 
     private void expectToGetBulkAndNotify(final ExecutorService exec,
-            final String getOid) throws IOException {
+                                          final String getOid) throws IOException {
         snmpInterface.send(isGetBulkPdu(getOid), same(target), isNull(), isA(ResponseListener.class));
         expectLastCall().andAnswer(new IAnswer<Void>() {
             @Override
@@ -606,6 +694,12 @@ public class SnmpSessionTest {
         private String actualOid;
         private final int type;
 
+        /**
+         * Instantiates a new Pdu matcher.
+         *
+         * @param type the type
+         * @param oid  the oid
+         */
         public PduMatcher(final int type, final String oid) {
             this.oid = oid;
             this.type = type;

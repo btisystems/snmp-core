@@ -17,18 +17,30 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/**
+ * The type Var bind comparator test.
+ */
 public class VarBindComparatorTest {
     private VarBindComparator comparator;
-    
+
+    /**
+     * Instantiates a new Var bind comparator test.
+     */
     public VarBindComparatorTest() {
     }
-    
+
+    /**
+     * Sets up.
+     */
     @Before
     public void setUp() {
         comparator = new VarBindComparator();
         
     }
 
+    /**
+     * Should order var binds.
+     */
     @Test
     public void shouldOrderVarBinds() {
         assertEquals(1, comparator.compare("1.1.1.2.1", "1.1.1.1.1"));

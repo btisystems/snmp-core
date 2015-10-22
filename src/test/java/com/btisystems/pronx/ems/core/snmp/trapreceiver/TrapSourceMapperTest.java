@@ -13,45 +13,55 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapreceiver;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 
-import com.btisystems.pronx.ems.core.snmp.trapreceiver.TrapSourceMapper;
+import static org.junit.Assert.assertEquals;
 
+/**
+ * The type Trap source mapper test.
+ */
 public class TrapSourceMapperTest {
 
+    /**
+     * Should map to single address.
+     */
     @Test
     public void shouldMapToSingleAddress() {
 
-    	TrapSourceMapper mapper = new TrapSourceMapper("127.0.0.1:192.0.0.101");
-    	
-    	assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.102", mapper.mapAddress("192.0.0.102"));
+        TrapSourceMapper mapper = new TrapSourceMapper("127.0.0.1:192.0.0.101");
+
+        assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.102", mapper.mapAddress("192.0.0.102"));
     }
-    
+
+    /**
+     * Should map to multiple explicit addresses.
+     */
     @Test
     public void shouldMapToMultipleExplicitAddresses() {
 
-    	TrapSourceMapper mapper = new TrapSourceMapper("127.0.0.1:192.0.0.101" +
-    	                                                        ",192.0.0.102" +
-    	                                                        ",192.0.0.103");
-    	
-    	assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.102", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.103", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
+        TrapSourceMapper mapper = new TrapSourceMapper("127.0.0.1:192.0.0.101" +
+                ",192.0.0.102" +
+                ",192.0.0.103");
+
+        assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.102", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.103", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.101", mapper.mapAddress("127.0.0.1"));
     }
-    
+
+    /**
+     * Should map to a range of addresses.
+     */
     @Test
     public void shouldMapToARangeOfAddresses() {
 
-    	TrapSourceMapper mapper = new TrapSourceMapper("127.0.0.1:192.0.0.201-203");
-    	
-    	assertEquals("192.0.0.201", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.202", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.203", mapper.mapAddress("127.0.0.1"));
-    	assertEquals("192.0.0.201", mapper.mapAddress("127.0.0.1"));
+        TrapSourceMapper mapper = new TrapSourceMapper("127.0.0.1:192.0.0.201-203");
+
+        assertEquals("192.0.0.201", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.202", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.203", mapper.mapAddress("127.0.0.1"));
+        assertEquals("192.0.0.201", mapper.mapAddress("127.0.0.1"));
     }
 }

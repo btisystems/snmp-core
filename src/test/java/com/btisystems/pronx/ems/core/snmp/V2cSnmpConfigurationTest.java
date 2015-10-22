@@ -14,11 +14,6 @@
 
 package com.btisystems.pronx.ems.core.snmp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.io.IOException;
-
 import org.junit.Test;
 import org.snmp4j.PDU;
 import org.snmp4j.Session;
@@ -27,11 +22,21 @@ import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
-public class V2cSnmpConfigurationTest
-{
+import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+/**
+ * The type V 2 c snmp configuration test.
+ */
+public class V2cSnmpConfigurationTest {
+
+    /**
+     * Should create target.
+     */
     @Test
-    public void shouldCreateTarget()   {
+    public void shouldCreateTarget() {
 
         final V2cSnmpConfiguration configuration = new V2cSnmpConfiguration();
         configuration.setCommunity("public");
@@ -48,8 +53,11 @@ public class V2cSnmpConfigurationTest
         assertEquals(9999, target.getMaxSizeRequestPDU());
     }
 
+    /**
+     * Should create pdu.
+     */
     @Test
-    public void shouldCreatePDU()  {
+    public void shouldCreatePDU() {
 
         final V2cSnmpConfiguration configuration = new V2cSnmpConfiguration();
         configuration.setCommunity("public");
@@ -68,8 +76,13 @@ public class V2cSnmpConfigurationTest
         assertEquals(PDU.SET, setPdu.getType());
     }
 
+    /**
+     * Should create snmp session.
+     *
+     * @throws IOException the io exception
+     */
     @Test
-    public void shouldCreateSnmpSession() throws IOException   {
+    public void shouldCreateSnmpSession() throws IOException {
 
         final V2cSnmpConfiguration configuration = new V2cSnmpConfiguration();
 

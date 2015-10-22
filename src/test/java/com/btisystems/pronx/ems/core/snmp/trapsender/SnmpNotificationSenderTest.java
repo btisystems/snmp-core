@@ -45,6 +45,9 @@ import com.btisystems.pronx.ems.core.snmp.trapsender.TrapRecipient;
 import com.btisystems.pronx.ems.core.model.INotification;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 
+/**
+ * The type Snmp notification sender test.
+ */
 @RunWith(value=PowerMockRunner.class)
 @PrepareForTest({TrapSender.class, Snmp.class})
 @PowerMockIgnore({"javax.management.*"}) 
@@ -59,9 +62,15 @@ public class SnmpNotificationSenderTest {
     private DefaultUdpTransportMapping mockUdp;
     private ISnmpNotificationOidLookup mockSnmpNotificationOidLookup;
 
+    /**
+     * Instantiates a new Snmp notification sender test.
+     */
     public SnmpNotificationSenderTest() {
     }
 
+    /**
+     * Sets up.
+     */
     @Before
     public void setUp() {
         mockSnmp = PowerMock.createMock(Snmp.class);
@@ -83,6 +92,11 @@ public class SnmpNotificationSenderTest {
 
     }
 
+    /**
+     * Should send trap.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void shouldSendTrap() throws Exception {
         expectNewSnmp();
@@ -114,6 +128,11 @@ public class SnmpNotificationSenderTest {
         assertEquals(new UnsignedInteger32(-1), pduCapture.getValue().get(5).getVariable());
     }
 
+    /**
+     * Should only init snmp once.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void shouldOnlyInitSnmpOnce() throws Exception {
         expectNewSnmp();

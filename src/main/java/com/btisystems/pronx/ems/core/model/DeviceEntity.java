@@ -122,7 +122,7 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
             addTable(children);
         }
     }
-
+    @SuppressWarnings("unchecked")
     private void addTable(final Collection<DeviceEntity> children) {
         final ITableAccess tableAccess = (ITableAccess) this;
         children.addAll(tableAccess.getEntries().values());

@@ -23,10 +23,16 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * The type Notification description test.
+ */
 public class NotificationDescriptionTest {
 
+    /**
+     * Should get notification description details.
+     */
     @Test
-    public void shouldGetNotificationDescriptionDetails()  {
+    public void shouldGetNotificationDescriptionDetails() {
         final NotificationDescription description = createNotificationDescription();
         assertEquals("N Name", description.getName());
         assertEquals("N Desc", description.getDescription());
@@ -35,8 +41,11 @@ public class NotificationDescriptionTest {
 
     }
 
+    /**
+     * Should get field description by name.
+     */
     @Test
-    public void shouldGetFieldDescriptionByName()  {
+    public void shouldGetFieldDescriptionByName() {
         final NotificationDescription description = createNotificationDescription();
         final FieldDescription fieldDescription = description.getFieldByName("stmnTypeIdx");
         assertEquals("stmnTypeIdx", fieldDescription.getName());
@@ -45,8 +54,11 @@ public class NotificationDescriptionTest {
         assertEquals("1.3.6.1.4.1", fieldDescription.getOid());
     }
 
+    /**
+     * Should get field description by oid.
+     */
     @Test
-    public void shouldGetFieldDescriptionByOid()  {
+    public void shouldGetFieldDescriptionByOid() {
         final NotificationDescription description = createNotificationDescription();
         final FieldDescription fieldDescription = description.getFieldByOid("1.3.6.1.4.3");
         assertEquals("stmnOperStatQlfr", fieldDescription.getName());
@@ -63,11 +75,11 @@ public class NotificationDescriptionTest {
     }
 
     private List<FieldDescription> createFieldDescriptionList() {
-         final List<FieldDescription> fieldDescriptions = new ArrayList<FieldDescription>();
-         fieldDescriptions.add(createFieldDescription("1.3.6.1.4.1", "stmnTypeIdx", "The specific type", FieldType.INTEGER));
-         fieldDescriptions.add(createFieldDescription("1.3.6.1.4.2", "stmnShelfIdx", "The number of", FieldType.INTEGER));
-         fieldDescriptions.add(createFieldDescription("1.3.6.1.4.3", "stmnOperStatQlfr", "This is a textual ", FieldType.STRING));
-         return fieldDescriptions;
+        final List<FieldDescription> fieldDescriptions = new ArrayList<FieldDescription>();
+        fieldDescriptions.add(createFieldDescription("1.3.6.1.4.1", "stmnTypeIdx", "The specific type", FieldType.INTEGER));
+        fieldDescriptions.add(createFieldDescription("1.3.6.1.4.2", "stmnShelfIdx", "The number of", FieldType.INTEGER));
+        fieldDescriptions.add(createFieldDescription("1.3.6.1.4.3", "stmnOperStatQlfr", "This is a textual ", FieldType.STRING));
+        return fieldDescriptions;
     }
 
     private FieldDescription createFieldDescription(final String oid, final String name, final String description, final FieldType type) {

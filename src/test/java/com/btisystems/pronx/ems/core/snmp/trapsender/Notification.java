@@ -20,6 +20,9 @@ import com.btisystems.pronx.ems.core.model.DeviceEntity;
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
 import com.btisystems.pronx.ems.core.model.INotification;
 
+/**
+ * The type Notification.
+ */
 public class Notification extends DeviceEntity implements Serializable, INotification {
 
 	private static final long serialVersionUID = 1L;
@@ -31,9 +34,20 @@ public class Notification extends DeviceEntity implements Serializable, INotific
     private String string;
     private int unsigned;
 
+    /**
+     * Instantiates a new Notification.
+     */
     public Notification() {
     }
 
+    /**
+     * Instantiates a new Notification.
+     *
+     * @param id       the id
+     * @param ip       the ip
+     * @param string   the string
+     * @param unsigned the unsigned
+     */
     public Notification(final int id, final String ip, final String string, final int unsigned) {
         this.id = id;
         this.ip = ip;
@@ -42,40 +56,80 @@ public class Notification extends DeviceEntity implements Serializable, INotific
     }
 
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     public int getId() {
         return this.id;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     */
     public void setId(final int id) {
         final int oldValue = this.id;
         this.id = id;
         notifyChange(1, oldValue, id);
     }
 
+    /**
+     * Gets ip.
+     *
+     * @return the ip
+     */
     public String getIp() {
         return this.ip;
     }
 
+    /**
+     * Sets ip.
+     *
+     * @param ip the ip
+     */
     public void setIp(final String ip) {
         final String oldValue = this.ip;
         this.ip = ip;
         notifyChange(4, oldValue, ip);
     }
 
+    /**
+     * Gets string.
+     *
+     * @return the string
+     */
     public String getString() {
         return this.string;
     }
 
+    /**
+     * Sets string.
+     *
+     * @param string the string
+     */
     public void setString(final String string) {
         final String oldValue = this.string;
         this.string = string;
         notifyChange(5, oldValue, string);
     }
 
+    /**
+     * Gets unsigned.
+     *
+     * @return the unsigned
+     */
     public int getUnsigned() {
         return unsigned;
     }
 
+    /**
+     * Sets unsigned.
+     *
+     * @param unsigned the unsigned
+     */
     public void setUnsigned(final int unsigned) {
         this.unsigned = unsigned;
     }

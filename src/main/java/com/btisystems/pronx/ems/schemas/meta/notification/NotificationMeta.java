@@ -30,9 +30,7 @@ public class NotificationMeta {
 
         NotificationMeta that = (NotificationMeta) o;
 
-        if (notificationList != null ? !notificationList.equals(that.notificationList) : that.notificationList != null)
-            return false;
-        return !(fieldList != null ? !fieldList.equals(that.fieldList) : that.fieldList != null);
+        return !(notificationList != null ? !notificationList.equals(that.notificationList) : that.notificationList != null) && !(fieldList != null ? !fieldList.equals(that.fieldList) : that.fieldList != null);
 
     }
 

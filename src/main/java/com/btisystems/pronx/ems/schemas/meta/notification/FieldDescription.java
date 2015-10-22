@@ -24,8 +24,7 @@ public class FieldDescription {
 
         if (!oid.equals(that.oid)) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null) return false;
-        return type == that.type;
+        return !(description != null ? !description.equals(that.description) : that.description != null) && type == that.type;
 
     }
 

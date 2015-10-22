@@ -50,8 +50,7 @@ public class NotificationDefinition {
         if (fieldReference != null ? !fieldReference.equals(that.fieldReference) : that.fieldReference != null)
             return false;
         if (oid != null ? !oid.equals(that.oid) : that.oid != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        return !(description != null ? !description.equals(that.description) : that.description != null);
+        return !(name != null ? !name.equals(that.name) : that.name != null) && !(description != null ? !description.equals(that.description) : that.description != null);
 
     }
 

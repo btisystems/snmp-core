@@ -229,7 +229,7 @@ public class SnmpSessionTest {
      * @throws IOException the io exception
      */
     @Test
-    public void shouldThrowExceptionifFailsToGetVariableByOid() throws IOException {
+    public void shouldThrowExceptionIfFailsToGetVariableByOid() throws IOException {
         expect(configuration.createPDU(PDU.GET)).andReturn(new PDU());
         expect(snmpInterface.send(isA(PDU.class), same(target))).andThrow(new IOException());
 
@@ -293,7 +293,7 @@ public class SnmpSessionTest {
      * @throws IOException the io exception
      */
     @Test
-    public void shouldNotThrowErrorCodeExcetpionByDefault() throws IOException {
+    public void shouldNotThrowErrorCodeExceptionByDefault() throws IOException {
         //Verify the default implementation doesn't throw an exception.
         session.checkErrorCodeAndDescription();
     }
@@ -399,7 +399,7 @@ public class SnmpSessionTest {
         replayAll();
 
         final WalkResponse response = session.walkDevice(variableHandler, oidList);
-        assertEquals(3, response.getRequestCount()); // TODO Sometimes this fails ... java.lang.AssertionError: expected:<3> but was:<0>
+        assertEquals(3, response.getRequestCount());
         assertEquals(4, response.getObjectCount());
         assertTrue(response.getWalkTime() >= 0);
         assertNull(response.getThrowable());

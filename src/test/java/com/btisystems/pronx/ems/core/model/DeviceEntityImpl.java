@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Exclusivley used for Testing DeviceEntity abstract class.
+ * Exclusively used for Testing DeviceEntity abstract class.
  * <p/>
  * All child devices are manipulated (add,remove or replace etc) using propertyChangeListener.
  */

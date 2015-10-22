@@ -389,9 +389,7 @@ public class SnmpTableWalkerTest {
                     final ResponseListener listener = (ResponseListener) args[3];
                     final Object userObject = args[2];
                     final PDU requestPdu = (PDU) args[0];
-//					System.out.println("Got request:" + requestPdu + " maxrep/non-rep:"
-//												+ requestPdu.getMaxRepetitions() + "/"
-//												+ requestPdu.getNonRepeaters());
+
                     executorService.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -406,7 +404,6 @@ public class SnmpTableWalkerTest {
                                 }
                             }
                             final ResponseEvent response = new ResponseEvent(this, address, requestPdu, responsePdu, userObject);
-//							System.out.println("respond:" + responsePdu);
                             listener.onResponse(response);
                         }
                     });
@@ -427,7 +424,6 @@ public class SnmpTableWalkerTest {
                     public void run() {
                         final PDU responsePdu = createPdu(null, null);
                         final ResponseEvent response = new ResponseEvent(this, address, requestPdu, responsePdu, userObject);
-//						System.out.println("respond:" + responsePdu);
                         listener.onResponse(response);
                     }
                 });

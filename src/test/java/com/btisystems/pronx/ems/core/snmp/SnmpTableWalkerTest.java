@@ -317,7 +317,7 @@ public class SnmpTableWalkerTest {
 		return this;
 	}
 
-	private synchronized SnmpTableWalkerTest withResponses(final String[] ... responseSets) throws IOException {
+	private SnmpTableWalkerTest withResponses(final String[] ... responseSets) throws IOException {
 		Stubber stubber = new StubberImpl();
 		for (final String[] responseSet : responseSets) {
 			stubber = stubber.doAnswer(new Answer<Void>() {

@@ -15,6 +15,7 @@ package com.btisystems.pronx.ems.schemas.meta.notification;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -76,8 +77,10 @@ public class FieldList implements Serializable {
      * @return the field description
      */
     public List<FieldDescription> getFieldDescription() {
-
-        return fieldDescription;
+        if (fieldDescription == null) {
+            fieldDescription = new ArrayList<FieldDescription>();
+        }
+        return this.fieldDescription;
     }
 
     /**

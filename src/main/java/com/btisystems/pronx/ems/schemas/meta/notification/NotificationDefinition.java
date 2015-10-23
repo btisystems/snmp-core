@@ -15,6 +15,7 @@ package com.btisystems.pronx.ems.schemas.meta.notification;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -159,8 +160,10 @@ public class NotificationDefinition implements Serializable {
      * @return the field reference
      */
     public List<FieldReference> getFieldReference() {
-
-        return fieldReference;
+        if (fieldReference == null) {
+            fieldReference = new ArrayList<FieldReference>();
+        }
+        return this.fieldReference;
     }
 
     /**

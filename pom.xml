@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.btisystems</groupId>
     <artifactId>snmp-core</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
     <name>snmp-core</name>
     <description>A Library for interacting with SNMP based Devices using SNMP4J</description>

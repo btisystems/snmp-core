@@ -78,7 +78,7 @@ public class TrapReceiver implements ITrapReceiver {
     private OctetString authoritativeEngineID;
 
     @Override
-    public void setConfiguration(final ITrapReceiverConfiguration config) {
+    public synchronized void setConfiguration(final ITrapReceiverConfiguration config) {
         this.config = config;
         this.listeningAddress = getAddress(config.getListeningAddress());
         this.trapHandlerService = config.getTrapHandlerService();

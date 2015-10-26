@@ -1,7 +1,7 @@
 # snmp-core
 [![Build Status](https://travis-ci.org/btisystems/snmp-core.svg?branch=master)](https://travis-ci.org/btisystems/snmp-core)
 
-A Library providing core SNMP functionality for interacting with SNMP4j
+A Library providing core SNMP functionality for interacting with SNMP4j and the output of [Mibbler](https://github.com/btisystems/mibbler).
 
 ## Deploying to OSSRH 
 Besides an Apache Maven installation, you have to have a GPG client installed and on your command line path 
@@ -14,8 +14,8 @@ on OSX, run the following command.
      
 To save you having to type the password out each time you build a jar use gnupg agent described [here](http://sudoers.org/2013/11/05/gpg-agent.html).
 
-At this point (assuming the keys are placed in the gnupg directory) you can sign the jars by selecting the osshrh profile.
+At this point (assuming the keys are placed in the gnupg directory and the ossrh credentials are in your setttings.xml) you can sign the jars, build the javadoc and source and deploy by running the following.
 
-     mvn clean install -Possrh 
+     mvn clean deploy -Prelease
      
-This will create asc files in the target directory for the signed content.
+This will upload the jars to https://oss.sonatype.org and sync with Maven Central.

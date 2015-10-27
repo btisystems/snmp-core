@@ -20,6 +20,10 @@
         <developerConnection>scm:git:git@github.com:btisystems/snmp-core.git</developerConnection>
         <url>https://github.com/btisystems/snmp-core/issues</url>
     </scm>
+    <ciManagement>
+        <url>https://travis-ci.org/btisystems/snmp-core/</url>
+        <system>Travis</system>
+    </ciManagement>
     <issueManagement>
         <system>GitHub Issues</system>
         <url>https://github.com/btisystems/snmp-core/issues</url>
@@ -34,6 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.7</java.version>
         <powermock.version>1.5.6</powermock.version>
+        <scm-publish.pubScmUrl>scm:git:git@github.com:btisystems/snmp-core.git</scm-publish.pubScmUrl>
     </properties>
     <dependencies>
         <dependency>
@@ -315,6 +320,27 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <aggregate>true</aggregate>
+                            <show>public</show>
+                            <nohelp>true</nohelp>
+                            <header>snmp-core, ${project.version}</header>
+                            <footer>snmp-core, ${project.version}</footer>
+                            <doctitle>snmp-core, ${project.version}</doctitle>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-scm-publish-plugin</artifactId>
+                        <version>1.0-beta-2</version>
+                        <configuration>
+                            <checkoutDirectory>${project.build.directory}/scmpublish</checkoutDirectory>
+                            <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
+                            <content>${project.reporting.outputDirectory}/apidocs</content>
+                            <skipDeletedFiles>true</skipDeletedFiles>
+                            <pubScmUrl>scm:git:git@github.com:btisystems/snmp-core.git</pubScmUrl>
+                            <scmBranch>gh-pages</scmBranch>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -165,7 +165,7 @@ public class TrapReceiver implements ITrapReceiver {
         final Date timeNow = new Date();
         final PDU command = e.getPDU();
         final String remoteAddress = getRemoteAddress(e);
-        final String resolvedAddress = addressMapper.mapAddress(remoteAddress);
+        final String resolvedAddress = resolveAddress(remoteAddress);
         e.setProcessed(true);
         if (command != null) {
             switch (command.getType()) {
@@ -178,6 +178,14 @@ public class TrapReceiver implements ITrapReceiver {
                     LOG.warn("Unsupported PDU from:" + remoteAddress + ":" + command.toString());
             }
         }
+    }
+
+    private String resolveAddress(final String remoteAddress) {
+        String resolvedAddress = remoteAddress;
+        if (addressMapper != null){
+            resolvedAddress = addressMapper.mapAddress(remoteAddress);
+        }
+        return resolvedAddress;
     }
 
     private String getRemoteAddress(final CommandResponderEvent e) {

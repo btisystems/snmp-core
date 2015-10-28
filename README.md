@@ -1,21 +1,36 @@
 # snmp-core
 [![Build Status](https://travis-ci.org/btisystems/snmp-core.svg?branch=master)](https://travis-ci.org/btisystems/snmp-core)
+[![Coverage Status](http://img.shields.io/coveralls/btisystems/snmp-core/master.svg)](https://coveralls.io/r/btisystems/snmp-core?branch=master)
 
-A Library providing core SNMP functionality for interacting with SNMP4j
 
-## Deploying to OSSRH 
-Besides an Apache Maven installation, you have to have a GPG client installed and on your command line path 
-as required by the Maven GPG plugin. 
+A Library providing core SNMP functionality for interacting with SNMP4j and the output of [Mibbler](https://github.com/btisystems/mibbler).
 
-From [here](http://blog.ghostinthemachines.com/2015/03/01/how-to-use-gpg-command-line/) assuming homebrew installed 
-on OSX, run the following command. 
+### Requirements
 
-     brew install gnupg gpg-agent
-     
-To save you having to type the password out each time you build a jar use gnupg agent described [here](http://sudoers.org/2013/11/05/gpg-agent.html).
+* Java 7 onwards.
+* Maven 3.0.0 or newer.
 
-At this point (assuming the keys are placed in the gnupg directory) you can sign the jars by selecting the osshrh profile.
+### Features
 
-     mvn clean install -Possrh 
-     
-This will create asc files in the target directory for the signed content.
+See the libaries [javadoc](http://btisystems.github.io/snmp-core/javadoc/).
+
+
+### Usage
+
+Set up the snmp-core maven dependency in the build section of the project pom.xml:
+
+```xml
+    <dependency>
+        <groupId>com.btisystems</groupId>
+        <artifactId>snmp-core</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+```
+
+### Changelog
+
+See [changelog](CHANGELOG.md) for more details.
+
+### License
+
+The project snmp-core is licensed under the APACHE 2.0 license.

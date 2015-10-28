@@ -1,2 +1,5 @@
 language: java
 jdk: oraclejdk7
+after_success:
+  - mvn clean test javadoc:javadoc jacoco:report coveralls:report
+  - .utility/push-javadoc-to-gh-pages.sh

@@ -495,7 +495,7 @@ public class SnmpSessionTest {
      * @throws IOException          the io exception
      * @throws InterruptedException the interrupted exception
      */
-    @Test
+    @Test(expected=InterruptedException.class)
     public void shouldThrowExceptionIfWalkInterrupted() throws IOException, InterruptedException {
 
         final ExecutorService executorService = Executors.newCachedThreadPool();

@@ -515,7 +515,7 @@ public class SnmpSessionTest {
 
         verifyAll();
         executorService.shutdown();
-        executorService.awaitTermination(15, TimeUnit.SECONDS);
+        executorService.awaitTermination(1, TimeUnit.SECONDS);
     }
 
     /**

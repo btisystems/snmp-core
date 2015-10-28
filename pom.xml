@@ -20,14 +20,14 @@
         <developerConnection>scm:git:git@github.com:btisystems/snmp-core.git</developerConnection>
         <url>https://github.com/btisystems/snmp-core/issues</url>
     </scm>
-    <ciManagement>
-        <url>https://travis-ci.org/btisystems/snmp-core/</url>
-        <system>Travis</system>
-    </ciManagement>
     <issueManagement>
         <system>GitHub Issues</system>
         <url>https://github.com/btisystems/snmp-core/issues</url>
     </issueManagement>
+    <ciManagement>
+        <system>Travis</system>
+        <url>https://travis-ci.org/btisystems/snmp-core/</url>
+    </ciManagement>
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

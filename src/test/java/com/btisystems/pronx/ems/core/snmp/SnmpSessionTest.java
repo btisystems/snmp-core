@@ -229,12 +229,26 @@ public class SnmpSessionTest {
      * @throws IOException the io exception
      */
     @Test
-    public void shouldThrowExceptionIfFailsToGetVariableByOid() throws IOException {
+    public void shouldThrowExceptionIfFailsToGetVariableAsIntByOid() throws IOException {
         expect(configuration.createPDU(PDU.GET)).andReturn(new PDU());
         expect(snmpInterface.send(isA(PDU.class), same(target))).andThrow(new IOException());
 
         replayAll();
         final Integer variableAsInt = session.getVariableAsInt("1");
+
+        assertNull(variableAsInt);
+        verifyAll();
+
+    }
+    
+
+    @Test
+    public void shouldThrowExceptionIfFailsToGetVariableByOid() throws IOException {
+        expect(configuration.createPDU(PDU.GET)).andReturn(new PDU());
+        expect(snmpInterface.send(isA(PDU.class), same(target))).andThrow(new IOException());
+
+        replayAll();
+        final String variableAsInt = session.getVariable("1");
 
         assertNull(variableAsInt);
         verifyAll();
@@ -373,7 +387,6 @@ public class SnmpSessionTest {
      * @throws InterruptedException the interrupted exception
      */
     @Test
-    @Ignore
     public void shouldWalkDevice() throws IOException, InterruptedException {
 
         final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -381,7 +394,8 @@ public class SnmpSessionTest {
         expect(configuration.createPDU(PDU.GETBULK)).andReturn(new PDU());
         expect(target.getVersion()).andReturn(SnmpConstants.version2c);
         expect(configuration.getWalkTimeout()).andReturn(900000).anyTimes();
-
+        expect(configuration.getMaxRepetitions()).andReturn(100).anyTimes();
+        
         expectToGetBulkAndSendResponses(executorService, DUMMY_OID1, DUMMY_OID2, "Value");
         expectToAddVariableBinding(DUMMY_OID2, "Value");
 
@@ -524,6 +538,14 @@ public class SnmpSessionTest {
         assertFalse(response.isSuccess());
 
         verifyAll();
+    }
+    
+    @Test
+    public void shouldIncludeInvalidResponses() throws IOException, InterruptedException {
+        assertTrue(session.isInvalid(null));
+        assertTrue(session.isInvalid("Null"));
+        assertTrue(session.isInvalid("noSuchObject"));
+        assertFalse(session.isInvalid("This is not an valid response."));
     }
 
     private void expectToAddVariableBinding(final String oid, final String value) {

@@ -284,9 +284,9 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
      *
      * @param field the field
      * @return the setter name
+     * @throws java.lang.Exception
      */
-// Get name for get accessor method.
-    protected String getSetterName(final String field) {
+    protected String getSetterName(final String field) throws Exception {
         return "set" + capitalizeFirstCharacter(field);
     }
 

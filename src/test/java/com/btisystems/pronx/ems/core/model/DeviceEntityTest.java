@@ -13,12 +13,15 @@
  */
 package com.btisystems.pronx.ems.core.model;
 
+import com.btisystems.pronx.ems.core.exception.FieldAccessMethodException;
+import com.btisystems.pronx.ems.core.exception.InvalidFieldNameException;
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 
 import static org.easymock.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
@@ -72,6 +75,22 @@ public class DeviceEntityTest {
     public void setString() {
         deviceEntity.set("deviceName", "testDevice");
         assertEquals("testDevice", deviceEntity.getString("deviceName"));
+    }
+    
+    @Test(expected = InvalidFieldNameException.class)
+    public void shouldCatchNoSuchMethodExceptions() {
+        deviceEntity.set("not a field", "testDevice");
+    }
+    
+    @Test(expected = FieldAccessMethodException.class)
+    public void shouldCatchExceptions() throws Exception {
+        deviceEntity = new DeviceEntityImpl("1"){
+            @Override
+            protected String getSetterName(final String field) throws Exception {
+                throw new IOException("Some other exception");
+            } 
+        };
+        deviceEntity.set("deviceName", "testDevice");
     }
 
     /**

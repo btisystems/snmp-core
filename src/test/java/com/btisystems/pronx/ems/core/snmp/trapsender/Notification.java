@@ -19,6 +19,8 @@ import org.snmp4j.smi.OID;
 import com.btisystems.pronx.ems.core.model.DeviceEntity;
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
 import com.btisystems.pronx.ems.core.model.INotification;
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * The type Notification.
@@ -33,6 +35,7 @@ public class Notification extends DeviceEntity implements Serializable, INotific
     private String ip;
     private String string;
     private int unsigned;
+    private String dateTime;
 
     /**
      * Instantiates a new Notification.
@@ -48,11 +51,12 @@ public class Notification extends DeviceEntity implements Serializable, INotific
      * @param string   the string
      * @param unsigned the unsigned
      */
-    public Notification(final int id, final String ip, final String string, final int unsigned) {
+    public Notification(final int id, final String ip, final String string, final int unsigned, final String dateTime) {
         this.id = id;
         this.ip = ip;
         this.string = string;
         this.unsigned = unsigned;
+        this.dateTime = dateTime;
     }
 
 
@@ -134,57 +138,65 @@ public class Notification extends DeviceEntity implements Serializable, INotific
         this.unsigned = unsigned;
     }
 
-    
+    public String getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(final String dateTime) {
+        this.dateTime = dateTime;
+    }
 
     @Override
-	public String toString() {
-		return "Notification [id=" + id + ", ip=" + ip + ", string=" + string + ", unsigned=" + unsigned + "]";
-	}
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + this.id;
+        hash = 71 * hash + Objects.hashCode(this.ip);
+        hash = 71 * hash + Objects.hashCode(this.string);
+        hash = 71 * hash + this.unsigned;
+        hash = 71 * hash + Objects.hashCode(this.dateTime);
+        return hash;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id;
-		result = prime * result + ((ip == null) ? 0 : ip.hashCode());
-		result = prime * result + ((string == null) ? 0 : string.hashCode());
-		result = prime * result + unsigned;
-		return result;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Notification other = (Notification) obj;
+        if (this.id != other.id) {
+            return false;
+        }
+        if (!Objects.equals(this.ip, other.ip)) {
+            return false;
+        }
+        if (!Objects.equals(this.string, other.string)) {
+            return false;
+        }
+        if (this.unsigned != other.unsigned) {
+            return false;
+        }
+        if (!Objects.equals(this.dateTime, other.dateTime)) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Notification other = (Notification) obj;
-		if (id != other.id)
-			return false;
-		if (ip == null) {
-			if (other.ip != null)
-				return false;
-		} else if (!ip.equals(other.ip))
-			return false;
-		if (string == null) {
-			if (other.string != null)
-				return false;
-		} else if (!string.equals(other.string))
-			return false;
-		if (unsigned != other.unsigned)
-			return false;
-		return true;
-	}
+    @Override
+    public String toString() {
+        return "Notification{" + "id=" + id + ", ip=" + ip + ", string=" + string + ", unsigned=" + unsigned + ", dateTime=" + dateTime + '}';
+    }
 
-	@Override
+    @Override
     public Notification clone() {
         final Notification copy = new Notification();
         copy.id = id;
         copy.ip = ip;
         copy.string = string;
         copy.unsigned = unsigned;
+        copy.dateTime = dateTime;
         return copy;
     }
 
@@ -194,6 +206,7 @@ public class Notification extends DeviceEntity implements Serializable, INotific
         newDescription.addField(new DeviceEntityDescription.FieldDescription(2, "ip", DeviceEntityDescription.FieldType.IP_ADDRESS, -1));
         newDescription.addField(new DeviceEntityDescription.FieldDescription(3, "string", DeviceEntityDescription.FieldType.STRING, -1));
         newDescription.addField(new DeviceEntityDescription.FieldDescription(4, "unsigned", DeviceEntityDescription.FieldType.UNSIGNED32, -1));
+        newDescription.addField(new DeviceEntityDescription.FieldDescription(5, "dateTime", DeviceEntityDescription.FieldType.DATE_AND_TIME, -1));
         return newDescription;
     }
 

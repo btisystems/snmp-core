@@ -47,7 +47,7 @@ import java.util.TreeMap;
 public class TrapSender implements ITrapSender {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrapSender.class);
-    private Snmp snmp;
+    protected Snmp snmp;
 
     @Override
     public void send(final INotification notification, final ISnmpNotificationOidLookup lookup, final List<TrapRecipient> trapRecipients) {
@@ -136,7 +136,7 @@ public class TrapSender implements ITrapSender {
 
     }
 
-    private void createSnmpSession() throws IOException {
+    protected void createSnmpSession() throws IOException {
         if (snmp == null) {
             snmp = new Snmp(new DefaultUdpTransportMapping());
         }

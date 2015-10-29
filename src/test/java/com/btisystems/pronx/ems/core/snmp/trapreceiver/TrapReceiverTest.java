@@ -15,38 +15,30 @@ package com.btisystems.pronx.ems.core.snmp.trapreceiver;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.snmp4j.CommandResponder;
 import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.MessageDispatcher;
+import org.snmp4j.MessageDispatcherImpl;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.IpAddress;
-import org.snmp4j.util.MultiThreadedMessageDispatcher;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Snmp.class, TrapReceiver.class, CommandResponderEvent.class})
+ 
 public class TrapReceiverTest {
     private TrapReceiver receiver;
     private TrapReceiverConfiguration config;
     @Mock private ITrapHandlerService mockService;
-    private Snmp mockSnmp;
-    private CommandResponderEvent mockEvent;
+    @Mock private Snmp mockSnmp;
+    @Mock private CommandResponderEvent mockEvent;
     private PDU pdu;
     
     public TrapReceiverTest() {
@@ -55,16 +47,29 @@ public class TrapReceiverTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mockSnmp = PowerMockito.mock(Snmp.class);
-        mockEvent = PowerMockito.mock(CommandResponderEvent.class);
         
-        receiver = new TrapReceiver();
+        receiver = new TrapReceiver(){
+
+            @Override
+            protected synchronized void waitWhileListening() {}
+
+            @Override
+            protected Snmp createSnmp(final MessageDispatcher mtDispatcher) {
+                return mockSnmp;
+            }
+            
+        };
         
         config = new TrapReceiverConfiguration();
         config.setDispatcherThreadCount(1);
         config.setListeningAddress("0.0.0.0");
-        config.setAddressMapper(null);
         config.setTrapHandlerService(mockService);
+        config.setAddressMapper(new ITrapSourceMapper() {
+            @Override
+            public String mapAddress(final String sourceAddress) {
+                return sourceAddress;
+            }
+        });
         
         pdu = new PDU();
         pdu.setType(PDU.V1TRAP);
@@ -74,13 +79,7 @@ public class TrapReceiverTest {
 
     @Test
     public void shouldStartListening() throws Exception {       
-        PowerMockito.whenNew(Snmp.class)
-                .withParameterTypes(MessageDispatcher.class)
-                .withArguments(Mockito.isA(MultiThreadedMessageDispatcher.class))
-                .thenReturn(mockSnmp);
-        
         Mockito.when(mockSnmp.addNotificationListener((Address)Mockito.isNotNull(), (CommandResponder)Mockito.isNotNull())).thenReturn(Boolean.TRUE);
-        
         respondWithPDU();
         
         receiver.startReceiving();
@@ -88,36 +87,53 @@ public class TrapReceiverTest {
         Mockito.verify(mockService).handle((Date)Mockito.isNotNull(), Mockito.eq("1.1.1.1"), Mockito.eq(pdu));
     }
     
+    @Test
+    public void shouldHandleExceptionWhenListening() throws Exception {       
+        Mockito.when(mockSnmp.addNotificationListener((Address)Mockito.isNotNull(), (CommandResponder)Mockito.isNotNull())).thenReturn(Boolean.TRUE);
+        Mockito.doThrow(new IOException()).when(mockSnmp).listen();
+        
+        receiver.startReceiving();
+        
+        Mockito.verifyZeroInteractions(mockService);
+    }
+    
+    @Test
+    public void shouldIgnoreUnknownPDUType() throws Exception {       
+        Mockito.when(mockSnmp.addNotificationListener((Address)Mockito.isNotNull(), (CommandResponder)Mockito.isNotNull())).thenReturn(Boolean.TRUE);
+        respondWithPDU();
+        pdu.setType(-1);
+        
+        receiver.startReceiving();
+        
+        Mockito.verifyZeroInteractions(mockService);
+    }
     
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailInvalidAddress() throws Exception {
-        config.setListeningAddress("not an address");
+        config.setListeningAddress("not: an address");
         receiver.setConfiguration(config);
-        
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionOnNullDispatcher() throws Exception {
+        receiver = new TrapReceiver();
+        receiver.createSnmp(null);
+    }
+    
+    @Test
+    public void shouldCreateSnmp() throws Exception {
+        receiver = new TrapReceiver();
+        assertNotNull(receiver.createSnmp(new MessageDispatcherImpl()));
     }
 
     private void respondWithPDU() throws IOException {
-        PowerMockito.when(mockEvent.getPDU()).thenReturn(pdu);
-        PowerMockito.when(mockEvent.getPeerAddress()).thenReturn(new IpAddress("1.1.1.1")); 
+        Mockito.when(mockEvent.getPDU()).thenReturn(pdu);
+        Mockito.when(mockEvent.getPeerAddress()).thenReturn(new IpAddress("1.1.1.1")); 
 
         Mockito.doAnswer(new Answer() {
-            private final Thread thread = Thread.currentThread();
             @Override
             public Object answer(final InvocationOnMock invocation) throws Throwable {
-                Executors.newSingleThreadScheduledExecutor().schedule(new Runnable() {
-                    
-                    @Override
-                    public void run() {
-                        try {
-                            receiver.processPdu(mockEvent);
-                        } catch (Exception e){
-                            e.printStackTrace();
-                            fail(e.getMessage());
-                        } finally {
-                            thread.interrupt(); //Ensure the test exits.
-                        }
-                    }
-                }, 1, TimeUnit.SECONDS);
+                receiver.processPdu(mockEvent);
                 return null;
             }
         }).when(mockSnmp).listen();

@@ -103,7 +103,7 @@ public class TrapReceiver implements ITrapReceiver {
             SecurityProtocols.getInstance().addDefaultProtocols();
             SecurityProtocols.getInstance().addPrivacyProtocol(new Priv3DES());
 
-            final Snmp snmp = new Snmp(mtDispatcher);
+            final Snmp snmp = createSnmp(mtDispatcher);
             final USM usm = new USM(SecurityProtocols.getInstance(), localEngineID, 0);
             SecurityModels.getInstance().addSecurityModel(usm);
             if (authoritativeEngineID != null) {
@@ -122,7 +122,16 @@ public class TrapReceiver implements ITrapReceiver {
         }
     }
 
-    private synchronized void waitWhileListening() {
+    protected Snmp createSnmp(final MessageDispatcher mtDispatcher) {
+        if (mtDispatcher == null){
+            throw new IllegalArgumentException("Message Dispatcher cannot be null");
+        } 
+        final Snmp snmp = new Snmp(mtDispatcher);
+        return snmp;
+        
+    }
+
+    protected synchronized void waitWhileListening() {
         try {
             while (true) {
                 this.wait();

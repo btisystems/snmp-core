@@ -150,7 +150,10 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
      * @param intArray the source array
      * @param offset   the offset of the first integer of the identifier
      * @param length   the number of sub-identifiers in the identifier
-     * @return a string of the form "n1.n2....nn", where n1 is the                  integer at intArray[offset], n2 is the is the integer at                  intArray[offset + 1] and nn is the integer at                  intArray[offset + n - 1]
+     * @return a string of the form "n1.n2....nn", where n1 is the                  
+     * integer at intArray[offset], n2 is the is the integer at                  
+     * intArray[offset + 1] and nn is the integer at                  
+     * intArray[offset + n - 1]
      */
     protected String _getObjectIdentifier(final int[] intArray,
                                           final int offset,

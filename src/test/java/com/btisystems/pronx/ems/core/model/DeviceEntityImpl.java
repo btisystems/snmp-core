@@ -29,6 +29,7 @@ public class DeviceEntityImpl extends DeviceEntity implements ITableAccess {
     private String tableDeviceName;
     private DeviceEntity entityObject;
     private int deviceId;
+    private long time;
     private DeviceEntityDescription deviceEntityDescription;
     private Map<String, IDeviceEntity> entityMap;
 
@@ -97,6 +98,15 @@ public class DeviceEntityImpl extends DeviceEntity implements ITableAccess {
         this.deviceId = deviceId;
     }
 
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    
     /**
      * Gets device name.
      *

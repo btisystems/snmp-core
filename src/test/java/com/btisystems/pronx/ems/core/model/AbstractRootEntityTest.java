@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -61,6 +62,13 @@ public class AbstractRootEntityTest {
         getterMethodWasCalled = false;
     }
 
+    @Test
+    public void shouldProvideDeviceAddress() {
+        RootEntity rootEntity = new RootEntity();
+        rootEntity.setDeviceAddress("1.1.1.1");
+        assertEquals("1.1.1.1", rootEntity.getDeviceAddress());
+    }
+    
     /**
      * Verify get entity with oid expect null root.
      */

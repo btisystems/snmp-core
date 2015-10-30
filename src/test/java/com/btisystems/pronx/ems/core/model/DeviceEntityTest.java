@@ -16,6 +16,7 @@ package com.btisystems.pronx.ems.core.model;
 import com.btisystems.pronx.ems.core.exception.FieldAccessMethodException;
 import com.btisystems.pronx.ems.core.exception.InvalidFieldNameException;
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import java.beans.PropertyChangeEvent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,8 @@ import java.io.IOException;
 
 import static org.easymock.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -36,6 +39,8 @@ public class DeviceEntityTest {
 
     private DeviceEntityImpl deviceEntity;
     private DeviceEntityImpl device_1;
+    
+    boolean propertyChanged;
     /**
      * The Property change listener mock.
      */
@@ -92,6 +97,11 @@ public class DeviceEntityTest {
         };
         deviceEntity.set("deviceName", "testDevice");
     }
+    
+    @Test(expected = InvalidFieldNameException.class)
+    public void shouldCatchUnsuppoeredOperationOnGet() {
+        deviceEntity.getInt("not a field");
+    }
 
     /**
      * Sets int.
@@ -101,6 +111,40 @@ public class DeviceEntityTest {
         deviceEntity.set("deviceId", 123);
         assertEquals(123, deviceEntity.getInt("deviceId"));
     }
+    
+    @Test
+    public void setLong() {
+        deviceEntity.set("time", 123L);
+        assertEquals(123, deviceEntity.getLong("time"));
+    }
+    
+    @Test
+    public void shouldSupportToString() {
+        assertNotNull(deviceEntity.toString());
+    }
+    
+    @Test
+    public void shouldNotifyChange() {
+
+        deviceEntity.addPropertyChangeListener(new PropertyChangeListener() {
+
+            @Override
+            public void propertyChange(final PropertyChangeEvent evt) {
+                assertEquals("Old", evt.getOldValue());
+                assertEquals("New", evt.getNewValue());
+                assertEquals("1", evt.getPropertyName());
+                propertyChanged = true;
+            }
+        });
+        deviceEntity.notifyChange(1, "Old", "New");
+        assertTrue(propertyChanged);
+        propertyChanged = false;
+        
+        deviceEntity.clearPropertyChangeListeners();
+        deviceEntity.notifyChange(1, "Old", "New");
+        assertFalse(propertyChanged);
+    }
+    
 
     /**
      * Is supported.

@@ -43,7 +43,7 @@ import java.util.TreeSet;
 /**
  * Understands how to retrieval specific rows from a set of tables.
  */
-public class SnmpTableWalker extends DefaultPDUFactory {
+public class SnmpTableWalker extends DefaultPDUFactory implements ISnmpTableWalker {
 
     private static final Logger log = LoggerFactory.getLogger(SnmpTableWalker.class);
 
@@ -81,6 +81,7 @@ public class SnmpTableWalker extends DefaultPDUFactory {
      * @return the table rows
      * @throws IOException the io exception
      */
+    @Override
     public WalkResponse getTableRows(final IVariableBindingHandler networkDevice,
                                      final Map<DeviceEntityDescription, List<OID>> tableIndexes) throws IOException {
 

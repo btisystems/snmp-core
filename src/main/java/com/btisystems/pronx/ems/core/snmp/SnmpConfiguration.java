@@ -39,7 +39,7 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
     /**
      * The Version.
      */
-    protected int version;
+    private int version;
     private int retries = 1;
     private int timeout = DEFAULT_TIMEOUT;
     private int maxRepetitions = DEFAULT_REPETITIONS;
@@ -60,7 +60,9 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
      */
     public int getDispatcherPoolSize() {
         return dispatcherPoolSize;
-    }    @Override
+    }    
+    
+    @Override
     public void setCommunity(final String community) {
         this.community = new OctetString(community);
     }
@@ -79,7 +81,7 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
      *
      * @return the retries
      */
-    protected int getRetries() {
+    public int getRetries() {
         return retries;
     }
 
@@ -104,7 +106,7 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
      *
      * @return the timeout
      */
-    protected int getTimeout() {
+    public int getTimeout() {
         return timeout;
     }
 
@@ -115,6 +117,10 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
      */
     public void setTimeout(final int timeout) {
         this.timeout = timeout;
+    }
+
+    public void setVersion(final int version) {
+        this.version = version;
     }
 
     /**
@@ -184,7 +190,9 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
     @Override
     public int getVersion() {
         return version;
-    }    @Override
+    }    
+    
+    @Override
     public int getMaxRepetitions() {
         return maxRepetitions;
     }
@@ -202,18 +210,10 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
     public void setWalkTimeout(final int walkTimeout) {
         this.walkTimeout = walkTimeout;
     }
-
+    
     @Override
-    public String toString() {
-        //Eclipse generated toString.
-        return "SnmpConfiguration [version=" + version + ", retries=" + retries + ", timeout=" + timeout
-                + ", maxRepetitions=" + maxRepetitions + ", nonRepeaters=" + nonRepeaters + ", maxSizeResponsePDU="
-                + maxSizeResponsePDU + ", walkTimeout=" + walkTimeout + ", port=" + port + ", dispatcherPoolSize="
-                + dispatcherPoolSize + ", maximumRowsPerPdu=" + maximumRowsPerPdu + ", maximumColumnsPerPdu="
-                + maximumColumnsPerPdu + ", community=" + community + "]";
-    }    @Override
     public String getCommunity() {
-        return community.toString();
+        return community == null ? null : community.toString();
     }
 
     @Override

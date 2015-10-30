@@ -14,13 +14,13 @@
 package com.btisystems.pronx.ems.core.snmp;
 
 import com.btisystems.pronx.ems.core.exception.SystemObjectIdException;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IArgumentMatcher;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.snmp4j.PDU;
 import org.snmp4j.Session;
@@ -37,7 +37,9 @@ import org.snmp4j.smi.VariableBinding;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -78,6 +80,7 @@ public class SnmpSessionTest {
     private List<OID> oidList;
     private IpAddress address;
     private SnmpSession session;
+    private ISnmpTableWalker mockTableWalker;
 
     /**
      * Sets up.
@@ -90,6 +93,7 @@ public class SnmpSessionTest {
         snmpInterface = createMock(Session.class);
         target = createMock(Target.class);
         variableHandler = createMock(IVariableBindingHandler.class);
+        mockTableWalker = createMock(ISnmpTableWalker.class);
 
         address = new IpAddress(NE_IP);
 
@@ -105,6 +109,13 @@ public class SnmpSessionTest {
     @Test
     public void shouldGetHostAddress() {
         assertEquals(NE_IP, session.getAddress().getHostAddress());
+    }
+
+    @Test
+    public void shouldIgnoreClose() throws IOException {
+        replayAll();
+        session.close();
+        verifyAll();
     }
 
     /**
@@ -300,6 +311,55 @@ public class SnmpSessionTest {
         assertEquals(PDU.SET, pduCapture.getValue().getType());
         assertEquals(2, pduCapture.getValue().getVariableBindings().size());
     }
+    
+    @Test(expected = SnmpIoException.class)
+    public void shouldSetVariablesWithErrorResponse() throws IOException {
+
+        final PDU sendPdu = new PDU();
+        sendPdu.setType(PDU.SET);
+        expect(configuration.createPDU(PDU.SET)).andReturn(sendPdu);
+
+        final Capture<PDU> pduCapture = new Capture<>();
+        expect(snmpInterface.send(capture(pduCapture), same(target))).andReturn(createResponseEvent(createErrorPdu()));
+
+        replayAll();
+
+        session.setVariables(getVariableBindings("1.2.3", "Value1",
+                "4.5.6", "Value2"));
+    }
+    
+        
+    @Test(expected = SnmpIoException.class)
+    public void shouldSetVariablesWithUnauthorised() throws IOException {
+
+        final PDU sendPdu = new PDU();
+        sendPdu.setType(PDU.SET);
+        expect(configuration.createPDU(PDU.SET)).andReturn(sendPdu);
+
+        final Capture<PDU> pduCapture = new Capture<>();
+        expect(snmpInterface.send(capture(pduCapture), same(target))).andReturn(createResponseEvent(createUnauthorisedPdu()));
+
+        replayAll();
+
+        session.setVariables(getVariableBindings("1.2.3", "Value1",
+                "4.5.6", "Value2"));
+    }
+    
+    @Test(expected = SnmpIoException.class)
+    public void shouldSetVariablesWithIOException() throws IOException {
+
+        final PDU sendPdu = new PDU();
+        sendPdu.setType(PDU.SET);
+        expect(configuration.createPDU(PDU.SET)).andReturn(sendPdu);
+
+        final Capture<PDU> pduCapture = new Capture<>();
+        expect(snmpInterface.send(capture(pduCapture), same(target))).andThrow(new IOException());
+
+        replayAll();
+
+        session.setVariables(getVariableBindings("1.2.3", "Value1",
+                "4.5.6", "Value2"));
+    }
 
     /**
      * Should not throw error code excetpion by default.
@@ -423,6 +483,21 @@ public class SnmpSessionTest {
 
         executorService.shutdown();
         executorService.awaitTermination(15, TimeUnit.SECONDS);
+    }
+    
+    @Test
+    public void shouldDelegateTableWalk() throws IOException, InterruptedException {
+        assertTrue(session.getTableWalker() == session.getTableWalker());
+        session = new SnmpSession(configuration, snmpInterface, target, address){
+            @Override
+            protected ISnmpTableWalker getTableWalker() {
+                return mockTableWalker;
+            }
+        };
+        expect(mockTableWalker.getTableRows(variableHandler, null)).andReturn(null);
+        replayAll();
+        session.getTableRows(variableHandler, null);
+        verifyAll();
     }
 
     /**
@@ -678,6 +753,14 @@ public class SnmpSessionTest {
     private PDU createErrorPdu() {
         final PDU errorPdu = new PDU();
         errorPdu.setErrorStatus(SnmpConstants.SNMP_ERROR_BAD_VALUE);
+        errorPdu.setErrorIndex(1);
+        errorPdu.add(new VariableBinding(new OID("1.2.3"), new OctetString("Bad Value")));
+        return errorPdu;
+    }
+    
+    private PDU createUnauthorisedPdu() {
+        final PDU errorPdu = new PDU();
+        errorPdu.setErrorStatus(SnmpConstants.SNMP_ERROR_AUTHORIZATION_ERROR);
         errorPdu.setErrorIndex(1);
         errorPdu.add(new VariableBinding(new OID("1.2.3"), new OctetString("Bad Value")));
         return errorPdu;

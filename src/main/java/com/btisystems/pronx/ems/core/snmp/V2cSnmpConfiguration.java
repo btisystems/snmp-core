@@ -43,7 +43,7 @@ public class V2cSnmpConfiguration extends SnmpConfiguration {
      */
     public V2cSnmpConfiguration() {
         LOG.debug(">>> V2cSnmpConfiguration");
-        version = SnmpConstants.version2c;
+        setVersion(SnmpConstants.version2c);
     }
 
     @Override
@@ -86,4 +86,14 @@ public class V2cSnmpConfiguration extends SnmpConfiguration {
         snmp.listen();
         return snmp;
     }
+    
+    @Override
+    public String toString() {
+        return "V2cSnmpConfiguration{" + "version=" + getVersion() + ", retries=" + getRetries() + ", timeout=" + getTimeout()
+                + ", maxRepetitions=" + getMaxRepetitions() + ", nonRepeaters=" + getNonRepeaters() + ", maxSizeResponsePDU=" 
+                + getMaxSizeResponsePDU() + ", walkTimeout=" + getWalkTimeout() + ", port=" + getPort() + ", dispatcherPoolSize=" 
+                + getDispatcherPoolSize() + ", maximumRowsPerPdu=" + getMaximumRowsPerPdu() + ", maximumColumnsPerPdu=" 
+                + getMaximumColumnsPerPdu() + ", community=" + getCommunity() + '}';
+    }
+    
 }

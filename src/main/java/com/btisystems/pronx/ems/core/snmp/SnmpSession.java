@@ -67,7 +67,7 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
     private final Address address;
     private final Session snmpInterface;
 
-    private final SnmpTableWalker tableWalker;
+    private final ISnmpTableWalker tableWalker;
 
     /**
      * Class constructor.
@@ -169,7 +169,7 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
     public WalkResponse getTableRows(final IVariableBindingHandler networkDevice,
                                      final Map<DeviceEntityDescription, List<OID>> tableIndexes) throws IOException {
 
-        return tableWalker.getTableRows(networkDevice, tableIndexes);
+        return getTableWalker().getTableRows(networkDevice, tableIndexes);
     }
 
     @Override
@@ -271,16 +271,10 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
         request.add(new VariableBinding(new OID(oid)));
 
         ResponseEvent responseEvent;
-        System.currentTimeMillis();
         responseEvent = snmpInterface.send(request, target);
-        if (responseEvent != null) {
+        if (responseEvent != null && responseEvent.getResponse() != null) {
             response = responseEvent.getResponse();
-            if (response != null) {
-                var = response.get(0).getVariable();
-            } else {
-                throw new IOException("No response from device. "
-                        + "Please confirm that the device is running normally and verify the SNMP community strings.");
-            }
+            var = response.get(0).getVariable();
         } else {
             throw new IOException("No response from device. "
                     + "Please confirm that the device is running normally and verify the SNMP community strings.");
@@ -302,6 +296,10 @@ public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
      */
     protected boolean isInvalid(final String value) {
         return value == null || value.equals(NULL) || value.equals(NO_SUCH_OBJECT);
+    }
+
+    protected ISnmpTableWalker getTableWalker() {
+        return tableWalker;
     }
 
     private class TreeResponseListener implements TreeListener {

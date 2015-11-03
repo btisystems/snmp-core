@@ -51,7 +51,7 @@ public abstract class SnmpConfiguration implements ISnmpConfiguration {
     private int maximumRowsPerPdu = DEFAULT_MAX_ROWS_PER_PDU;
     private int maximumColumnsPerPdu = DEFAULT_MAX_COLUMNS_PER_PDU;
 
-    private OctetString community;
+    private OctetString community = new OctetString("public");
 
     /**
      * Gets dispatcher pool size.

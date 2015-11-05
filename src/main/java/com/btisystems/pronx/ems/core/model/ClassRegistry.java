@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
 
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
-import com.btisystems.pronx.ems.core.snmp.trapsender.VarBindComparator;
+import com.btisystems.pronx.ems.core.snmp.OIDComparator;
 
 /**
  * Manages the creation and population of entities for a discovered device.
@@ -40,7 +40,7 @@ public class ClassRegistry implements IClassRegistry {
     private final Class<? extends AbstractRootEntity> rootEntityClass;
 
     private List<OID> excludedDiscoveryOids = new ArrayList<>();
-    private Map<Class<? extends DeviceEntity>, OID> classToOidMap = new HashMap<>();
+    private final Map<Class<? extends DeviceEntity>, OID> classToOidMap;
 
     /**
      * Class constructor
@@ -54,7 +54,7 @@ public class ClassRegistry implements IClassRegistry {
         this.oidToClassMap = oidRegistry;
         this.rootEntityClass = rootEntityClass;
         this.classToOidMap = createClassToOidMap(oidRegistry);
-        nameToClassMap = createNameToClassMap(oidRegistry);
+        this.nameToClassMap = createNameToClassMap(oidRegistry);
     }
 
     /**
@@ -153,7 +153,7 @@ public class ClassRegistry implements IClassRegistry {
 
     private void sortOids(final List<OID> oids) {
         Collections.sort(oids, new Comparator<OID>(){
-            private final VarBindComparator alphaNumComparator = new VarBindComparator();
+            private final OIDComparator alphaNumComparator = new OIDComparator();
             @Override
             public int compare(final OID o1, final OID o2) {
                 return alphaNumComparator.compare(o1.toString(), o2.toString());
@@ -196,11 +196,11 @@ public class ClassRegistry implements IClassRegistry {
     }
     
     private HashMap<Class<? extends DeviceEntity>, OID> createClassToOidMap(final TreeMap<OID, Class<? extends DeviceEntity>> oidRegistry) {
-        final HashMap<Class<? extends DeviceEntity>, OID> classToOidMap = new HashMap<>();
+        final HashMap<Class<? extends DeviceEntity>, OID> newClassToOidMap = new HashMap<>();
         for (Map.Entry<OID, Class<? extends DeviceEntity>> entrySet : oidRegistry.entrySet()) {
-            classToOidMap.put(entrySet.getValue(), entrySet.getKey());
+            newClassToOidMap.put(entrySet.getValue(), entrySet.getKey());
         }
-        return classToOidMap;
+        return newClassToOidMap;
     }
 
     @Override

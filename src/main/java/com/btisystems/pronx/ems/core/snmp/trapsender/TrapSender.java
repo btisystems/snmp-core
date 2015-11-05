@@ -13,6 +13,7 @@
  */
 package com.btisystems.pronx.ems.core.snmp.trapsender;
 
+import com.btisystems.pronx.ems.core.snmp.OIDComparator;
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
 import com.btisystems.pronx.ems.core.model.INotification;
 import com.btisystems.pronx.ems.core.snmp.ISnmpNotificationOidLookup;
@@ -70,7 +71,7 @@ public class TrapSender implements ITrapSender {
     }
 
     private void buildPayload(final INotification notification, final ISnmpNotificationOidLookup lookup, final PDU trap) {
-        final Map<String, VariableBinding> variables = new TreeMap<String, VariableBinding>(new VarBindComparator());
+        final Map<String, VariableBinding> variables = new TreeMap<String, VariableBinding>(new OIDComparator());
         for (FieldDescription fieldDescription : notification.get_Description().getFields()) {
             final Variable variable = buildVarBind(fieldDescription, notification);
             if (variable != null) {

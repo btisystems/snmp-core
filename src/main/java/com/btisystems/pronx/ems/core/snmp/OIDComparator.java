@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.btisystems.pronx.ems.core.snmp.trapsender;
+package com.btisystems.pronx.ems.core.snmp;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -20,11 +20,43 @@ import java.util.Comparator;
  * Used to order Var Binds in accordance with Snmp standards, i.e. in alpha
  * numeric order by OID.
  */
-public class VarBindComparator implements Serializable, Comparator<String> {
-
+public class OIDComparator implements Serializable, Comparator<String> {
+  
+    
     private static final int DIGIT_LOWER_BOUND = 48;
     private static final int DIGIT_UPPER_BOUND = 57;
-    private static final long serialVersionUID = -5662537156155610845L;
+    
+    private boolean isDigit(final char ch) {
+        return ch >= DIGIT_LOWER_BOUND && ch <= DIGIT_UPPER_BOUND;
+    }
+
+    private String getChunk(final String s, final int slength, final int marker) {
+        int chunkMarker = marker;
+        final StringBuilder chunk = new StringBuilder();
+        char c = s.charAt(chunkMarker);
+        chunk.append(c);
+        chunkMarker++;
+        if (isDigit(c)) {
+            while (chunkMarker < slength){
+                c = s.charAt(chunkMarker);
+                if (!isDigit(c)){
+                    break;
+                }
+                chunk.append(c);
+                chunkMarker++;
+            }
+        } else {
+            while (chunkMarker < slength) {
+                c = s.charAt(chunkMarker);
+                if (isDigit(c)){
+                    break;
+                }
+                chunk.append(c);
+                chunkMarker++;
+            }
+        }
+        return chunk.toString();
+    }
 
     @Override
     public int compare(final String o1, final String o2) {
@@ -44,7 +76,7 @@ public class VarBindComparator implements Serializable, Comparator<String> {
             thatMarker += thatChunk.length();
 
             // If both chunks contain numeric characters, sort them numerically
-            int result;
+            int result = 0;
             if (isDigit(thisChunk.charAt(0)) && isDigit(thatChunk.charAt(0))) {
                 // Simple chunk comparison by length.
                 final int thisChunkLength = thisChunk.length();
@@ -68,49 +100,5 @@ public class VarBindComparator implements Serializable, Comparator<String> {
         }
         return s1Length - s2Length;
     }
-
-    private String getChunk(final String s, final int slength, final int marker) {
-        int chunkMarker = marker;
-        final StringBuilder chunk = new StringBuilder();
-        final char c = s.charAt(chunkMarker);
-        chunk.append(c);
-        chunkMarker++;
-        if (isDigit(c)) {
-            orderDigit(chunkMarker, slength, s, chunk);
-        } else {
-            orderNonDigit(chunkMarker, slength, s, chunk);
-        }
-        return chunk.toString();
-    }
-
-    private boolean isDigit(final char ch) {
-        return ch >= DIGIT_LOWER_BOUND && ch <= DIGIT_UPPER_BOUND;
-    }
-
-    private void orderDigit(final int chunkMarker, final int slength, final String s, final StringBuilder chunk) {
-        int cm = chunkMarker;
-        char c;
-        while (cm < slength) {
-            c = s.charAt(chunkMarker);
-            if (!isDigit(c)) {
-                break;
-            }
-            chunk.append(c);
-            cm++;
-        }
-    }
-
-    private void orderNonDigit(final int chunkMarker, final int slength, final String s, final StringBuilder chunk) {
-        int cm = chunkMarker;
-        char c;
-        while (cm < slength) {
-            c = s.charAt(chunkMarker);
-            if (isDigit(c)) {
-                break;
-            }
-            chunk.append(c);
-            cm++;
-        }
-    }
-
 }
+

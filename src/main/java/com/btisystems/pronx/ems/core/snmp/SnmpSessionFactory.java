@@ -34,6 +34,9 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
     private ISnmpConfigurationFactory configurationFactory;
     private Session defaultSnmpInterface;
 
+    public SnmpSessionFactory() {
+    }
+    
     public SnmpSessionFactory(final ISnmpConfigurationFactory defaultConfigurationFactory) {
         this.configurationFactory = defaultConfigurationFactory;
     }
@@ -42,7 +45,7 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
     public ISnmpSession createSession(final ISnmpConfiguration configuration, final String ipAddress) throws IOException {
         LOG.debug(">>> createSession address:{}", ipAddress);
         final Address address = getAddress(ipAddress, configuration.getPort());
-        final Session snmpInterface = configurationFactory.getConfiguration(AccessType.READ_ONLY).createSnmpSession(new DefaultUdpTransportMapping());
+        final Session snmpInterface = configuration.createSnmpSession(new DefaultUdpTransportMapping());
         final Target target = configuration.createTarget(address);
         return new SnmpSession(configuration, snmpInterface, target, address);
     }
@@ -63,13 +66,7 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
                                                   final String factoryName,
                                                   final AccessType accessType) throws IOException {
 
-        LOG.debug(">>> createSessionUsingFactory address:{} {}", ipAddress, factoryName);
-
-        final ISnmpConfiguration configuration = configurationFactory.getConfiguration(accessType);
-        if (configuration instanceof V2cSnmpConfiguration && communityString != null) {
-            ((V2cSnmpConfiguration) configuration).setCommunity(communityString);
-        }
-        return createSession(configuration, ipAddress);
+        throw new UnsupportedOperationException("Alternative configuration factory not supported.");
     }
 
     private Address getAddress(final String transportAddress, final int port) {
@@ -90,17 +87,5 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
             return new TcpAddress(address);
         }
         throw new IllegalArgumentException("Unknown transport " + transport);
-    }
-
-    private Session getDefaultSnmpInterface() throws IOException {
-        if (defaultSnmpInterface == null) {
-            synchronized (configurationFactory) {
-                if (defaultSnmpInterface == null) {
-                    final ISnmpConfiguration defaultSnmpConfiguration = configurationFactory.getConfiguration(AccessType.READ_WRITE);
-                    defaultSnmpInterface =  defaultSnmpConfiguration.createSnmpSession(new DefaultUdpTransportMapping());
-                }
-            }
-        }
-        return defaultSnmpInterface;
     }
 }

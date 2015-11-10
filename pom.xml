@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.btisystems</groupId>
     <artifactId>snmp-core</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>snmp-core</name>
     <description>A Library for interacting with SNMP based Devices using SNMP4J</description>
@@ -51,11 +51,6 @@
                     <groupId>log4j</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.1.Final</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -150,6 +145,22 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>*</Import-Package>
+                        <Export-Package>com.btisystems.pronx.ems.core.exception,
+                            com.btisystems.pronx.ems.core.model,
+                            com.btisystems.pronx.ems.core.snmp,
+                            com.btisystems.pronx.ems.core.snmp.trapreceiver,
+                            com.btisystems.pronx.ems.core.snmp.trapsender,
+                            com.btisystems.pronx.ems.schemas.meta.notification</Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

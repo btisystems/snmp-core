@@ -20,26 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import java.lang.reflect.Method;
 
 /**
  * Abstract class to be extended by the root entity for each device type.
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class AbstractRootEntity extends DeviceEntity implements IObjectSetter {
 
     private static Logger log = LoggerFactory.getLogger(AbstractRootEntity.class);
 
     @SuppressWarnings("unused")
-    @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
     private int id;
     private String deviceAddress;
 

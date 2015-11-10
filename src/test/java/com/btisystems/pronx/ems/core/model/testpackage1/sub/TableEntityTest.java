@@ -17,13 +17,6 @@ package com.btisystems.pronx.ems.core.model.testpackage1.sub;
 import java.io.Serializable;
 import java.util.Map;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
 import org.snmp4j.smi.OID;
 
 import com.btisystems.pronx.ems.core.model.AbstractRootEntity;
@@ -32,18 +25,12 @@ import com.btisystems.pronx.ems.core.model.IDeviceEntity;
 import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
 import com.btisystems.pronx.ems.core.model.ITableAccess;
 
-@Entity(name = "com.btisystems.management.mibs.bti701_v1.bti.btiproducts.bti701.System701")
-@Table(name = "system701")
 public class TableEntityTest
     extends DeviceEntity
     implements Serializable, ITableAccess
 {
-
-    @Id
-    @GeneratedValue
+    
     private int _id;
-    @OneToOne
-    @JoinColumn(name = "_deviceId")
     private AbstractRootEntity parentEntity;
 
     private final static DeviceEntityDescription _entityDescription = createEntityDescription();

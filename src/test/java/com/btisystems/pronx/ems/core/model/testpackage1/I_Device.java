@@ -13,9 +13,6 @@
  */
 package com.btisystems.pronx.ems.core.model.testpackage1;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToOne;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -29,7 +26,6 @@ import com.btisystems.pronx.ems.core.model.testpackage1.sub.EntityTest1;
 public class I_Device
         extends AbstractRootEntity {
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parentEntity")
     private EntityTest1 entityTest1;
 
     public EntityTest1 getEntityTest1() {

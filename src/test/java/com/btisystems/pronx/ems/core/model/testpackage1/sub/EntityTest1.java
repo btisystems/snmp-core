@@ -16,13 +16,6 @@ package com.btisystems.pronx.ems.core.model.testpackage1.sub;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
@@ -36,34 +29,23 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-@Entity(name = "com.btisystems.management.mibs.bti701_v1.bti.btiproducts.bti701.System701")
-@Table(name = "system701")
 public class EntityTest1
     extends DeviceEntity
     implements Serializable, IVariableBindingSetter
 {
 
-    @Id
-    @GeneratedValue
     private int _id;
-    @OneToOne
-    @JoinColumn(name = "_deviceId")
     private AbstractRootEntity parentEntity;
-    @Column(length = 1024)
     private String macaddress;
     private int configfile;
     private int lfpcontrol;
     private int systemtime;
     private int jamborframe;
     private int reboot;
-    @Column(length = 1024)
     private String softwareVersion;
-    @Column(length = 1024)
     private String hardwareVersion;
     private int qinqForwardVID;
-    @Column(length = 1024)
     private String snmpTrapSer1;
-    @Column(length = 1024)
     private String snmpTrapSer2;
     private int qinqEtherType;
     private final static DeviceEntityDescription _entityDescription = createEntityDescription();

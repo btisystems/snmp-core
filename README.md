@@ -12,7 +12,7 @@ A Library providing core SNMP functionality for interacting with SNMP4j and the 
 
 ### Features
 
-See the libaries [javadoc](http://btisystems.github.io/snmp-core/javadoc/).
+See the libaries [site](http://btisystems.github.io/snmp-core/site/).
 
 
 ### Usage

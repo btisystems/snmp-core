@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FieldDescription.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.schemas.meta.notification</a> &gt; <span class="el_source">FieldDescription.java</span></div><h1>FieldDescription.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.schemas.meta.notification;
+
+
+import java.io.Serializable;
+
+/**
+ * The type Field description.
+ */
+public class FieldDescription implements Serializable {
+    private static final long serialVersionUID = 1734631453238572681L;
+    /**
+     * The Oid.
+     */
+    protected String oid;
+    /**
+     * The Name.
+     */
+    protected String name;
+    /**
+     * The Description.
+     */
+    protected String description;
+    /**
+     * The Type.
+     */
+    protected FieldType type;
+
+<span class="fc" id="L41">    public FieldDescription() {</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public int hashCode() {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        int result = oid != null ? oid.hashCode() : 0;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        result = 31 * result + (name != null ? name.hashCode() : 0);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        result = 31 * result + (description != null ? description.hashCode() : 0);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        result = 31 * result + (type != null ? type.hashCode() : 0);</span>
+<span class="fc" id="L50">        return result;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (this == o) return true;</span>
+<span class="fc bfc" id="L56" title="All 4 branches covered.">        if (o == null || getClass() != o.getClass()) return false;</span>
+
+<span class="fc" id="L58">        FieldDescription that = (FieldDescription) o;</span>
+
+<span class="fc bfc" id="L60" title="All 6 branches covered.">        if (oid != null ? !oid.equals(that.oid) : that.oid != null) return false;</span>
+<span class="fc bfc" id="L61" title="All 6 branches covered.">        if (name != null ? !name.equals(that.name) : that.name != null) return false;</span>
+<span class="fc bfc" id="L62" title="All 6 branches covered.">        if (description != null ? !description.equals(that.description) : that.description != null) return false;</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        return type == that.type;</span>
+
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L69">        return &quot;FieldDescription{&quot; +</span>
+                &quot;oid='&quot; + oid + '\'' +
+                &quot;, name='&quot; + name + '\'' +
+                &quot;, description='&quot; + description + '\'' +
+                &quot;, type=&quot; + type +
+                '}';
+    }
+
+    /**
+     * Gets oid.
+     *
+     * @return the oid
+     */
+    public String getOid() {
+
+<span class="fc" id="L84">        return oid;</span>
+    }
+
+    /**
+     * Sets oid.
+     *
+     * @param oid the oid
+     */
+    public void setOid(String oid) {
+<span class="fc" id="L93">        this.oid = oid;</span>
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
+    public String getName() {
+<span class="fc" id="L102">        return name;</span>
+    }
+
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     */
+    public void setName(String name) {
+<span class="fc" id="L111">        this.name = name;</span>
+<span class="fc" id="L112">    }</span>
+
+    /**
+     * Gets description.
+     *
+     * @return the description
+     */
+    public String getDescription() {
+<span class="fc" id="L120">        return description;</span>
+    }
+
+    /**
+     * Sets description.
+     *
+     * @param description the description
+     */
+    public void setDescription(String description) {
+<span class="fc" id="L129">        this.description = description;</span>
+<span class="fc" id="L130">    }</span>
+
+    /**
+     * Gets type.
+     *
+     * @return the type
+     */
+    public FieldType getType() {
+<span class="fc" id="L138">        return type;</span>
+    }
+
+    /**
+     * Sets type.
+     *
+     * @param type the type
+     */
+    public void setType(FieldType type) {
+<span class="fc" id="L147">        this.type = type;</span>
+<span class="fc" id="L148">    }</span>
+
+    /**
+     * With oid field description.
+     *
+     * @param value the value
+     * @return the field description
+     */
+    public FieldDescription withOid(String value) {
+<span class="fc" id="L157">        setOid(value);</span>
+<span class="fc" id="L158">        return this;</span>
+    }
+
+    /**
+     * With name field description.
+     *
+     * @param value the value
+     * @return the field description
+     */
+    public FieldDescription withName(String value) {
+<span class="fc" id="L168">        setName(value);</span>
+<span class="fc" id="L169">        return this;</span>
+    }
+
+    /**
+     * With description field description.
+     *
+     * @param value the value
+     * @return the field description
+     */
+    public FieldDescription withDescription(String value) {
+<span class="fc" id="L179">        setDescription(value);</span>
+<span class="fc" id="L180">        return this;</span>
+    }
+
+    /**
+     * With type field description.
+     *
+     * @param value the value
+     * @return the field description
+     */
+    public FieldDescription withType(FieldType value) {
+<span class="fc" id="L190">        setType(value);</span>
+<span class="fc" id="L191">        return this;</span>
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

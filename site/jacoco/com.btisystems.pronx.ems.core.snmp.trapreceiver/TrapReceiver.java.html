@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TrapReceiver.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.snmp.trapreceiver</a> &gt; <span class="el_source">TrapReceiver.java</span></div><h1>TrapReceiver.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.core.snmp.trapreceiver;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.snmp4j.CommandResponderEvent;
+import org.snmp4j.MessageDispatcher;
+import org.snmp4j.MessageDispatcherImpl;
+import org.snmp4j.PDU;
+import org.snmp4j.Snmp;
+import org.snmp4j.mp.MPv1;
+import org.snmp4j.mp.MPv2c;
+import org.snmp4j.mp.MPv3;
+import org.snmp4j.security.Priv3DES;
+import org.snmp4j.security.SecurityModels;
+import org.snmp4j.security.SecurityProtocols;
+import org.snmp4j.security.USM;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.IpAddress;
+import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.TcpAddress;
+import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.util.MultiThreadedMessageDispatcher;
+import org.snmp4j.util.ThreadPool;
+
+import java.io.IOException;
+import java.util.Date;
+
+/**
+ * The type Trap receiver.
+ */
+<span class="fc" id="L44">public class TrapReceiver implements ITrapReceiver {</span>
+
+    /**
+     * The constant SLASH.
+     */
+    public static final char SLASH = '/';
+    /**
+     * The constant PORT.
+     */
+    public static final String PORT = &quot;/161&quot;;
+<span class="fc" id="L54">    private static final Logger LOG = LoggerFactory.getLogger(TrapReceiver.class);</span>
+    private static final String TCP_TRANSPORT = &quot;tcp&quot;;
+    private static final String UDP_TRANSPORT = &quot;udp&quot;;
+<span class="fc" id="L57">    private static OctetString localEngineID = new OctetString(MPv3.createLocalEngineID());</span>
+    /**
+     * The Config.
+     */
+    protected ITrapReceiverConfiguration config;
+    /**
+     * The Address mapper.
+     */
+    protected ITrapSourceMapper addressMapper;
+    /**
+     * The Listening address.
+     */
+    protected Address listeningAddress;
+    /**
+     * The Trap handler service.
+     */
+    protected ITrapHandlerService trapHandlerService;
+    /**
+     * The Dispatcher thread count.
+     */
+    protected int dispatcherThreadCount;
+    private OctetString authoritativeEngineID;
+
+    @Override
+    public synchronized void setConfiguration(final ITrapReceiverConfiguration config) {
+<span class="fc" id="L82">        this.config = config;</span>
+<span class="fc" id="L83">        this.listeningAddress = getAddress(config.getListeningAddress());</span>
+<span class="fc" id="L84">        this.trapHandlerService = config.getTrapHandlerService();</span>
+<span class="fc" id="L85">        this.addressMapper = config.getAddressMapper();</span>
+<span class="fc" id="L86">        this.dispatcherThreadCount = config.getDispatcherThreadCount();</span>
+<span class="fc" id="L87">    }</span>
+
+    @Override
+    public synchronized void startReceiving() {
+<span class="fc" id="L91">        LOG.debug(&quot;&gt;&gt;&gt; receiveTraps&quot;);</span>
+        try {
+<span class="fc" id="L93">            final ThreadPool threadPool = ThreadPool.create(&quot;DispatcherPool&quot;, config.getDispatcherThreadCount());</span>
+<span class="fc" id="L94">            final MessageDispatcher mtDispatcher = new MultiThreadedMessageDispatcher(threadPool,</span>
+                    new MessageDispatcherImpl());
+
+            // add message processing models
+<span class="fc" id="L98">            mtDispatcher.addMessageProcessingModel(new MPv1());</span>
+<span class="fc" id="L99">            mtDispatcher.addMessageProcessingModel(new MPv2c());</span>
+<span class="fc" id="L100">            mtDispatcher.addMessageProcessingModel(new MPv3(localEngineID.getValue()));</span>
+
+            // add all security protocols
+<span class="fc" id="L103">            SecurityProtocols.getInstance().addDefaultProtocols();</span>
+<span class="fc" id="L104">            SecurityProtocols.getInstance().addPrivacyProtocol(new Priv3DES());</span>
+
+<span class="fc" id="L106">            final Snmp snmp = createSnmp(mtDispatcher);</span>
+<span class="fc" id="L107">            final USM usm = new USM(SecurityProtocols.getInstance(), localEngineID, 0);</span>
+<span class="fc" id="L108">            SecurityModels.getInstance().addSecurityModel(usm);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">            if (authoritativeEngineID != null) {</span>
+<span class="nc" id="L110">                snmp.setLocalEngine(authoritativeEngineID.getValue(), 0, 0);</span>
+            }
+
+<span class="fc" id="L113">            snmp.addNotificationListener(listeningAddress, this);</span>
+
+<span class="fc" id="L115">            snmp.listen();</span>
+<span class="fc" id="L116">            LOG.info(&quot;Listening for notifications on {}&quot;, listeningAddress);</span>
+
+<span class="fc" id="L118">            waitWhileListening();</span>
+<span class="fc" id="L119">        } catch (final IOException e) {</span>
+<span class="fc" id="L120">            LOG.debug(&quot;Failed listening for traps:&quot;, e);</span>
+<span class="fc" id="L121">            LOG.warn(&quot;IOException listening for traps:{}&quot;, e.getMessage());</span>
+<span class="fc" id="L122">        }</span>
+<span class="fc" id="L123">    }</span>
+
+    protected Snmp createSnmp(final MessageDispatcher mtDispatcher) {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (mtDispatcher == null){</span>
+<span class="fc" id="L127">            throw new IllegalArgumentException(&quot;Message Dispatcher cannot be null&quot;);</span>
+        } 
+<span class="fc" id="L129">        final Snmp snmp = new Snmp(mtDispatcher);</span>
+<span class="fc" id="L130">        return snmp;</span>
+        
+    }
+
+    protected synchronized void waitWhileListening() {
+        try {
+            while (true) {
+<span class="nc" id="L137">                this.wait();</span>
+            }
+<span class="nc" id="L139">        } catch (final InterruptedException ex) {</span>
+<span class="nc" id="L140">            Thread.currentThread().interrupt();</span>
+        }
+<span class="nc" id="L142">    }</span>
+
+    /**
+     * Gets address.
+     *
+     * @param transportAddress the transport address
+     * @return the address
+     */
+    protected Address getAddress(final String transportAddress) {
+<span class="fc" id="L151">        String transport = UDP_TRANSPORT;</span>
+<span class="fc" id="L152">        String modifiedAddress = transportAddress;</span>
+<span class="fc" id="L153">        final int colon = modifiedAddress.indexOf(':');</span>
+
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if (colon &gt; 0) {</span>
+<span class="fc" id="L156">            transport = modifiedAddress.substring(0, colon);</span>
+<span class="fc" id="L157">            modifiedAddress = modifiedAddress.substring(colon + 1);</span>
+        }
+        // set default port
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if (modifiedAddress.indexOf(SLASH) &lt; 0) {</span>
+<span class="fc" id="L161">            modifiedAddress += PORT;</span>
+        }
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (transport.equalsIgnoreCase(UDP_TRANSPORT)) {</span>
+<span class="fc" id="L164">            return new UdpAddress(modifiedAddress);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        } else if (transport.equalsIgnoreCase(TCP_TRANSPORT)) {</span>
+<span class="nc" id="L166">            return new TcpAddress(modifiedAddress);</span>
+        }
+
+<span class="fc" id="L169">        throw new IllegalArgumentException(&quot;Unknown transport &quot; + transport);</span>
+    }
+
+    @Override
+    public synchronized void processPdu(final CommandResponderEvent e) {
+<span class="fc" id="L174">        final Date timeNow = new Date();</span>
+<span class="fc" id="L175">        final PDU command = e.getPDU();</span>
+<span class="fc" id="L176">        final String remoteAddress = getRemoteAddress(e);</span>
+<span class="fc" id="L177">        final String resolvedAddress = resolveAddress(remoteAddress);</span>
+<span class="fc" id="L178">        e.setProcessed(true);</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        if (command != null) {</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            switch (command.getType()) {</span>
+                case PDU.TRAP:
+                case PDU.INFORM:
+                case PDU.V1TRAP:
+<span class="fc" id="L184">                    processNotification(remoteAddress, command, timeNow, resolvedAddress);</span>
+<span class="fc" id="L185">                    break;</span>
+                default:
+<span class="fc" id="L187">                    LOG.warn(&quot;Unsupported PDU from:&quot; + remoteAddress + &quot;:&quot; + command.toString());</span>
+            }
+        }
+<span class="fc" id="L190">    }</span>
+
+    private String resolveAddress(final String remoteAddress) {
+<span class="fc" id="L193">        String resolvedAddress = remoteAddress;</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">        if (addressMapper != null){</span>
+<span class="fc" id="L195">            resolvedAddress = addressMapper.mapAddress(remoteAddress);</span>
+        }
+<span class="fc" id="L197">        return resolvedAddress;</span>
+    }
+
+    private String getRemoteAddress(final CommandResponderEvent e) {
+<span class="fc" id="L201">        return ((IpAddress) e.getPeerAddress()).getInetAddress().getHostAddress();</span>
+    }
+
+    private void processNotification(final String remoteAddress, final PDU command, final Date timeNow, final String resolvedAddress) {
+        // log here in case issues when sending it to service
+<span class="fc" id="L206">        LOG.debug(&quot;Trap received from address = {} containing command = {}&quot;, remoteAddress, command);</span>
+<span class="fc" id="L207">        trapHandlerService.handle(timeNow, resolvedAddress, command);</span>
+<span class="fc" id="L208">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

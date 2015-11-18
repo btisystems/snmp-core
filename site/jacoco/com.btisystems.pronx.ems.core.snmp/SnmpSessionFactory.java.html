@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SnmpSessionFactory.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.snmp</a> &gt; <span class="el_source">SnmpSessionFactory.java</span></div><h1>SnmpSessionFactory.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.core.snmp;
+
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.snmp4j.Session;
+import org.snmp4j.Target;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.TcpAddress;
+import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.transport.DefaultUdpTransportMapping;
+
+import com.btisystems.pronx.ems.core.snmp.ISnmpConfigurationFactory.AccessType;
+
+
+public class SnmpSessionFactory implements ISnmpSessionFactory {
+
+<span class="fc" id="L32">    private static final Logger LOG = LoggerFactory.getLogger(SnmpSessionFactory.class);</span>
+
+    private ISnmpConfigurationFactory configurationFactory;
+    private Session defaultSnmpInterface;
+
+<span class="nc" id="L37">    public SnmpSessionFactory() {</span>
+<span class="nc" id="L38">    }</span>
+    
+<span class="fc" id="L40">    public SnmpSessionFactory(final ISnmpConfigurationFactory defaultConfigurationFactory) {</span>
+<span class="fc" id="L41">        this.configurationFactory = defaultConfigurationFactory;</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public ISnmpSession createSession(final ISnmpConfiguration configuration, final String ipAddress) throws IOException {
+<span class="fc" id="L46">        LOG.debug(&quot;&gt;&gt;&gt; createSession address:{}&quot;, ipAddress);</span>
+<span class="fc" id="L47">        final Address address = getAddress(ipAddress, configuration.getPort());</span>
+<span class="fc" id="L48">        final Session snmpInterface = configuration.createSnmpSession(new DefaultUdpTransportMapping());</span>
+<span class="fc" id="L49">        final Target target = configuration.createTarget(address);</span>
+<span class="fc" id="L50">        return new SnmpSession(configuration, snmpInterface, target, address);</span>
+    }
+
+    @Override
+    public ISnmpSession createSession(final String ipAddress, final String communityString) throws IOException {
+<span class="fc" id="L55">        LOG.debug(&quot;&gt;&gt;&gt; createSession address:{}&quot;, ipAddress);</span>
+<span class="fc" id="L56">        final ISnmpConfiguration configuration = configurationFactory.getConfiguration(AccessType.READ_WRITE);</span>
+<span class="pc bpc" id="L57" title="3 of 4 branches missed.">        if (configuration instanceof V2cSnmpConfiguration &amp;&amp; communityString != null) {</span>
+<span class="nc" id="L58">            ((V2cSnmpConfiguration) configuration).setCommunity(communityString);</span>
+        }
+<span class="fc" id="L60">        return createSession(configuration, ipAddress);</span>
+    }
+
+    @Override
+    public ISnmpSession createSession(final String ipAddress,
+                                                  final String communityString,
+                                                  final String factoryName,
+                                                  final AccessType accessType) throws IOException {
+
+<span class="fc" id="L69">        throw new UnsupportedOperationException(&quot;Alternative configuration factory not supported.&quot;);</span>
+    }
+
+    private Address getAddress(final String transportAddress, final int port) {
+<span class="fc" id="L73">        String address = transportAddress;</span>
+<span class="fc" id="L74">        String transport = &quot;udp&quot;;</span>
+<span class="fc" id="L75">        final int colon = address.indexOf(':');</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (colon &gt; 0) {</span>
+<span class="fc" id="L77">            transport = address.substring(0, colon);</span>
+<span class="fc" id="L78">            address = address.substring(colon + 1);</span>
+        }
+        // set default port
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (address.indexOf('/') &lt; 0) {</span>
+<span class="fc" id="L82">            address += &quot;/&quot; + port;</span>
+        }
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (transport.equalsIgnoreCase(&quot;udp&quot;)) {</span>
+<span class="fc" id="L85">            return new UdpAddress(address);</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        } else if (transport.equalsIgnoreCase(&quot;tcp&quot;)) {</span>
+<span class="fc" id="L87">            return new TcpAddress(address);</span>
+        }
+<span class="fc" id="L89">        throw new IllegalArgumentException(&quot;Unknown transport &quot; + transport);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

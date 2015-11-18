@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SnmpSession.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.snmp</a> &gt; <span class="el_source">SnmpSession.java</span></div><h1>SnmpSession.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btisystems.pronx.ems.core.snmp;
+
+import com.btisystems.pronx.ems.core.exception.SystemObjectIdException;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.snmp4j.PDU;
+import org.snmp4j.Session;
+import org.snmp4j.Target;
+import org.snmp4j.event.ResponseEvent;
+import org.snmp4j.mp.SnmpConstants;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.IpAddress;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.Variable;
+import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.util.DefaultPDUFactory;
+import org.snmp4j.util.TreeEvent;
+import org.snmp4j.util.TreeListener;
+import org.snmp4j.util.TreeUtils;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * A {@link ISnmpSession}.
+ */
+public class SnmpSession extends DefaultPDUFactory implements ISnmpSession {
+
+    /**
+     * The constant SPACE.
+     */
+    public static final String SPACE = &quot; &quot;;
+    /**
+     * Main logger for SNMP session.
+     */
+<span class="fc" id="L53">    protected static final Logger LOG = LoggerFactory.getLogger(SnmpSession.class);</span>
+    /**
+     * Fine grained logger for var bind set requests.
+     */
+<span class="fc" id="L57">    protected static final Logger SETTER_LOG = LoggerFactory.getLogger(ISnmpSession.class.getName() + &quot;.set&quot;);</span>
+    /**
+     * Fine grained logger for walk requests.
+     */
+<span class="fc" id="L61">    protected static final Logger WALKER_LOG = LoggerFactory.getLogger(ISnmpSession.class.getName() + &quot;.walk&quot;);</span>
+    private static final String SYSTEM_OBJECT_ID_OID = &quot;1.3.6.1.2.1.1.2.0&quot;;
+    private static final String NO_SUCH_OBJECT = &quot;noSuchObject&quot;;
+    private static final String NULL = &quot;Null&quot;;
+    private final ISnmpConfiguration snmpConfiguration;
+    private final Target target;
+    private final Address address;
+    private final Session snmpInterface;
+
+    private final ISnmpTableWalker tableWalker;
+
+    /**
+     * Class constructor.
+     *
+     * @param snmpConfiguration the configuration to be used for the session
+     * @param snmp              session to be wrapped
+     * @param target            snmp4j's remote SNMP entity reference
+     * @param address           address of the device associated with the session
+     */
+    public SnmpSession(final ISnmpConfiguration snmpConfiguration,
+                       final Session snmp,
+                       final Target target,
+<span class="fc" id="L83">                       final Address address) {</span>
+<span class="fc" id="L84">        this.snmpConfiguration = snmpConfiguration;</span>
+<span class="fc" id="L85">        this.snmpInterface = snmp;</span>
+<span class="fc" id="L86">        this.address = address;</span>
+<span class="fc" id="L87">        this.target = target;</span>
+
+<span class="fc" id="L89">        tableWalker = new SnmpTableWalker(snmpConfiguration, snmp, target, address);</span>
+<span class="fc" id="L90">    }</span>
+
+    @Override
+    public String identifyDevice() {
+<span class="fc" id="L94">        LOG.debug(&quot;&gt;&gt;&gt; identifyDevice address:{}&quot;, getHostAddress());</span>
+        try {
+<span class="fc" id="L96">            return getVariableValue(SYSTEM_OBJECT_ID_OID).toString();</span>
+<span class="fc" id="L97">        } catch (final IOException e) {</span>
+<span class="fc" id="L98">            throw new SystemObjectIdException(address, e);</span>
+        }
+    }
+
+
+    @Override
+    public String getVariable(final String oid) {
+<span class="fc" id="L105">        LOG.debug(&quot;&gt;&gt;&gt; getVariable oid:{}, address:{}&quot;, oid, getHostAddress());</span>
+        try {
+<span class="fc" id="L107">            return getVariableValue(oid).toString();</span>
+<span class="fc" id="L108">        } catch (final IOException e) {</span>
+<span class="fc" id="L109">            LOG.debug(&quot;Ignoring IOException {}&quot;, e.getMessage());</span>
+<span class="fc" id="L110">            LOG.trace(&quot;IOException {}&quot;, e);</span>
+
+        }
+<span class="fc" id="L113">        return null;</span>
+    }
+
+    @Override
+    public Integer getVariableAsInt(final String oid) {
+<span class="fc" id="L118">        LOG.debug(&quot;&gt;&gt;&gt; getVariableAsInt oid:{}, address:{}&quot;, oid, getHostAddress());</span>
+        try {
+<span class="fc" id="L120">            return getVariableValue(oid).toInt();</span>
+<span class="fc" id="L121">        } catch (final IOException e) {</span>
+<span class="fc" id="L122">            LOG.debug(&quot;Ignoring IOException {}&quot;, e.getMessage());</span>
+<span class="fc" id="L123">            LOG.trace(&quot;IOException {}&quot;, e);</span>
+        }
+<span class="fc" id="L125">        return null;</span>
+    }
+
+
+    @Override
+    public WalkResponse walkDevice(final IVariableBindingHandler networkDevice,
+                                   final List&lt;OID&gt; oids) {
+<span class="fc" id="L132">        WALKER_LOG.debug(&quot;&gt;&gt;&gt; walkDevice address:{}&quot;, getHostAddress());</span>
+<span class="fc" id="L133">        WALKER_LOG.trace(&quot;&gt;&gt;&gt; walkDevice address:{} for oids={}&quot;, getHostAddress(), oids);</span>
+
+<span class="fc" id="L135">        final TreeUtils treeUtils = new TreeUtils(snmpInterface, this);</span>
+<span class="fc" id="L136">        final TreeResponseListener treeListener = new TreeResponseListener(networkDevice, oids, treeUtils);</span>
+
+
+<span class="fc" id="L139">        synchronized (treeListener) {</span>
+
+<span class="fc" id="L141">            treeUtils.setIgnoreLexicographicOrder(true);</span>
+<span class="fc" id="L142">            treeUtils.setMaxRepetitions(snmpConfiguration.getMaxRepetitions());</span>
+<span class="fc" id="L143">            WALKER_LOG.debug(&quot;NE:{},  First subtree:{}&quot;, getHostAddress(), oids.get(0));</span>
+<span class="fc" id="L144">            treeUtils.getSubtree(target, oids.get(0), this, treeListener);</span>
+            try {
+                // Allow for possibility that listener has already terminated in this thread,
+                // which it might have done if the initial Snmp.send threw an IOException
+<span class="fc bfc" id="L148" title="All 2 branches covered.">                if (!treeListener.isFinished()) {</span>
+<span class="fc" id="L149">                    final long startTime = System.currentTimeMillis();</span>
+<span class="fc bfc" id="L150" title="All 4 branches covered.">                    while ((!treeListener.isFinished()) &amp;&amp; ((System.currentTimeMillis() - startTime) &lt; snmpConfiguration.getWalkTimeout())) {</span>
+<span class="fc" id="L151">                        treeListener.wait(snmpConfiguration.getWalkTimeout());</span>
+                    }
+                    //Timed out rather than finished.
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                    if (!treeListener.isFinished()) {</span>
+<span class="fc" id="L155">                        treeListener.stopWalk();</span>
+<span class="fc" id="L156">                        LOG.error(&quot;Walk for device {} timed out.&quot;, getHostAddress());</span>
+<span class="fc" id="L157">                        return new WalkResponse(new WalkException(&quot;Walk timed out&quot;));</span>
+                    }
+                }
+<span class="fc" id="L160">            } catch (final InterruptedException ex) {</span>
+<span class="fc" id="L161">                Thread.interrupted();</span>
+<span class="fc" id="L162">                WALKER_LOG.warn(&quot;listener wait interrupted:{}&quot;, ex);</span>
+<span class="fc" id="L163">            }</span>
+<span class="fc" id="L164">            return treeListener.getResponse();</span>
+<span class="nc" id="L165">        }</span>
+    }
+
+    @Override
+    public WalkResponse getTableRows(final IVariableBindingHandler networkDevice,
+                                     final Map&lt;DeviceEntityDescription, List&lt;OID&gt;&gt; tableIndexes) throws IOException {
+
+<span class="fc" id="L172">        return getTableWalker().getTableRows(networkDevice, tableIndexes);</span>
+    }
+
+    @Override
+    public InetAddress getAddress() {
+<span class="fc" id="L177">        return ((IpAddress) address).getInetAddress();</span>
+    }
+
+    @Override
+    public void close() throws IOException {
+        // Actually nothing to do.
+        // snmpInterface is a singleton and should not be closed.
+<span class="fc" id="L184">    }</span>
+
+    @Override
+    public void setVariables(final VariableBinding[] bindings) {
+<span class="fc" id="L188">        final String hostIp = getHostAddress();</span>
+<span class="fc" id="L189">        SETTER_LOG.debug(&quot;&gt;&gt;&gt; setVariable bindings:{}, address {}&quot;, bindings, hostIp);</span>
+
+
+<span class="fc" id="L192">        final PDU request = snmpConfiguration.createPDU(PDU.SET);</span>
+<span class="fc" id="L193">        request.addAll(bindings);</span>
+
+<span class="fc" id="L195">        final ResponseEvent responseEvent = send(request, hostIp);</span>
+<span class="fc" id="L196">        processResponseEvent(responseEvent, hostIp);</span>
+<span class="fc" id="L197">    }</span>
+
+    private ResponseEvent send(final PDU request, final String hostIp) throws SnmpIoException {
+        ResponseEvent responseEvent;
+        try {
+<span class="fc" id="L202">            responseEvent = snmpInterface.send(request, target);</span>
+<span class="fc" id="L203">        } catch (final IOException e) {</span>
+<span class="fc" id="L204">            LOG.debug(&quot;Failed to set variables:&quot;, e);</span>
+<span class="fc" id="L205">            SETTER_LOG.warn(&quot;IO Exception sending to host {}, message={}&quot;, hostIp, e.getMessage());</span>
+<span class="fc" id="L206">            throw new SnmpIoException(hostIp, e.getMessage());</span>
+<span class="fc" id="L207">        }</span>
+<span class="fc" id="L208">        return responseEvent;</span>
+    }
+
+    private void processResponseEvent(final ResponseEvent responseEvent, final String hostIp) throws SnmpIoException {
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (responseEvent.getError() != null) {</span>
+<span class="fc" id="L213">            SETTER_LOG.warn(&quot;Response when sending to host {} has error: {}&quot;, hostIp, responseEvent.getError().getMessage());</span>
+<span class="fc" id="L214">            throw new SnmpIoException(hostIp, responseEvent.getError().getMessage());</span>
+        }
+
+<span class="fc" id="L217">        final PDU response = responseEvent.getResponse();</span>
+
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        if (response != null) {</span>
+<span class="fc" id="L220">            final int errorStatusId = response.getErrorStatus();</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">            if (errorStatusId != SnmpConstants.SNMP_ERROR_SUCCESS) {</span>
+<span class="fc" id="L222">                SETTER_LOG.warn(&quot;Response PDU when sending to host {} has error: {}&quot;, hostIp, constructErrorMessage(response));</span>
+
+<span class="fc" id="L224">                checkErrorCodeAndDescription();</span>
+
+<span class="fc bfc" id="L226" title="All 2 branches covered.">                if (SnmpConstants.SNMP_ERROR_AUTHORIZATION_ERROR == errorStatusId) {</span>
+<span class="fc" id="L227">                    final String authErrorMsg = &quot;Authorization error occurred; Please confirm that the device is running normally and verify the SNMP community strings.&quot;;</span>
+<span class="fc" id="L228">                    throw new SnmpIoException(hostIp, authErrorMsg);</span>
+                }
+
+<span class="fc" id="L231">                throw new SnmpIoException(hostIp, response.getErrorStatusText());</span>
+            }
+<span class="fc" id="L233">            SETTER_LOG.debug(&quot;Success&quot;);</span>
+<span class="fc" id="L234">        } else {</span>
+<span class="fc" id="L235">            SETTER_LOG.debug(&quot;Timed Out&quot;);</span>
+<span class="fc" id="L236">            throw new SnmpIoException(hostIp, &quot;Timed out&quot;);</span>
+        }
+<span class="fc" id="L238">    }</span>
+
+    private static String constructErrorMessage(final PDU response) {
+<span class="fc" id="L241">        final int bindingIndex = response.getErrorIndex() - 1;</span>
+<span class="fc" id="L242">        Object error = &quot;&quot;;</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if (bindingIndex &gt; -1) {</span>
+<span class="fc" id="L244">            error = response.getVariableBindings().get(bindingIndex);</span>
+        }
+<span class="fc" id="L246">        return response.getErrorStatusText() + SPACE + error;</span>
+    }
+
+    @Override
+    public void checkErrorCodeAndDescription() {
+        //Empty implementation, i.e. no error code handling.
+<span class="fc" id="L252">    }</span>
+
+    /**
+     * Gets host address.
+     *
+     * @return the host address
+     */
+    protected String getHostAddress() {
+<span class="fc" id="L260">        return ((IpAddress) address).getInetAddress().getHostAddress();</span>
+    }
+
+    // Get the value of a variable specified by its oid.
+    private Variable getVariableValue(final String oid) throws IOException {
+<span class="fc" id="L265">        LOG.debug(&quot;&gt;&gt;&gt; getVariableValue oid:{}&quot;, oid);</span>
+
+        PDU response;
+        Variable var;
+
+<span class="fc" id="L270">        final PDU request = snmpConfiguration.createPDU(PDU.GET);</span>
+<span class="fc" id="L271">        request.add(new VariableBinding(new OID(oid)));</span>
+
+        ResponseEvent responseEvent;
+<span class="fc" id="L274">        responseEvent = snmpInterface.send(request, target);</span>
+<span class="pc bpc" id="L275" title="1 of 4 branches missed.">        if (responseEvent != null &amp;&amp; responseEvent.getResponse() != null) {</span>
+<span class="fc" id="L276">            response = responseEvent.getResponse();</span>
+<span class="fc" id="L277">            var = response.get(0).getVariable();</span>
+        } else {
+<span class="fc" id="L279">            throw new IOException(&quot;No response from device. &quot;</span>
+                    + &quot;Please confirm that the device is running normally and verify the SNMP community strings.&quot;);
+        }
+<span class="fc" id="L282">        return var;</span>
+    }
+
+    @Override
+    public PDU createPDU(final Target target) {
+<span class="fc" id="L287">        final PDU request = snmpConfiguration.createPDU(PDU.GETBULK);</span>
+<span class="fc" id="L288">        return request;</span>
+    }
+
+    /**
+     * Is invalid boolean.
+     *
+     * @param value the value
+     * @return the boolean
+     */
+    protected boolean isInvalid(final String value) {
+<span class="fc bfc" id="L298" title="All 6 branches covered.">        return value == null || value.equals(NULL) || value.equals(NO_SUCH_OBJECT);</span>
+    }
+
+    protected ISnmpTableWalker getTableWalker() {
+<span class="fc" id="L302">        return tableWalker;</span>
+    }
+
+    private class TreeResponseListener implements TreeListener {
+
+<span class="fc" id="L307">        private final long startTime = System.currentTimeMillis();</span>
+        private final IVariableBindingHandler networkDevice;
+        private final List&lt;OID&gt; oids;
+        private final TreeUtils treeUtils;
+        private boolean finished;
+        private int requests;
+        private int objects;
+        private WalkResponse response;
+        private int oidIndex;
+        private OID lastProcessedOid;
+
+        /**
+         * Instantiates a new Tree response listener.
+         *
+         * @param networkDevice the network device
+         * @param oids          the oids
+         * @param treeUtils     the tree utils
+         */
+        public TreeResponseListener(final IVariableBindingHandler networkDevice,
+                                    final List&lt;OID&gt; oids,
+<span class="fc" id="L327">                                    final TreeUtils treeUtils) {</span>
+<span class="fc" id="L328">            this.networkDevice = networkDevice;</span>
+<span class="fc" id="L329">            this.oids = oids;</span>
+<span class="fc" id="L330">            this.treeUtils = treeUtils;</span>
+<span class="fc" id="L331">            oidIndex = 0;</span>
+<span class="fc" id="L332">            finished = false;</span>
+<span class="fc" id="L333">        }</span>
+
+        /**
+         * Gets response.
+         *
+         * @return the response
+         */
+        public WalkResponse getResponse() {
+<span class="fc bfc" id="L341" title="All 2 branches covered.">            return (response == null) ? new WalkResponse(new WalkException(&quot;Walk interrupted&quot;)) : response;</span>
+        }
+
+        /**
+         * Stop walk.
+         */
+        public void stopWalk() {
+<span class="fc" id="L348">            finished = true;</span>
+<span class="fc" id="L349">        }        @Override</span>
+        public boolean next(final TreeEvent e) {
+<span class="fc" id="L351">            requests++;</span>
+<span class="fc" id="L352">            final VariableBinding[] vbs = e.getVariableBindings();</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">            for (int i = 0; i &lt; vbs.length; i++) {</span>
+<span class="pc bpc" id="L354" title="1 of 2 branches missed.">                if (addVariable(vbs, i)) {</span>
+<span class="fc" id="L355">                    objects++;</span>
+                }
+            }
+
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">            return !finished;</span>
+        }
+
+        private boolean addVariable(final VariableBinding[] vbs, final int i) {
+            try {
+<span class="fc" id="L364">                final VariableBinding binding = vbs[i];</span>
+<span class="fc" id="L365">                final boolean wasAdded = networkDevice.addVariable(binding);</span>
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">                if (wasAdded) {</span>
+<span class="fc" id="L367">                    WALKER_LOG.debug(&quot;Element {} added varbind: {}.&quot;, getHostAddress(), binding);</span>
+<span class="fc" id="L368">                    lastProcessedOid = binding.getOid();</span>
+                } else {
+<span class="nc" id="L370">                    LOG.debug(&quot;Element {} unknown varbind: {}&quot;, getHostAddress(), binding);</span>
+<span class="nc" id="L371">                    return false;</span>
+                }
+<span class="fc" id="L373">            } catch (final RuntimeException e) {</span>
+<span class="fc" id="L374">                WALKER_LOG.warn(&quot;Failed adding varbind &quot; + vbs[i] + &quot; for element &quot; + getHostAddress() + &quot;.&quot;, e);</span>
+<span class="fc" id="L375">            }</span>
+<span class="fc" id="L376">            return true;</span>
+        }
+
+        @Override
+        public void finished(final TreeEvent e) {
+<span class="fc bfc" id="L381" title="All 4 branches covered.">            if ((e.getVariableBindings() != null) &amp;&amp; (e.getVariableBindings().length &gt; 0)) {</span>
+<span class="fc" id="L382">                WALKER_LOG.debug(&quot;Element {} finished subtree count {}.&quot;, getHostAddress(), e.getVariableBindings().length);</span>
+<span class="fc" id="L383">                next(e);</span>
+            }
+
+<span class="pc bpc" id="L386" title="2 of 4 branches missed.">            if (!finished &amp;&amp; advanceOidIndex()) {</span>
+<span class="nc" id="L387">                return;</span>
+            }
+
+<span class="fc" id="L390">            final long walkTime = System.currentTimeMillis() - startTime;</span>
+<span class="fc" id="L391">            WALKER_LOG.debug(&quot;Element {} walked, requests: {}, objects: {} time: {}.&quot;, getHostAddress(), requests, objects, walkTime);</span>
+
+<span class="fc bfc" id="L393" title="All 2 branches covered.">            if (e.isError()) {</span>
+<span class="fc" id="L394">                LOG.error(&quot;Exception while walking &quot; + getHostAddress() + &quot;.&quot;, e.getException());</span>
+<span class="fc" id="L395">                response = new WalkResponse(new WalkException(e.getErrorMessage()));</span>
+            } else {
+<span class="fc" id="L397">                response = new WalkResponse(true);</span>
+<span class="fc" id="L398">                response.setObjectCount(objects);</span>
+<span class="fc" id="L399">                response.setRequestCount(requests);</span>
+<span class="fc" id="L400">                response.setWalkTime(walkTime);</span>
+            }
+
+<span class="fc" id="L403">            finished = true;</span>
+
+<span class="fc" id="L405">            synchronized (this) {</span>
+<span class="fc" id="L406">                this.notify();</span>
+<span class="pc" id="L407">            }</span>
+<span class="fc" id="L408">        }</span>
+
+        @Override
+        public boolean isFinished() {
+<span class="fc" id="L412">            WALKER_LOG.debug(&quot;Element {} finished: {}&quot;, getHostAddress(), finished);</span>
+<span class="fc" id="L413">            return finished;</span>
+        }
+
+        private boolean advanceOidIndex() {
+<span class="pc bpc" id="L417" title="5 of 6 branches missed.">            while (++oidIndex &lt; oids.size()</span>
+                    &amp;&amp; (lastProcessedOid != null &amp;&amp; lastProcessedOid.compareTo(oids.get(oidIndex)) &gt; 0)) {
+                // Empty block
+            }
+
+<span class="pc bpc" id="L422" title="1 of 2 branches missed.">            if (oidIndex &lt; oids.size()) {</span>
+<span class="nc" id="L423">                WALKER_LOG.debug(&quot;Element {} next subtree: {}&quot;, getHostAddress(), oids.get(oidIndex));</span>
+<span class="nc" id="L424">                treeUtils.getSubtree(target, oids.get(oidIndex), this, this);</span>
+<span class="nc" id="L425">                return true;</span>
+            }
+
+<span class="fc" id="L428">            return false;</span>
+        }
+
+
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

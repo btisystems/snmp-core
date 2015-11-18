@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>DeviceEntityDescription.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.model</a> &gt; <span class="el_source">DeviceEntityDescription.java</span></div><h1>DeviceEntityDescription.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btisystems.pronx.ems.core.model;
+
+import org.snmp4j.smi.OID;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+
+/**
+ * Metadata for device entities.
+ */
+public class DeviceEntityDescription implements Serializable {
+
+    // The OID associated with the managed object.
+    private final OID oid;
+
+    // The variables in the managed object.
+<span class="fc" id="L33">    private final Map&lt;String, FieldDescription&gt; fieldsByName = new TreeMap&lt;String, FieldDescription&gt;();</span>
+<span class="fc" id="L34">    private final Map&lt;Integer, FieldDescription&gt; fieldsById = new TreeMap&lt;Integer, FieldDescription&gt;();</span>
+
+    /**
+     * Instantiates a new Device entity description.
+     *
+     * @param oid the oid
+     */
+<span class="fc" id="L41">    public DeviceEntityDescription(final OID oid) {</span>
+<span class="fc" id="L42">        this.oid = oid;</span>
+<span class="fc" id="L43">    }</span>
+
+    ;
+
+    /**
+     * Add field.
+     *
+     * @param description the description
+     */
+    public void addField(final FieldDescription description) {
+<span class="fc" id="L53">        fieldsByName.put(description.getName(), description);</span>
+<span class="fc" id="L54">        fieldsById.put(description.getId(), description);</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Gets oid.
+     *
+     * @return the oid
+     */
+    public OID getOid() {
+<span class="fc" id="L63">        return oid;</span>
+    }
+
+    /**
+     * Gets field by name.
+     *
+     * @param name the name
+     * @return the field by name
+     */
+    public FieldDescription getFieldByName(final String name) {
+<span class="fc" id="L73">        return fieldsByName.get(name);</span>
+    }
+
+    /**
+     * Gets field by id.
+     *
+     * @param id the id
+     * @return the field by id
+     */
+    public FieldDescription getFieldById(final int id) {
+<span class="nc" id="L83">        return fieldsById.get(id);</span>
+    }
+
+    /**
+     * Gets fields.
+     *
+     * @return the fields
+     */
+    public Collection&lt;FieldDescription&gt; getFields() {
+<span class="fc" id="L92">        return fieldsByName.values();</span>
+    }
+
+    /**
+     * The enum Field type.
+     */
+<span class="pc" id="L98">    public enum FieldType {</span>
+        /**
+         * Integer field type.
+         */
+<span class="fc" id="L102">        INTEGER, /**</span>
+         * String field type.
+         */
+<span class="fc" id="L105">        STRING, /**</span>
+         * Unsigned 32 field type.
+         */
+<span class="fc" id="L108">        UNSIGNED32, /**</span>
+         * Unsigned 64 field type.
+         */
+<span class="fc" id="L111">        UNSIGNED64, /**</span>
+         * Ip address field type.
+         */
+<span class="fc" id="L114">        IP_ADDRESS, /**</span>
+         * Date and time field type.
+         */
+<span class="fc" id="L117">        DATE_AND_TIME, /**</span>
+         * Bits field type.
+         */
+<span class="fc" id="L120">        BITS, /**</span>
+         * Table field type.
+         */
+<span class="fc" id="L123">        TABLE, /**</span>
+         * Entity field type.
+         */
+<span class="fc" id="L126">        ENTITY, /**</span>
+         * Fixed x 10 field type.
+         */
+<span class="fc" id="L129">        FIXED_X10, /**</span>
+         * Fixed x 100 field type.
+         */
+<span class="fc" id="L132">        FIXED_X100, /**</span>
+         * Fixed x 1000 field type.
+         */
+<span class="fc" id="L135">        FIXED_X1000, /**</span>
+         * Oid field type.
+         */
+<span class="fc" id="L138">        OID</span>
+    }
+
+    /**
+     * The type Field description.
+     */
+    public static class FieldDescription implements Serializable {
+        // The OID subidentifier value for the field.
+        // If the managed object's OID is 1.2.3, the field with the OID 1.2.3.4 will have id 4.
+        private final int id;
+        private final String name;
+        private final FieldType type;
+        private final int maximumLength; // Only for string types, otherwise -1.
+
+        /**
+         * Instantiates a new Field description.
+         *
+         * @param id            the id
+         * @param name          the name
+         * @param type          the type
+         * @param maximumLength the maximum length
+         */
+        public FieldDescription(final int id, final String name, final FieldType type, final int maximumLength) {
+<span class="fc" id="L161">            super();</span>
+<span class="fc" id="L162">            this.id = id;</span>
+<span class="fc" id="L163">            this.name = name;</span>
+<span class="fc" id="L164">            this.type = type;</span>
+<span class="fc" id="L165">            this.maximumLength = maximumLength;</span>
+<span class="fc" id="L166">        }</span>
+
+        /**
+         * Gets id.
+         *
+         * @return the id
+         */
+        public int getId() {
+<span class="fc" id="L174">            return id;</span>
+        }
+
+        /**
+         * Gets name.
+         *
+         * @return the name
+         */
+        public String getName() {
+<span class="fc" id="L183">            return name;</span>
+        }
+
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
+        public FieldType getType() {
+<span class="fc" id="L192">            return type;</span>
+        }
+
+        /**
+         * Gets maximum length.
+         *
+         * @return the maximum length
+         */
+        public int getMaximumLength() {
+<span class="nc" id="L201">            return maximumLength;</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc" id="L206">            return &quot;FieldDescription{&quot; + &quot;id=&quot; + id + &quot;, name=&quot; + name + &quot;, type=&quot; + type + &quot;, maximumLength=&quot; + maximumLength + '}';</span>
+        }
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FieldList.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.schemas.meta.notification</a> &gt; <span class="el_source">FieldList.java</span></div><h1>FieldList.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.schemas.meta.notification;
+
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * The type Field list.
+ */
+<span class="fc" id="L25">public class FieldList implements Serializable {</span>
+    private static final long serialVersionUID = -263065358323362154L;
+    /**
+     * The Field description.
+     */
+    protected List&lt;FieldDescription&gt; fieldDescription;
+
+    @Override
+    public int hashCode() {
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        return fieldDescription != null ? fieldDescription.hashCode() : 0;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (this == o) {</span>
+<span class="fc" id="L40">            return true;</span>
+        }
+<span class="fc bfc" id="L42" title="All 4 branches covered.">        if (o == null || getClass() != o.getClass()) {</span>
+<span class="fc" id="L43">            return false;</span>
+        }
+
+<span class="fc" id="L46">        FieldList fieldList = (FieldList) o;</span>
+
+<span class="pc bpc" id="L48" title="1 of 6 branches missed.">        return !(fieldDescription != null ? !fieldDescription.equals(fieldList.fieldDescription) : fieldList.fieldDescription != null);</span>
+
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L54">        return &quot;FieldList{&quot; +</span>
+                &quot;fieldDescription=&quot; + fieldDescription +
+                '}';
+    }
+
+    /**
+     * With field description field list.
+     *
+     * @param values the values
+     * @return the field list
+     */
+    public FieldList withFieldDescription(FieldDescription... values) {
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (values != null) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            for (FieldDescription value : values) {</span>
+<span class="fc" id="L68">                getFieldDescription().add(value);</span>
+            }
+        }
+<span class="fc" id="L71">        return this;</span>
+    }
+
+    /**
+     * Gets field description.
+     *
+     * @return the field description
+     */
+    public List&lt;FieldDescription&gt; getFieldDescription() {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (fieldDescription == null) {</span>
+<span class="fc" id="L81">            fieldDescription = new ArrayList&lt;FieldDescription&gt;();</span>
+        }
+<span class="fc" id="L83">        return this.fieldDescription;</span>
+    }
+
+    /**
+     * Sets field description.
+     *
+     * @param fieldDescription the field description
+     */
+    public void setFieldDescription(List&lt;FieldDescription&gt; fieldDescription) {
+<span class="fc" id="L92">        this.fieldDescription = fieldDescription;</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * With field description field list.
+     *
+     * @param values the values
+     * @return the field list
+     */
+    public FieldList withFieldDescription(Collection&lt;FieldDescription&gt; values) {
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (values != null) {</span>
+<span class="fc" id="L103">            getFieldDescription().addAll(values);</span>
+        }
+<span class="fc" id="L105">        return this;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

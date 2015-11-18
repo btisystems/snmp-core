@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>DeviceEntity.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.model</a> &gt; <span class="el_source">DeviceEntity.java</span></div><h1>DeviceEntity.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.core.model;
+
+import com.btisystems.pronx.ems.core.exception.FieldAccessMethodException;
+import com.btisystems.pronx.ems.core.exception.InvalidFieldNameException;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Abstract class to be extended by the root entity for each device type.
+ */
+<span class="fc" id="L35">public abstract class DeviceEntity implements IDeviceEntity, Serializable {</span>
+    /**
+     * The constant EMPTY_STRING.
+     */
+    public static final String EMPTY_STRING = &quot;&quot;;
+    /**
+     * The constant DOT.
+     */
+    public static final String DOT = &quot;.&quot;;
+    /**
+     * The constant S_02X.
+     */
+    public static final String S_02X = &quot;%s%02x&quot;;
+    /**
+     * The constant COLON.
+     */
+    public static final String COLON = &quot;:&quot;;
+<span class="fc" id="L52">    private static final Logger LOG = LoggerFactory.getLogger(DeviceEntity.class);</span>
+<span class="fc" id="L53">    private final Set&lt;PropertyChangeListener&gt; changeListeners = new HashSet&lt;&gt;();</span>
+
+    /**
+     * Gets children.
+     *
+     * @return the children
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    Collection&lt;DeviceEntity&gt; getChildren() {
+<span class="fc" id="L62">        final Collection&lt;DeviceEntity&gt; children = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (get_Description() != null) {</span>
+<span class="fc" id="L64">            addFields(children);</span>
+        }
+<span class="fc" id="L66">        return children;</span>
+    }
+
+    private void addFields(final Collection&lt;DeviceEntity&gt; children) {
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        for (final FieldDescription field : get_Description().getFields()) {</span>
+<span class="fc" id="L71">            addField(field, children);</span>
+<span class="fc" id="L72">        }</span>
+<span class="fc" id="L73">    }</span>
+
+    private void addField(final FieldDescription field, final Collection&lt;DeviceEntity&gt; children) {
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (field.getType() == FieldType.ENTITY) {</span>
+<span class="fc" id="L77">            addEntity(field, children);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        } else if (field.getType() == FieldType.TABLE) {</span>
+<span class="fc" id="L79">            addTable(children);</span>
+        }
+<span class="fc" id="L81">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private void addTable(final Collection&lt;DeviceEntity&gt; children) {
+<span class="fc" id="L85">        final ITableAccess tableAccess = (ITableAccess) this;</span>
+<span class="fc" id="L86">        children.addAll(tableAccess.getEntries().values());</span>
+<span class="fc" id="L87">    }</span>
+
+    private void addEntity(final FieldDescription field, final Collection&lt;DeviceEntity&gt; children) {
+<span class="fc" id="L90">        final Object obj = invokeGetter(field.getName());</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (obj instanceof DeviceEntity) {</span>
+<span class="fc" id="L92">            children.add((DeviceEntity) obj);</span>
+        }
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * Add child.
+     *
+     * @param child the child
+     */
+    protected void addChild(final IDeviceEntity child) {
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        for (final PropertyChangeListener listener : changeListeners) {</span>
+<span class="fc" id="L103">            child.addPropertyChangeListener(listener);</span>
+<span class="fc" id="L104">        }</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * Remove child.
+     *
+     * @param child the child
+     */
+    protected void removeChild(final DeviceEntity child) {
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        for (final PropertyChangeListener listener : changeListeners) {</span>
+<span class="fc" id="L114">            child.removePropertyChangeListener(listener);</span>
+<span class="fc" id="L115">        }</span>
+<span class="fc" id="L116">    }</span>
+
+    /**
+     * Replace child.
+     *
+     * @param oldChild the old child
+     * @param newChild the new child
+     */
+    protected void replaceChild(final DeviceEntity oldChild,
+                                final DeviceEntity newChild) {
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if (oldChild != null) {</span>
+<span class="fc" id="L127">            removeChild(oldChild);</span>
+        }
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if (newChild != null) {</span>
+<span class="fc" id="L130">            addChild(newChild);</span>
+        }
+<span class="fc" id="L132">    }</span>
+
+    /**
+     * Notify change.
+     *
+     * @param fieldId  the field id
+     * @param oldValue the old value
+     * @param newValue the new value
+     */
+    protected void notifyChange(final int fieldId, final Object oldValue, final Object newValue) {
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        for (final PropertyChangeListener listener : changeListeners) {</span>
+<span class="fc" id="L143">            listener.propertyChange(new PropertyChangeEvent(this, EMPTY_STRING + Integer.toString(fieldId), oldValue, newValue));</span>
+<span class="fc" id="L144">        }</span>
+<span class="fc" id="L145">    }</span>
+
+    /**
+     * Deliver an object identifier string from part of an integer array.
+     *
+     * @param intArray the source array
+     * @param offset   the offset of the first integer of the identifier
+     * @param length   the number of sub-identifiers in the identifier
+     * @return a string of the form &quot;n1.n2....nn&quot;, where n1 is the                  
+     * integer at intArray[offset], n2 is the is the integer at                  
+     * intArray[offset + 1] and nn is the integer at                  
+     * intArray[offset + n - 1]
+     */
+    protected String _getObjectIdentifier(final int[] intArray,
+                                          final int offset,
+                                          final int length) {
+<span class="fc" id="L161">        final StringBuilder buffer = new StringBuilder();</span>
+
+<span class="fc" id="L163">        String sepChar = EMPTY_STRING;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        for (int x = 0; x &lt; length; x++) {</span>
+<span class="fc" id="L165">            buffer.append(sepChar).append(intArray[offset + x]);</span>
+<span class="fc" id="L166">            sepChar = DOT;</span>
+        }
+<span class="fc" id="L168">        return buffer.toString();</span>
+    }
+
+    /**
+     * Deliver a Mac address string from part of an integer array.
+     *
+     * @param intArray the source array
+     * @param offset   the offset of the first integer of the identifier
+     * @param length   the number of sub-identifiers in the identifier
+     * @return a string of the form &quot;n1.n2....nn&quot;, where n1 is the                  integer at intArray[offset], n2 is the is the integer at                  intArray[offset + 1] and nn is the integer at                  intArray[offset + n - 1]
+     */
+    protected String _getMacAddress(final int[] intArray,
+                                    final int offset,
+                                    final int length) {
+<span class="fc" id="L182">        final StringBuilder buffer = new StringBuilder();</span>
+
+<span class="fc" id="L184">        String sepChar = EMPTY_STRING;</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        for (int x = 0; x &lt; length; x++) {</span>
+<span class="fc" id="L186">            buffer.append(String.format(S_02X, sepChar, intArray[offset + x]));</span>
+<span class="fc" id="L187">            sepChar = COLON;</span>
+        }
+<span class="fc" id="L189">        return buffer.toString();</span>
+    }
+
+    @Override
+    public Object clone() { // NO-CHECKSTYLE
+<span class="fc" id="L194">        LOG.warn(&quot;clone not implemented for {}&quot;, this);</span>
+<span class="fc" id="L195">        return null;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L200">        return &quot;DeviceEntity{&quot; + &quot;changeListeners=&quot; + changeListeners + &quot;, get_Description()=&quot; + get_Description() + '}';</span>
+    }
+
+    @Override
+    public abstract DeviceEntityDescription get_Description();
+
+    @Override
+    public String getString(final String fieldName) {
+<span class="fc" id="L208">        return (String) invokeGetter(fieldName);</span>
+    }
+
+    @Override
+    public int getInt(final String fieldName) {
+<span class="fc" id="L213">        return (Integer) invokeGetter(fieldName);</span>
+    }
+
+    @Override
+    public long getLong(final String fieldName) {
+<span class="fc" id="L218">        return (Long) invokeGetter(fieldName);</span>
+    }
+
+    @Override
+    public void set(final String fieldName, final String value) {
+<span class="fc" id="L223">        invokeSetter(fieldName, value, String.class);</span>
+<span class="fc" id="L224">    }</span>
+
+    @Override
+    public void set(final String fieldName, final int value) {
+<span class="fc" id="L228">        invokeSetter(fieldName, value, int.class);</span>
+<span class="fc" id="L229">    }</span>
+
+    @Override
+    public void set(final String fieldName, final long value) {
+<span class="fc" id="L233">        invokeSetter(fieldName, value, long.class);</span>
+<span class="fc" id="L234">    }</span>
+
+    @Override
+    public void addPropertyChangeListener(final PropertyChangeListener listener) {
+<span class="fc" id="L238">        changeListeners.add(listener);</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        for (final DeviceEntity child : getChildren()) {</span>
+<span class="fc" id="L240">            child.addPropertyChangeListener(listener);</span>
+<span class="fc" id="L241">        }</span>
+<span class="fc" id="L242">    }</span>
+
+    @Override
+    public void removePropertyChangeListener(final PropertyChangeListener listener) {
+<span class="fc" id="L246">        changeListeners.remove(listener);</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">        for (final DeviceEntity child : getChildren()) {</span>
+<span class="fc" id="L248">            child.removePropertyChangeListener(listener);</span>
+<span class="fc" id="L249">        }</span>
+<span class="fc" id="L250">    }</span>
+
+    @Override
+    public void clearPropertyChangeListeners() {
+<span class="fc" id="L254">        changeListeners.clear();</span>
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">        for (final DeviceEntity child : getChildren()) {</span>
+<span class="nc" id="L256">            child.clearPropertyChangeListeners();</span>
+<span class="nc" id="L257">        }</span>
+<span class="fc" id="L258">    }</span>
+
+    @Override
+    public void set_ParentEntity(final AbstractRootEntity parent) {
+
+<span class="fc" id="L263">    }</span>
+
+    @Override
+    public boolean isSupported(final String fieldName) {
+<span class="fc" id="L267">        final DeviceEntityDescription description = get_Description();</span>
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        return description.getFieldByName(fieldName) != null;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private void invokeSetter(final String fieldName, final Object value, final Class type) {
+        try {
+<span class="fc" id="L274">            final Method method = this.getClass().getMethod(getSetterName(fieldName), type);</span>
+<span class="fc" id="L275">            method.invoke(this, value);</span>
+<span class="fc" id="L276">        } catch (final NoSuchMethodException e) {</span>
+<span class="fc" id="L277">            LOG.warn(&quot;Exception on getMethod&quot;, e);</span>
+<span class="fc" id="L278">            throw new InvalidFieldNameException(this, fieldName);</span>
+<span class="fc" id="L279">        } catch (final Exception e) {</span>
+<span class="fc" id="L280">            LOG.warn(&quot;Exception on set&quot;, e);</span>
+<span class="fc" id="L281">            throw new FieldAccessMethodException(this, fieldName, e.getMessage());</span>
+<span class="fc" id="L282">        }</span>
+<span class="fc" id="L283">    }</span>
+
+    /**
+     * Gets setter name.
+     *
+     * @param field the field
+     * @return the setter name
+     * @throws java.lang.Exception
+     */
+    protected String getSetterName(final String field) throws Exception {
+<span class="fc" id="L293">        return &quot;set&quot; + capitalizeFirstCharacter(field);</span>
+    }
+
+    private Object invokeGetter(final String fieldName) {
+        try {
+<span class="fc" id="L298">            final Method method = this.getClass().getMethod(getGetterName(fieldName));</span>
+<span class="fc" id="L299">            return method.invoke(this, (Object[]) null);</span>
+<span class="fc" id="L300">        } catch (final NoSuchMethodException e) {</span>
+<span class="fc" id="L301">            LOG.warn(&quot;Exception on getMethod&quot;, e);</span>
+<span class="fc" id="L302">            throw new InvalidFieldNameException(this, fieldName);</span>
+<span class="nc" id="L303">        } catch (final Exception e) {</span>
+<span class="nc" id="L304">            LOG.warn(&quot;Exception on get&quot;, e);</span>
+<span class="nc" id="L305">            throw new FieldAccessMethodException(this, fieldName, e.getMessage());</span>
+        }
+    }
+
+    /**
+     * Gets getter name.
+     *
+     * @param field the field
+     * @return the getter name
+     */
+// Get name for get accessor method.
+    protected String getGetterName(final String field) {
+<span class="fc" id="L317">        return &quot;get&quot; + capitalizeFirstCharacter(field);</span>
+    }
+
+    // Capitalise first character of the specified name.
+    private String capitalizeFirstCharacter(final String name) {
+<span class="fc" id="L322">        final StringBuilder sb = new StringBuilder(name);</span>
+<span class="fc" id="L323">        final char firstChar = sb.charAt(0);</span>
+<span class="fc" id="L324">        sb.setCharAt(0, Character.toUpperCase(firstChar));</span>
+<span class="fc" id="L325">        return sb.toString();</span>
+    }
+
+    /**
+     * Get change listeners set.
+     *
+     * @return the set
+     */
+    Set&lt;PropertyChangeListener&gt; _getChangeListeners() {
+<span class="fc" id="L334">        return changeListeners;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

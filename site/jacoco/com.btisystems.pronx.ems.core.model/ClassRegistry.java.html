@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ClassRegistry.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.model</a> &gt; <span class="el_source">ClassRegistry.java</span></div><h1>ClassRegistry.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.core.model;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.snmp4j.smi.OID;
+
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import com.btisystems.pronx.ems.core.snmp.OIDComparator;
+
+/**
+ * Manages the creation and population of entities for a discovered device.
+ */
+public class ClassRegistry implements IClassRegistry {
+
+<span class="fc" id="L36">    private static final Logger LOG = LoggerFactory.getLogger(ClassRegistry.class);</span>
+    private static final long serialVersionUID = 1L;
+    private final TreeMap&lt;OID, Class&lt;? extends DeviceEntity&gt;&gt; oidToClassMap;
+    private final HashMap&lt;String, Class&lt;? extends DeviceEntity&gt;&gt; nameToClassMap;
+    private final Class&lt;? extends AbstractRootEntity&gt; rootEntityClass;
+
+<span class="fc" id="L42">    private List&lt;OID&gt; excludedDiscoveryOids = new ArrayList&lt;&gt;();</span>
+    private final Map&lt;Class&lt;? extends DeviceEntity&gt;, OID&gt; classToOidMap;
+
+    /**
+     * Class constructor
+     *
+     * @param oidRegistry   the registry used to map OIDs to entity classes
+     * @param rootEntityClass     the root entity class
+     */
+    public ClassRegistry(final TreeMap&lt;OID, Class&lt;? extends DeviceEntity&gt;&gt; oidRegistry,
+<span class="fc" id="L52">            final Class&lt;? extends AbstractRootEntity&gt; rootEntityClass) {</span>
+<span class="fc" id="L53">        LOG.debug(&quot;&gt;&gt;&gt; ClassRegistry&quot;);</span>
+<span class="fc" id="L54">        this.oidToClassMap = oidRegistry;</span>
+<span class="fc" id="L55">        this.rootEntityClass = rootEntityClass;</span>
+<span class="fc" id="L56">        this.classToOidMap = createClassToOidMap(oidRegistry);</span>
+<span class="fc" id="L57">        this.nameToClassMap = createNameToClassMap(oidRegistry);</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class&lt;? extends AbstractRootEntity&gt; getRootEntityClass() {
+<span class="fc" id="L65">        return rootEntityClass;</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class&lt;? extends DeviceEntity&gt; getClass(final OID oid) {
+<span class="fc" id="L73">        return oidToClassMap.get(oid);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class&lt;? extends DeviceEntity&gt; getClass(final String name) {
+<span class="fc" id="L81">        return nameToClassMap.get(name);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List&lt;OID&gt; getOids() {
+<span class="nc" id="L89">        return new ArrayList&lt;&gt;(oidToClassMap.keySet());</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List&lt;OID&gt; getDiscoveryOids() {
+<span class="fc" id="L97">        List&lt;OID&gt; oids = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        for (final Map.Entry&lt;OID, Class&lt;? extends DeviceEntity&gt;&gt; entry : oidToClassMap.entrySet()) {</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">            if (!IIndexed.class.isAssignableFrom(entry.getValue())) {</span>
+<span class="fc" id="L100">                oids.add(entry.getKey());</span>
+            }
+<span class="fc" id="L102">        }</span>
+<span class="fc" id="L103">        oids = processExcludedOIDs(oids);</span>
+<span class="fc" id="L104">        LOG.trace(&quot;Returning discovery oids: {}&quot;, oids);</span>
+<span class="fc" id="L105">        return oids;</span>
+    }
+
+    @Override
+    public Map&lt;Class&lt;? extends DeviceEntity&gt;, OID&gt; getClassToOidMap() {
+<span class="nc" id="L110">        return classToOidMap;</span>
+    }
+
+    /**
+     * Processes the oid list against the excluded oids set on this registry.
+     * For each excluded oid:
+     *  - The oid is removed from the list.
+     *  - The parent oid (ie the branch) is also removed to prevent sub-tree walk of excluded oid.
+     *  - The sub-oids of the parent are added back in.
+     *
+     * This ensures the excluded oid won't be walked on its own, or as part of a sub-tree walk, but also that
+     * sub-oids which aren't explicitely excluded are still walked.
+     *
+     * @param oids
+     * @return the oid list.
+     */
+    private List&lt;OID&gt; processExcludedOIDs(final List&lt;OID&gt; oids) {
+<span class="fc" id="L127">        LOG.debug(&quot;Excluding oids from discovery list: {}&quot;, excludedDiscoveryOids);</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for (final OID excludedOid : excludedDiscoveryOids) {</span>
+<span class="fc" id="L129">            final List&lt;OID&gt; oidsToRemove = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L130">            final List&lt;OID&gt; oidsToAdd = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            for (final OID discoveryOid : oids) {</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">                if (discoveryOid.toString().startsWith(excludedOid.toString())){</span>
+<span class="fc" id="L133">                    oidsToRemove.add(discoveryOid);</span>
+                }
+<span class="fc" id="L135">                final OID excludedBranch = new OID(excludedOid).trim();</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                if (discoveryOid.equals(excludedBranch)){</span>
+<span class="fc" id="L137">                    oidsToRemove.add(discoveryOid);</span>
+<span class="fc" id="L138">                    reAddScalars(excludedBranch, oidsToAdd);</span>
+                }
+<span class="fc" id="L140">            }</span>
+
+<span class="fc bfc" id="L142" title="All 2 branches covered.">            for (final OID oid : oidsToAdd) {</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">                if (!oids.contains(oid)){</span>
+<span class="fc" id="L144">                    oids.add(oid);</span>
+                }
+<span class="fc" id="L146">            }</span>
+<span class="fc" id="L147">            oids.removeAll(oidsToRemove);</span>
+
+<span class="fc" id="L149">        }</span>
+<span class="fc" id="L150">        sortOids(oids);</span>
+<span class="fc" id="L151">        return oids;</span>
+    }
+
+    private void sortOids(final List&lt;OID&gt; oids) {
+<span class="fc" id="L155">        Collections.sort(oids, new Comparator&lt;OID&gt;(){</span>
+<span class="fc" id="L156">            private final OIDComparator alphaNumComparator = new OIDComparator();</span>
+            @Override
+            public int compare(final OID o1, final OID o2) {
+<span class="fc" id="L159">                return alphaNumComparator.compare(o1.toString(), o2.toString());</span>
+            }
+        });
+<span class="fc" id="L162">    }</span>
+
+    private void reAddScalars(final OID excludedBranch, final List&lt;OID&gt; oidsToAdd) {
+<span class="fc" id="L165">        final Class&lt;? extends DeviceEntity&gt; excludedClazz = oidToClassMap.get(excludedBranch);</span>
+        try {
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">            if (excludedClazz != null){</span>
+<span class="fc" id="L168">                final DeviceEntity excludedEntity = excludedClazz.newInstance();</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">                for (final FieldDescription fieldDescription : excludedEntity.get_Description().getFields()) {</span>
+<span class="fc" id="L170">                    oidsToAdd.add(new OID(excludedEntity.get_Description().getOid()).append(fieldDescription.getId()));</span>
+<span class="fc" id="L171">                }</span>
+            }
+<span class="nc" id="L173">        } catch (final Exception ex) {</span>
+<span class="nc" id="L174">            LOG.error(&quot;Error adding scalar attributes back in for excluded branch: {}&quot;, excludedBranch, ex);</span>
+<span class="fc" id="L175">        }</span>
+<span class="fc" id="L176">    }</span>
+
+    @Override
+    public void setExcludedDiscoveryOids(final String oids) {
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (oids != null) {</span>
+            // Expect a comma-separated list of oids.
+<span class="fc" id="L182">            final List&lt;OID&gt; oidList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">            for (final String oid : oids.split(&quot;,&quot;)) {</span>
+<span class="fc" id="L184">                oidList.add(new OID(oid));</span>
+            }
+<span class="fc" id="L186">            excludedDiscoveryOids = oidList;</span>
+        }
+<span class="fc" id="L188">    }</span>
+
+    private HashMap&lt;String, Class&lt;? extends DeviceEntity&gt;&gt; createNameToClassMap(final TreeMap&lt;OID, Class&lt;? extends DeviceEntity&gt;&gt; oidRegistry) {
+<span class="fc" id="L191">        final HashMap&lt;String, Class&lt;? extends DeviceEntity&gt;&gt; newNameToClassMap = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        for (final Class&lt;? extends DeviceEntity&gt; entityClass : oidRegistry.values()) {</span>
+<span class="fc" id="L193">            newNameToClassMap.put(entityClass.getSimpleName(), entityClass);</span>
+<span class="fc" id="L194">        }</span>
+<span class="fc" id="L195">        return newNameToClassMap;</span>
+    }
+    
+    private HashMap&lt;Class&lt;? extends DeviceEntity&gt;, OID&gt; createClassToOidMap(final TreeMap&lt;OID, Class&lt;? extends DeviceEntity&gt;&gt; oidRegistry) {
+<span class="fc" id="L199">        final HashMap&lt;Class&lt;? extends DeviceEntity&gt;, OID&gt; newClassToOidMap = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        for (Map.Entry&lt;OID, Class&lt;? extends DeviceEntity&gt;&gt; entrySet : oidRegistry.entrySet()) {</span>
+<span class="fc" id="L201">            newClassToOidMap.put(entrySet.getValue(), entrySet.getKey());</span>
+<span class="fc" id="L202">        }</span>
+<span class="fc" id="L203">        return newClassToOidMap;</span>
+    }
+
+    @Override
+    public DeviceEntityDescription getEntityDescription(final OID oid) {
+<span class="fc" id="L208">        final Class&lt;? extends DeviceEntity&gt; entityClazz = oidToClassMap.get(oid);</span>
+        // TODO SJ Make autogen generate a static method to avoid instantiation.
+        try {
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if (entityClazz != null) {</span>
+<span class="fc" id="L212">                final DeviceEntity entity = entityClazz.newInstance();</span>
+<span class="fc" id="L213">                return entity.get_Description();</span>
+            }
+<span class="nc" id="L215">        } catch (final Exception ex) {</span>
+<span class="nc" id="L216">            LOG.error(&quot;Error retrieving entity description : {}&quot;, oid, ex);</span>
+<span class="nc" id="L217">        }</span>
+<span class="nc" id="L218">        return null;</span>
+    }
+
+
+	@Override
+    public Class&lt;? extends DeviceEntity&gt; getContainingEntityClass(final String oidValue) {
+
+        // If the parent of the supplied OID represents a mib table or scalars grouping, return the parent class.
+        // Otherwise, just return the child class.
+
+<span class="fc" id="L228">        LOG.debug(&quot;oid={}&quot;, oidValue);</span>
+<span class="fc" id="L229">        final OID baseOid = new OID(oidValue);</span>
+<span class="fc" id="L230">        final Class&lt;? extends DeviceEntity&gt; childClass = getClass(baseOid);</span>
+<span class="fc" id="L231">        LOG.debug(&quot;child class={}&quot;, childClass);</span>
+<span class="fc" id="L232">        baseOid.trim(1);</span>
+<span class="fc" id="L233">        final Class&lt;? extends DeviceEntity&gt; parentClass = getClass(baseOid);</span>
+<span class="fc" id="L234">        LOG.debug(&quot;parent class={}&quot;, parentClass);</span>
+<span class="pc bpc" id="L235" title="1 of 6 branches missed.">        if (parentClass != null &amp;&amp; (isClassForAMibTable(parentClass) || isClassForAVarBindsSetter(parentClass))) {</span>
+<span class="fc" id="L236">            return parentClass;</span>
+        }
+<span class="fc" id="L238">        return childClass;</span>
+    }
+
+    // Return true only if class represents a Mib Table.
+    private boolean isClassForAMibTable(final Class&lt;? extends DeviceEntity&gt; clazz) {
+<span class="fc" id="L243">        return ITableAccess.class.isAssignableFrom(clazz);</span>
+    }
+
+    private boolean isClassForAVarBindsSetter(final Class&lt;? extends DeviceEntity&gt; clazz) {
+<span class="fc" id="L247">        return IVariableBindingSetter.class.isAssignableFrom(clazz);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

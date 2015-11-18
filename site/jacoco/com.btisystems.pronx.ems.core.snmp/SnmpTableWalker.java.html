@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SnmpTableWalker.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.snmp</a> &gt; <span class="el_source">SnmpTableWalker.java</span></div><h1>SnmpTableWalker.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btisystems.pronx.ems.core.snmp;
+
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription;
+import com.btisystems.pronx.ems.core.model.DeviceEntityDescription.FieldDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.snmp4j.PDU;
+import org.snmp4j.Session;
+import org.snmp4j.Target;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.IpAddress;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.util.DefaultPDUFactory;
+import org.snmp4j.util.TableEvent;
+import org.snmp4j.util.TableListener;
+import org.snmp4j.util.TableUtils;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+
+/**
+ * Understands how to retrieval specific rows from a set of tables.
+ */
+public class SnmpTableWalker extends DefaultPDUFactory implements ISnmpTableWalker {
+
+<span class="fc" id="L48">    private static final Logger log = LoggerFactory.getLogger(SnmpTableWalker.class);</span>
+
+    // More fine grained logging than whole class ...
+<span class="fc" id="L51">    private static final Logger walkerLog = LoggerFactory.getLogger(ISnmpSession.class.getName() + &quot;.walk&quot;);</span>
+
+    private final ISnmpConfiguration snmpConfiguration;
+    private final Target target;
+    private final Address address;
+    private final Session snmpInterface;
+
+    /**
+     * Class constructor.
+     *
+     * @param snmpConfiguration the configuration to be used for the session
+     * @param snmp              session to be wrapped
+     * @param target            snmp4j's remote SNMP entity reference
+     * @param address           address of the device associated with the session
+     */
+    public SnmpTableWalker(final ISnmpConfiguration snmpConfiguration,
+                           final Session snmp,
+                           final Target target,
+<span class="fc" id="L69">                           final Address address) {</span>
+<span class="fc" id="L70">        this.snmpConfiguration = snmpConfiguration;</span>
+<span class="fc" id="L71">        this.snmpInterface = snmp;</span>
+<span class="fc" id="L72">        this.address = address;</span>
+<span class="fc" id="L73">        this.target = target;</span>
+<span class="fc" id="L74">    }</span>
+
+    /**
+     * Gets table rows.
+     *
+     * @param networkDevice the network device
+     * @param tableIndexes  the table indexes
+     * @return the table rows
+     * @throws IOException the io exception
+     */
+    @Override
+    public WalkResponse getTableRows(final IVariableBindingHandler networkDevice,
+                                     final Map&lt;DeviceEntityDescription, List&lt;OID&gt;&gt; tableIndexes) throws IOException {
+
+<span class="fc" id="L88">        final Iterator&lt;TableIndexRetrievalDescriptor&gt; retrievalIterator = getTableRetrievalDescriptors(tableIndexes).iterator();</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (retrievalIterator.hasNext()) {</span>
+
+<span class="fc" id="L91">            final TableUtils tableUtils = newTableUtility();</span>
+<span class="fc" id="L92">            final TableResponseListener listener = new TableResponseListener(networkDevice);</span>
+
+            do {
+<span class="fc" id="L95">                final TableIndexRetrievalDescriptor indexRetrieval = retrievalIterator.next();</span>
+<span class="fc" id="L96">                final WalkResponse response = retrieveRowsWithIndex(tableUtils, listener, indexRetrieval);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">                if (response != null) {</span>
+<span class="fc" id="L98">                    return response;</span>
+                }
+<span class="fc bfc" id="L100" title="All 4 branches covered.">            } while (!listener.hadError() &amp;&amp; retrievalIterator.hasNext());</span>
+
+<span class="fc" id="L102">            return listener.getResponse();</span>
+        }
+<span class="fc" id="L104">        return new WalkResponse(new WalkException(&quot;Nothing to retrieve&quot;));</span>
+    }
+
+    private Collection&lt;TableIndexRetrievalDescriptor&gt; getTableRetrievalDescriptors(final Map&lt;DeviceEntityDescription, List&lt;OID&gt;&gt; tableIndexes) {
+
+<span class="fc" id="L109">        final Map&lt;OID, TableIndexRetrievalDescriptor&gt; descriptorMap = new HashMap&lt;OID, TableIndexRetrievalDescriptor&gt;();</span>
+
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        for (final Entry&lt;DeviceEntityDescription, List&lt;OID&gt;&gt; entry : tableIndexes.entrySet()) {</span>
+<span class="fc" id="L112">            final DeviceEntityDescription deviceEntityDescription = entry.getKey();</span>
+<span class="fc" id="L113">            final Collection&lt;FieldDescription&gt; columnDescriptions = deviceEntityDescription.getFields();</span>
+
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            for (final OID indexOid : entry.getValue()) {</span>
+
+<span class="fc" id="L117">                TableIndexRetrievalDescriptor descriptor = descriptorMap.get(indexOid);</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">                if (descriptor == null) {</span>
+<span class="fc" id="L119">                    descriptor = new TableIndexRetrievalDescriptor(indexOid);</span>
+<span class="fc" id="L120">                    descriptorMap.put(indexOid, descriptor);</span>
+                }
+
+<span class="fc bfc" id="L123" title="All 2 branches covered.">                for (final FieldDescription columnDescription : columnDescriptions) {</span>
+<span class="fc" id="L124">                    final OID columnOid = new OID(deviceEntityDescription.getOid());</span>
+<span class="fc" id="L125">                    columnOid.append(columnDescription.getId());</span>
+<span class="fc" id="L126">                    log.debug(&quot;Add OID for column:{}&quot;, columnOid);</span>
+<span class="fc" id="L127">                    descriptor.columnOids.add(columnOid);</span>
+<span class="fc" id="L128">                }</span>
+<span class="fc" id="L129">            }</span>
+<span class="fc" id="L130">        }</span>
+<span class="fc" id="L131">        return descriptorMap.values();</span>
+    }
+
+    // Create and configure Table walking utility.
+    private TableUtils newTableUtility() {
+<span class="fc" id="L136">        final TableUtils tableUtils = new TableUtils(snmpInterface, this);</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (snmpConfiguration.getMaximumColumnsPerPdu() != 0) {</span>
+<span class="fc" id="L138">            tableUtils.setMaxNumColumnsPerPDU(snmpConfiguration.getMaximumColumnsPerPdu());</span>
+        }
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (snmpConfiguration.getMaximumRowsPerPdu() != 0) {</span>
+<span class="fc" id="L141">            tableUtils.setMaxNumRowsPerPDU(snmpConfiguration.getMaximumRowsPerPdu());</span>
+        }
+<span class="fc" id="L143">        return tableUtils;</span>
+    }
+
+    private WalkResponse retrieveRowsWithIndex(final TableUtils tableUtils,
+                                               final TableResponseListener listener,
+                                               final TableIndexRetrievalDescriptor indexRetrieval) {
+
+<span class="fc" id="L150">        walkerLog.debug(&quot;retrieve columns {} with index {}&quot;, indexRetrieval.getColumnOids(), indexRetrieval.lowIndex);</span>
+
+<span class="fc" id="L152">        listener.reset();</span>
+<span class="fc" id="L153">        synchronized (listener) {</span>
+<span class="fc" id="L154">            tableUtils.getTable(target, indexRetrieval.getColumnOids(), listener, null, indexRetrieval.lowIndex, indexRetrieval.highIndex);</span>
+            try {
+                // Allow for possibility that listener has already terminated in this thread,
+                // which it might have done if the initial Snmp.send threw an IOException
+<span class="fc bfc" id="L158" title="All 2 branches covered.">                if (!listener.isFinished()) {</span>
+<span class="fc" id="L159">                    final long startTime = System.currentTimeMillis();</span>
+<span class="fc bfc" id="L160" title="All 4 branches covered.">                    while ((!listener.isFinished()) &amp;&amp; ((System.currentTimeMillis() - startTime) &lt; snmpConfiguration.getWalkTimeout())) {</span>
+<span class="fc" id="L161">                        listener.wait(snmpConfiguration.getWalkTimeout());</span>
+                    }
+
+<span class="fc bfc" id="L164" title="All 2 branches covered.">                    if (!listener.isFinished()) {</span>
+                        //Timed out rather than finished.
+<span class="fc" id="L166">                        listener.stopWalk();</span>
+<span class="fc" id="L167">                        log.error(&quot;Table Walk for device {} timed out.&quot;, getHostAddress());</span>
+<span class="fc" id="L168">                        return new WalkResponse(new WalkException(&quot;Walk timed out&quot;));</span>
+                    }
+                }
+<span class="nc" id="L171">            } catch (final InterruptedException ex) {</span>
+<span class="nc" id="L172">                Thread.interrupted();</span>
+<span class="nc" id="L173">                walkerLog.warn(&quot;listener wait interrupted:{}&quot;, ex);</span>
+<span class="fc" id="L174">            }</span>
+<span class="pc" id="L175">        }</span>
+<span class="fc" id="L176">        return null;</span>
+    }
+
+    private String getHostAddress() {
+<span class="fc" id="L180">        return ((IpAddress) address).getInetAddress().getHostAddress();</span>
+    }
+
+
+    @Override
+    public PDU createPDU(final Target target) {
+<span class="fc" id="L186">        final PDU request = new PDU();</span>
+<span class="fc" id="L187">        request.setType(PDU.GETBULK);</span>
+<span class="fc" id="L188">        return request;</span>
+    }
+
+    private class TableResponseListener implements TableListener {
+
+<span class="fc" id="L193">        private final long startTime = System.currentTimeMillis();</span>
+        private final IVariableBindingHandler networkDevice;
+        private boolean finished;
+        private int requests;
+        private int objects;
+        private WalkResponse response;
+
+        /**
+         * Instantiates a new Table response listener.
+         *
+         * @param networkDevice the network device
+         */
+<span class="fc" id="L205">        public TableResponseListener(final IVariableBindingHandler networkDevice) {</span>
+<span class="fc" id="L206">            this.networkDevice = networkDevice;</span>
+<span class="fc" id="L207">            finished = false;</span>
+<span class="fc" id="L208">        }</span>
+
+        /**
+         * Gets response.
+         *
+         * @return the response
+         */
+        public WalkResponse getResponse() {
+<span class="fc bfc" id="L216" title="All 2 branches covered.">            if (response != null) {</span>
+<span class="fc" id="L217">                return response;</span>
+            }
+<span class="pc bpc" id="L219" title="1 of 2 branches missed.">            if (!finished) {</span>
+<span class="nc" id="L220">                return new WalkResponse(new WalkException(&quot;Walk interrupted&quot;));</span>
+            }
+
+
+<span class="fc" id="L224">            final long walkTime = System.currentTimeMillis() - startTime;</span>
+<span class="fc" id="L225">            walkerLog.debug(&quot;requests:{}, objects:{}&quot;, requests, objects);</span>
+<span class="fc" id="L226">            walkerLog.debug(&quot;time:{}&quot;, walkTime);</span>
+
+<span class="fc" id="L228">            response = new WalkResponse(true);</span>
+<span class="fc" id="L229">            response.setObjectCount(objects);</span>
+<span class="fc" id="L230">            response.setRequestCount(requests);</span>
+<span class="fc" id="L231">            response.setWalkTime(walkTime);</span>
+<span class="fc" id="L232">            return response;</span>
+        }
+
+        /**
+         * Stop walk.
+         */
+        public void stopWalk() {
+<span class="fc" id="L239">            finished = true;</span>
+<span class="fc" id="L240">        }        @Override</span>
+        public boolean next(final TableEvent e) {
+<span class="fc" id="L242">            requests++;</span>
+<span class="fc" id="L243">            final VariableBinding[] vbs = e.getColumns();</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">            for (VariableBinding vb : vbs) {</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">                if (vb != null) {</span>
+<span class="fc" id="L246">                    addVariable(vb);</span>
+                }
+<span class="fc" id="L248">                objects++;</span>
+            }
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">            return !finished;</span>
+        }
+
+        /**
+         * Had error boolean.
+         *
+         * @return the boolean
+         */
+        public boolean hadError() {
+<span class="fc bfc" id="L259" title="All 2 branches covered.">            return response != null;</span>
+        }        private boolean addVariable(final VariableBinding binding) {
+<span class="fc" id="L261">            walkerLog.debug(&quot;&gt;&gt;&gt; addVariable:{}&quot;, binding);</span>
+            try {
+<span class="fc" id="L263">                final boolean wasAdded = networkDevice.addVariable(binding);</span>
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">                if (!wasAdded) {</span>
+<span class="fc" id="L265">                    return false;</span>
+                }
+<span class="nc" id="L267">            } catch (final Exception e) {</span>
+<span class="nc" id="L268">                walkerLog.warn(&quot;Exception adding variable binding:{} {} from &quot; + getHostAddress(), binding, e);</span>
+<span class="nc" id="L269">            }</span>
+<span class="nc" id="L270">            return true;</span>
+        }
+
+        /**
+         * Reset.
+         */
+        public void reset() {
+<span class="fc" id="L277">            finished = false;</span>
+<span class="fc" id="L278">        }        @Override</span>
+        public void finished(final TableEvent e) {
+<span class="fc" id="L280">            walkerLog.debug(&quot;Finished table request&quot;);</span>
+<span class="pc bpc" id="L281" title="3 of 4 branches missed.">            if ((e.getColumns() != null) &amp;&amp; (e.getColumns().length &gt; 0)) {</span>
+<span class="nc" id="L282">                next(e);</span>
+            }
+
+<span class="fc bfc" id="L285" title="All 2 branches covered.">            if (e.isError()) {</span>
+<span class="fc" id="L286">                log.error(&quot;Exception when walking:&quot; + e.getErrorMessage(), e.getException());</span>
+<span class="fc" id="L287">                response = new WalkResponse(new WalkException(e.getErrorMessage()));</span>
+            }
+<span class="fc" id="L289">            finished = true;</span>
+<span class="fc" id="L290">            synchronized (this) {</span>
+<span class="fc" id="L291">                this.notify();</span>
+<span class="pc" id="L292">            }</span>
+<span class="fc" id="L293">        }</span>
+
+        @Override
+        public boolean isFinished() {
+<span class="fc" id="L297">            walkerLog.debug(&quot;isFinished {}&quot;, finished);</span>
+<span class="fc" id="L298">            return finished;</span>
+        }
+
+
+
+
+
+
+    }
+
+    private class TableIndexRetrievalDescriptor {
+        /**
+         * The Low index.
+         */
+        protected OID lowIndex;
+        /**
+         * The High index.
+         */
+        protected OID highIndex;
+        /**
+         * The Column oids.
+         */
+        protected Set&lt;OID&gt; columnOids;
+        /**
+         * Instantiates a new Table index retrieval descriptor.
+         *
+         * @param indexOid the index oid
+         */
+<span class="fc" id="L326">        public TableIndexRetrievalDescriptor(final OID indexOid) {</span>
+<span class="fc bfc" id="L327" title="All 2 branches covered.">            if (indexOid.last() == 0) {</span>
+<span class="fc" id="L328">                lowIndex = indexOid.trim();</span>
+            } else {
+<span class="fc" id="L330">                lowIndex = new OID(indexOid);</span>
+<span class="fc" id="L331">                lowIndex.set(indexOid.size() - 1, indexOid.last() - 1);</span>
+            }
+
+<span class="fc" id="L334">            highIndex = indexOid;</span>
+<span class="fc" id="L335">            columnOids = new TreeSet&lt;OID&gt;();</span>
+<span class="fc" id="L336">        }</span>
+
+        /**
+         * Get column oids oid [ ].
+         *
+         * @return the oid [ ]
+         */
+        public OID[] getColumnOids() {
+<span class="fc" id="L344">            return columnOids.toArray(new OID[columnOids.size()]);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>V2cSnmpConfiguration.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.snmp</a> &gt; <span class="el_source">V2cSnmpConfiguration.java</span></div><h1>V2cSnmpConfiguration.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btisystems.pronx.ems.core.snmp;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.snmp4j.CommunityTarget;
+import org.snmp4j.MessageDispatcher;
+import org.snmp4j.MessageDispatcherImpl;
+import org.snmp4j.PDU;
+import org.snmp4j.Snmp;
+import org.snmp4j.Target;
+import org.snmp4j.TransportMapping;
+import org.snmp4j.mp.MPv2c;
+import org.snmp4j.mp.SnmpConstants;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.OctetString;
+import org.snmp4j.util.MultiThreadedMessageDispatcher;
+import org.snmp4j.util.ThreadPool;
+
+import java.io.IOException;
+
+/**
+ * V2c SNMP Configuration
+ */
+public class V2cSnmpConfiguration extends SnmpConfiguration {
+<span class="fc" id="L39">    private static final Logger LOG = LoggerFactory.getLogger(V2cSnmpConfiguration.class);</span>
+
+    /**
+     * Class constructor
+     */
+<span class="fc" id="L44">    public V2cSnmpConfiguration() {</span>
+<span class="fc" id="L45">        LOG.debug(&quot;&gt;&gt;&gt; V2cSnmpConfiguration&quot;);</span>
+<span class="fc" id="L46">        setVersion(SnmpConstants.version2c);</span>
+<span class="fc" id="L47">    }</span>
+
+    @Override
+    public Target createTarget(final Address address) {
+<span class="fc" id="L51">        final CommunityTarget target = new CommunityTarget();</span>
+<span class="fc" id="L52">        target.setCommunity(new OctetString(getCommunity()));</span>
+<span class="fc" id="L53">        target.setAddress(address);</span>
+<span class="fc" id="L54">        target.setVersion(getVersion());</span>
+<span class="fc" id="L55">        target.setRetries(getRetries());</span>
+<span class="fc" id="L56">        target.setTimeout(getTimeout());</span>
+<span class="fc" id="L57">        target.setMaxSizeRequestPDU(getMaxSizeResponsePDU());</span>
+<span class="fc" id="L58">        return target;</span>
+    }
+
+    @Override
+    public PDU createPDU(final int type) {
+<span class="fc" id="L63">        final PDU pdu = new PDU();</span>
+<span class="fc" id="L64">        pdu.setType(type);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        switch (type) {</span>
+            case PDU.GETBULK:
+<span class="fc" id="L67">                pdu.setMaxRepetitions(getMaxRepetitions());</span>
+<span class="fc" id="L68">                pdu.setNonRepeaters(getNonRepeaters());</span>
+<span class="fc" id="L69">                break;</span>
+            default:
+<span class="fc" id="L71">                LOG.trace(&quot;Not setting up non-default configuration for PDU type {}.&quot;, type);</span>
+        }
+<span class="fc" id="L73">        return pdu;</span>
+    }
+
+    @Override
+    public Snmp createSnmpSession(final TransportMapping transportMapping) throws IOException {
+<span class="fc" id="L78">        final ThreadPool threadPool = ThreadPool.create(&quot;SnmpDispatcherPool&quot;, getDispatcherPoolSize());</span>
+<span class="fc" id="L79">        final MessageDispatcher mtDispatcher = new MultiThreadedMessageDispatcher(threadPool, new MessageDispatcherImpl());</span>
+
+        // Add message processing models
+<span class="fc" id="L82">        mtDispatcher.addMessageProcessingModel(new MPv2c());</span>
+
+<span class="fc" id="L84">        final Snmp snmp = new Snmp(mtDispatcher, transportMapping);</span>
+
+<span class="fc" id="L86">        snmp.listen();</span>
+<span class="fc" id="L87">        return snmp;</span>
+    }
+    
+    @Override
+    public String toString() {
+<span class="fc" id="L92">        return &quot;V2cSnmpConfiguration{&quot; + &quot;version=&quot; + getVersion() + &quot;, retries=&quot; + getRetries() + &quot;, timeout=&quot; + getTimeout()</span>
+                + &quot;, maxRepetitions=&quot; + getMaxRepetitions() + &quot;, nonRepeaters=&quot; + getNonRepeaters() + &quot;, maxSizeResponsePDU=&quot; 
+                + getMaxSizeResponsePDU() + &quot;, walkTimeout=&quot; + getWalkTimeout() + &quot;, port=&quot; + getPort() + &quot;, dispatcherPoolSize=&quot; 
+                + getDispatcherPoolSize() + &quot;, maximumRowsPerPdu=&quot; + getMaximumRowsPerPdu() + &quot;, maximumColumnsPerPdu=&quot; 
+                + getMaximumColumnsPerPdu() + &quot;, community=&quot; + getCommunity() + '}';
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

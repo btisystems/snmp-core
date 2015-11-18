@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>WalkResponse.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.snmp</a> &gt; <span class="el_source">WalkResponse.java</span></div><h1>WalkResponse.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.core.snmp;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Encapsulates the parameters describing the response to an SNMP walk request.
+ */
+public class WalkResponse {
+
+    /**
+     * The constant SUCCESS.
+     */
+    public static final String SUCCESS = &quot;success&quot;;
+    /**
+     * The constant FAILED.
+     */
+    public static final String FAILED = &quot;failed:&quot;;
+    /**
+     * The constant NO_IDEA.
+     */
+    public static final String NO_IDEA = &quot;???&quot;;
+<span class="fc" id="L36">    private static Logger log = LoggerFactory.getLogger(WalkResponse.class);</span>
+
+    private final boolean isSuccess;
+    private final Throwable throwable;
+
+    // Walk record
+    private long walkTime;      // Time taken
+    private long pingTime;      // ICMP latency
+    private int objectCount;    // Number of bindings returned
+    private int requestCount;   // Number of requests
+
+    /**
+     * Instantiates a new Walk response.
+     *
+     * @param isSuccess the is success
+     */
+<span class="fc" id="L52">    public WalkResponse(final boolean isSuccess) {</span>
+<span class="fc" id="L53">        log.debug(&quot;&gt;&gt;&gt; DeviceDiscoveryResponse:{}&quot;, isSuccess);</span>
+<span class="fc" id="L54">        this.isSuccess = isSuccess;</span>
+<span class="fc" id="L55">        throwable = null;</span>
+<span class="fc" id="L56">    }</span>
+
+    /**
+     * Instantiates a new Walk response.
+     *
+     * @param throwable the throwable
+     */
+<span class="fc" id="L63">    public WalkResponse(final Throwable throwable) {</span>
+<span class="fc" id="L64">        this.isSuccess = false;</span>
+<span class="fc" id="L65">        this.throwable = throwable;</span>
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * Is success boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isSuccess() {
+<span class="fc" id="L74">        return isSuccess;</span>
+    }
+
+    /**
+     * Gets throwable.
+     *
+     * @return the throwable
+     */
+    public Throwable getThrowable() {
+<span class="fc" id="L83">        return throwable;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (isSuccess) {</span>
+<span class="fc" id="L89">            return SUCCESS;</span>
+        } else {
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">            return FAILED + ((throwable != null) ? throwable.getMessage() : NO_IDEA);</span>
+        }
+    }
+
+    /**
+     * Gets walk time.
+     *
+     * @return the walk time
+     */
+    public long getWalkTime() {
+<span class="fc" id="L101">        return walkTime;</span>
+    }
+
+    /**
+     * Sets walk time.
+     *
+     * @param walkTime the walk time
+     */
+    public void setWalkTime(final long walkTime) {
+<span class="fc" id="L110">        this.walkTime = walkTime;</span>
+<span class="fc" id="L111">    }</span>
+
+    /**
+     * Gets ping time.
+     *
+     * @return the ping time
+     */
+    public long getPingTime() {
+<span class="nc" id="L119">        return pingTime;</span>
+    }
+
+    /**
+     * Sets ping time.
+     *
+     * @param pingTime the ping time
+     */
+    public void setPingTime(final long pingTime) {
+<span class="nc" id="L128">        this.pingTime = pingTime;</span>
+<span class="nc" id="L129">    }</span>
+
+    /**
+     * Gets object count.
+     *
+     * @return the object count
+     */
+    public int getObjectCount() {
+<span class="fc" id="L137">        return objectCount;</span>
+    }
+
+    /**
+     * Sets object count.
+     *
+     * @param objectCount the object count
+     */
+    public void setObjectCount(final int objectCount) {
+<span class="fc" id="L146">        this.objectCount = objectCount;</span>
+<span class="fc" id="L147">    }</span>
+
+    /**
+     * Gets request count.
+     *
+     * @return the request count
+     */
+    public int getRequestCount() {
+<span class="fc" id="L155">        return requestCount;</span>
+    }
+
+    /**
+     * Sets request count.
+     *
+     * @param requestCount the request count
+     */
+    public void setRequestCount(final int requestCount) {
+<span class="fc" id="L164">        this.requestCount = requestCount;</span>
+<span class="fc" id="L165">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

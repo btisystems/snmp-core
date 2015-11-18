@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SnmpConfiguration.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.snmp</a> &gt; <span class="el_source">SnmpConfiguration.java</span></div><h1>SnmpConfiguration.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.btisystems.pronx.ems.core.snmp;
+
+import org.snmp4j.PDU;
+import org.snmp4j.Snmp;
+import org.snmp4j.Target;
+import org.snmp4j.TransportMapping;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.OctetString;
+
+import java.io.IOException;
+
+/**
+ * Base class for SNMP Configuration, extended for different versions.
+ */
+<span class="fc" id="L29">public abstract class SnmpConfiguration implements ISnmpConfiguration {</span>
+
+    private static final int DEFAULT_TIMEOUT = 1000;
+    private static final int DEFAULT_REPETITIONS = 10;
+    private static final int DEFAULT_MAX_SIZE_RESPONSE_PDU = 65535;
+    private static final int DEFAULT_WALK_TIMEOUT = 900000;
+    private static final int DEFAULT_PORT = 161;
+    private static final int DEFAULT_DISPATCHER_POOL_SIZE = 8;
+    private static final int DEFAULT_MAX_ROWS_PER_PDU = 0; // 0 =&gt; use snmp4j default
+    private static final int DEFAULT_MAX_COLUMNS_PER_PDU = 0; // 0 =&gt; use snmp4j default
+    /**
+     * The Version.
+     */
+    private int version;
+<span class="fc" id="L43">    private int retries = 1;</span>
+<span class="fc" id="L44">    private int timeout = DEFAULT_TIMEOUT;</span>
+<span class="fc" id="L45">    private int maxRepetitions = DEFAULT_REPETITIONS;</span>
+<span class="fc" id="L46">    private int nonRepeaters = 0;</span>
+<span class="fc" id="L47">    private int maxSizeResponsePDU = DEFAULT_MAX_SIZE_RESPONSE_PDU;</span>
+<span class="fc" id="L48">    private int walkTimeout = DEFAULT_WALK_TIMEOUT;</span>
+<span class="fc" id="L49">    private int port = DEFAULT_PORT;</span>
+<span class="fc" id="L50">    private int dispatcherPoolSize = DEFAULT_DISPATCHER_POOL_SIZE;</span>
+<span class="fc" id="L51">    private int maximumRowsPerPdu = DEFAULT_MAX_ROWS_PER_PDU;</span>
+<span class="fc" id="L52">    private int maximumColumnsPerPdu = DEFAULT_MAX_COLUMNS_PER_PDU;</span>
+
+<span class="fc" id="L54">    private OctetString community = new OctetString(&quot;public&quot;);</span>
+
+    /**
+     * Gets dispatcher pool size.
+     *
+     * @return the dispatcher pool size
+     */
+    public int getDispatcherPoolSize() {
+<span class="fc" id="L62">        return dispatcherPoolSize;</span>
+    }    
+    
+    @Override
+    public void setCommunity(final String community) {
+<span class="fc" id="L67">        this.community = new OctetString(community);</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Sets dispatcher pool size.
+     *
+     * @param dispatcherPoolSize the dispatcher pool size
+     */
+    public void setDispatcherPoolSize(final int dispatcherPoolSize) {
+<span class="fc" id="L76">        this.dispatcherPoolSize = dispatcherPoolSize;</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Gets retries.
+     *
+     * @return the retries
+     */
+    public int getRetries() {
+<span class="fc" id="L85">        return retries;</span>
+    }
+
+    /**
+     * Sets retries.
+     *
+     * @param retries the retries
+     */
+    public void setRetries(final int retries) {
+<span class="fc" id="L94">        this.retries = retries;</span>
+<span class="fc" id="L95">    }    /**</span>
+     * Sets max repetitions.
+     *
+     * @param maxRepetitions the max repetitions
+     */
+    public void setMaxRepetitions(final int maxRepetitions) {
+<span class="fc" id="L101">        this.maxRepetitions = maxRepetitions;</span>
+<span class="fc" id="L102">    }</span>
+
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
+    public int getTimeout() {
+<span class="fc" id="L110">        return timeout;</span>
+    }
+
+    /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
+    public void setTimeout(final int timeout) {
+<span class="fc" id="L119">        this.timeout = timeout;</span>
+<span class="fc" id="L120">    }</span>
+
+    public void setVersion(final int version) {
+<span class="fc" id="L123">        this.version = version;</span>
+<span class="fc" id="L124">    }</span>
+
+    /**
+     * Gets non repeaters.
+     *
+     * @return the non repeaters
+     */
+    public int getNonRepeaters() {
+<span class="fc" id="L132">        return nonRepeaters;</span>
+    }
+
+    /**
+     * Sets non repeaters.
+     *
+     * @param nonRepeaters the non repeaters
+     */
+    public void setNonRepeaters(final int nonRepeaters) {
+<span class="fc" id="L141">        this.nonRepeaters = nonRepeaters;</span>
+<span class="fc" id="L142">    }</span>
+
+    /**
+     * Gets max size response pdu.
+     *
+     * @return the max size response pdu
+     */
+    public int getMaxSizeResponsePDU() {
+<span class="fc" id="L150">        return maxSizeResponsePDU;</span>
+    }
+
+    /**
+     * Sets max size response pdu.
+     *
+     * @param maxSizeResponsePDU the max size response pdu
+     */
+    public void setMaxSizeResponsePDU(final int maxSizeResponsePDU) {
+<span class="fc" id="L159">        this.maxSizeResponsePDU = maxSizeResponsePDU;</span>
+<span class="fc" id="L160">    }</span>
+
+    /**
+     * Deliver a {@link Target} built from the configuration
+     *
+     * @param address the address of the device with which the target is to be associated
+     * @return a {@link Target} from the configuration
+     */
+    @Override
+    public abstract Target createTarget(final Address address);
+
+    /**
+     * Deliver a {@link PDU} built from the configuration
+     *
+     * @param type the request type
+     * @return a {@link PDU}, built from the configuration with the specified request type
+     */
+    @Override
+    public abstract PDU createPDU(final int type);
+
+    /**
+     * Deliver an {@link Snmp} session for the specified transport mapping
+     *
+     * @param transportMapping the initial transport mapping
+     * @return an {@link Snmp} instance
+     * @throws IOException
+     */
+    @Override
+    public abstract Snmp createSnmpSession(final TransportMapping transportMapping) throws IOException;
+
+    @Override
+    public int getVersion() {
+<span class="fc" id="L192">        return version;</span>
+    }    
+    
+    @Override
+    public int getMaxRepetitions() {
+<span class="fc" id="L197">        return maxRepetitions;</span>
+    }
+
+    @Override
+    public int getWalkTimeout() {
+<span class="fc" id="L202">        return walkTimeout;</span>
+    }
+
+    /**
+     * Sets walk timeout.
+     *
+     * @param walkTimeout the walk timeout
+     */
+    public void setWalkTimeout(final int walkTimeout) {
+<span class="fc" id="L211">        this.walkTimeout = walkTimeout;</span>
+<span class="fc" id="L212">    }</span>
+    
+    @Override
+    public String getCommunity() {
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">        return community == null ? null : community.toString();</span>
+    }
+
+    @Override
+    public int getMaximumRowsPerPdu() {
+<span class="fc" id="L221">        return maximumRowsPerPdu;</span>
+    }
+
+    /**
+     * Sets maximum rows per pdu.
+     *
+     * @param maximumRowsPerPdu the maximum rows per pdu
+     */
+    public void setMaximumRowsPerPdu(final int maximumRowsPerPdu) {
+<span class="fc" id="L230">        this.maximumRowsPerPdu = maximumRowsPerPdu;</span>
+<span class="fc" id="L231">    }</span>
+
+    @Override
+    public int getMaximumColumnsPerPdu() {
+<span class="fc" id="L235">        return maximumColumnsPerPdu;</span>
+    }
+
+    /**
+     * Sets maximum columns per pdu.
+     *
+     * @param maximumColumnsPerPdu the maximum columns per pdu
+     */
+    public void setMaximumColumnsPerPdu(final int maximumColumnsPerPdu) {
+<span class="fc" id="L244">        this.maximumColumnsPerPdu = maximumColumnsPerPdu;</span>
+<span class="fc" id="L245">    }</span>
+
+    @Override
+    public int getPort() {
+<span class="fc" id="L249">        return port;</span>
+    }
+
+    @Override
+    public void setPort(final int port) {
+<span class="fc" id="L254">        this.port = port;</span>
+<span class="fc" id="L255">    }</span>
+
+
+
+
+
+
+
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

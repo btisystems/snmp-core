@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>NetworkDevice.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">snmp-core</a> &gt; <a href="index.source.html" class="el_package">com.btisystems.pronx.ems.core.model</a> &gt; <span class="el_source">NetworkDevice.java</span></div><h1>NetworkDevice.java</h1><pre class="source lang-java linenums">/*
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.btisystems.pronx.ems.core.model;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
+
+
+/**
+ * Manages the creation and population of entities for a discovered device.
+ */
+
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">public class NetworkDevice implements INetworkDevice {</span>
+
+<span class="fc" id="L31">    private static Logger log = LoggerFactory.getLogger(NetworkDevice.class);</span>
+
+    private final IClassRegistry oidRegistry;
+
+<span class="fc" id="L35">    private final Map&lt;OID, DeviceEntity&gt; simpleObjects = new HashMap&lt;OID, DeviceEntity&gt;();</span>
+
+    private AbstractRootEntity rootEntity;
+
+    private final String deviceAddress;
+
+    /**
+     * Class constructor
+     *
+     * @param oidRegistry   the registry used to map OIDs to entity classes
+     * @param deviceAddress the name of the device
+     */
+    public NetworkDevice(final IClassRegistry oidRegistry,
+                  final String deviceAddress) {
+<span class="fc" id="L49">        super();</span>
+<span class="fc" id="L50">        this.oidRegistry = oidRegistry;</span>
+<span class="fc" id="L51">        this.deviceAddress = deviceAddress;</span>
+<span class="fc" id="L52">    }</span>
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean addVariable(final VariableBinding binding) {
+<span class="fc" id="L59">        log.debug(&quot;&gt;&gt;&gt; addVariable:{}&quot;, binding);</span>
+
+<span class="fc" id="L61">        final OID containingOid = getContainingClassOid(binding.getOid());</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (containingOid != null) {</span>
+
+            // Determine the number of index elements in the OID for the variable.
+            // This is difference in the length of its OID and the containing object's OID.
+<span class="fc" id="L66">            final int indexElementCount = binding.getOid().size() - containingOid.size();</span>
+<span class="fc" id="L67">            log.trace(&quot;indexElementCount:{}&quot;, indexElementCount);</span>
+
+            // We have got a class that can potentially contain the variable.
+            // See if that class is a table entry (i.e. it has an index).
+<span class="fc" id="L71">            final Class&lt;? extends DeviceEntity&gt; containingClass = oidRegistry.getClass(containingOid);</span>
+
+            // If there is no entry index, we must be dealing with a scalar variable.
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            if (!IIndexed.class.isAssignableFrom(containingClass)) {</span>
+
+                // Check that the OID of the containing object is the same as the
+                // variable, without the variable identifier and the final &quot;.0&quot;.
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">                if (indexElementCount == 2) {</span>
+                    // Set the variable on the containing object
+<span class="fc" id="L80">                    addScalarVariable(binding, containingOid);</span>
+                } else {
+<span class="nc" id="L82">                    log.debug(&quot;Unrecognised OID:&quot; + binding.getOid());</span>
+<span class="nc" id="L83">                    return false;</span>
+                }
+            } else {
+                // This must be a variable in a table element.
+<span class="fc" id="L87">                addTableColumn(binding, containingOid, indexElementCount - 1);</span>
+            }
+<span class="fc" id="L89">            return true;</span>
+        } else {
+<span class="fc" id="L91">            log.info(&quot;Ignoring oid {} from {}.&quot;, binding.getOid(), deviceAddress);</span>
+<span class="fc" id="L92">            return false;</span>
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AbstractRootEntity getRootObject() {
+<span class="fc" id="L101">        return getRootEntity();</span>
+    }
+
+    // Add scalar variable to its object
+    private void addScalarVariable(final VariableBinding binding,
+                                   final OID containingOid) {
+<span class="fc" id="L107">        log.debug(&quot;&gt;&gt;&gt; addScalarVariable:{} {}&quot;, binding, containingOid);</span>
+
+        // Locate/create the instance of the class for the parent object.
+<span class="fc" id="L110">        final Object containingObject = getObject(containingOid);</span>
+
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (containingObject != null) {</span>
+            // Set the variable on the parent object.
+<span class="fc" id="L114">            setVariable(containingObject, binding);</span>
+        } else {
+<span class="nc" id="L116">            log.debug(&quot;Failed to find class for:{}&quot;, containingOid);</span>
+        }
+<span class="fc" id="L118">    }</span>
+
+    // Add table column to table entry
+    private void addTableColumn(final VariableBinding binding,
+                                final OID entryOid,
+                                final int indexElementCount) {
+<span class="fc" id="L124">        log.debug(&quot;&gt;&gt;&gt; addTableColumn:{} {}&quot;, binding, entryOid);</span>
+
+<span class="fc" id="L126">        final String entryIdentifier = getTableEntryIdentifier(binding.getOid(), indexElementCount);</span>
+<span class="fc" id="L127">        log.debug(&quot;entryIdentifier:{}&quot;, entryIdentifier);</span>
+
+        // Determine whether this table entry already exists.
+<span class="fc" id="L130">        final Object tableEntry = getTableEntry(entryOid, binding.getOid(), entryIdentifier);</span>
+
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (tableEntry != null) {</span>
+            // Set the variable on the table entry
+<span class="fc" id="L134">            setVariable(tableEntry, binding);</span>
+        }
+<span class="fc" id="L136">        log.debug(&quot;&lt;&lt;&lt; addTableColumn&quot;);</span>
+<span class="fc" id="L137">    }</span>
+
+    // Deliver the table entry for the specified OID and entryIdentifier
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private Object getTableEntry(final OID entryOid,
+                                 final OID variableOid,
+                                 final String entryIdentifier) {
+
+        // Check we recognise the table entry.
+<span class="fc" id="L146">        final Class&lt;? extends DeviceEntity&gt; clazz = oidRegistry.getClass(entryOid);</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (clazz == null) {</span>
+<span class="nc" id="L148">            log.debug(&quot;Unrecognized table entry:{}&quot;, entryOid);</span>
+<span class="nc" id="L149">            return null;</span>
+        }
+
+        // Get the table to which the entry is to be added
+<span class="fc" id="L153">        final DeviceEntity entity = getObject(getParentOid(entryOid));</span>
+<span class="pc bpc" id="L154" title="2 of 4 branches missed.">        assert entity != null : &quot;Failed to get table object&quot;;</span>
+<span class="fc" id="L155">        final ITableAccess&lt;DeviceEntity&gt; table = (ITableAccess&lt;DeviceEntity&gt;) entity;</span>
+
+        // See if the specific entry already exists for the table.
+<span class="fc" id="L158">        final Object entryObject = table.getEntry(entryIdentifier);</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (entryObject != null) {</span>
+<span class="fc" id="L160">            return entryObject;</span>
+        }
+
+        // Need to create a new table entry.
+<span class="fc" id="L164">        final Object newEntryObject = instantiateObject(clazz);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (newEntryObject != null) {</span>
+<span class="fc" id="L166">            table.setEntry(entryIdentifier, (DeviceEntity) newEntryObject);</span>
+<span class="fc" id="L167">            ((IIndexed) newEntryObject)._setIndex(variableOid);</span>
+<span class="fc" id="L168">            return newEntryObject;</span>
+        }
+<span class="nc" id="L170">        return null;</span>
+    }
+
+    // Sets variable on a managed object.
+    private void setVariable(final Object parentObject,
+                             final VariableBinding binding) {
+<span class="fc" id="L176">        log.debug(&quot;&gt;&gt;&gt; setVariable oid:{} object:{}&quot;, binding.getOid(), parentObject.getClass().getName());</span>
+<span class="fc" id="L177">        ((IVariableBindingSetter) parentObject).set(binding);</span>
+<span class="fc" id="L178">    }</span>
+
+    // Gets the instance of the managed object identified by its OID.
+    private DeviceEntity getObject(final OID oid) {
+        // See if the object has already been created.
+<span class="fc" id="L183">        final DeviceEntity object = simpleObjects.get(oid);</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        if (object != null) {</span>
+<span class="fc" id="L185">            return object;</span>
+        }
+
+        // Need to instantiate a new entity.
+<span class="fc" id="L189">        final DeviceEntity newObject = createNewEntity(oid);</span>
+<span class="fc" id="L190">        return newObject;</span>
+    }
+
+    // Given the OID of a class, instantiates a new object and adds it to the root entity.
+    private DeviceEntity createNewEntity(final OID oid) {
+<span class="fc" id="L195">        final Class&lt;? extends DeviceEntity&gt; clazz = oidRegistry.getClass(oid);</span>
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        if (clazz == null) {</span>
+<span class="nc" id="L197">            log.debug(&quot;No class for oid:{}&quot;, oid);</span>
+<span class="nc" id="L198">            return null;</span>
+        }
+
+        // Instantiate the new object.
+<span class="fc" id="L202">        final DeviceEntity object = instantiateObject(clazz);</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        if (object != null) {</span>
+            // Add to the simple objects.
+<span class="fc" id="L205">            simpleObjects.put(oid, object);</span>
+
+            // Add to the root entity for the device
+<span class="fc" id="L208">            final AbstractRootEntity rootEntity = getRootEntity();</span>
+<span class="fc" id="L209">            rootEntity.setObject(object);</span>
+<span class="fc" id="L210">            return object;</span>
+        }
+<span class="nc" id="L212">        return null;</span>
+    }
+
+    // Deliver the root entity for the device, creating it if necessary.
+    private AbstractRootEntity getRootEntity() {
+<span class="fc" id="L217">        log.debug(&quot;&gt;&gt;&gt; getRootEntity&quot;);</span>
+
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        if (rootEntity == null) {</span>
+<span class="fc" id="L220">            final Class&lt;? extends AbstractRootEntity&gt; rootEntityClass = oidRegistry.getRootEntityClass();</span>
+            try {
+<span class="fc" id="L222">                log.debug(&quot;instantiating entity type:{}&quot;, rootEntityClass);</span>
+<span class="fc" id="L223">                rootEntity = rootEntityClass.newInstance();</span>
+<span class="fc" id="L224">                log.debug(&quot;set device address:{}&quot;, deviceAddress);</span>
+<span class="fc" id="L225">                rootEntity.setDeviceAddress(deviceAddress);</span>
+<span class="nc" id="L226">            } catch (final Exception e) {</span>
+<span class="nc" id="L227">                log.debug(&quot;Failed to create root entity:&quot;, e);</span>
+<span class="nc" id="L228">                log.error(&quot;Failed to create root entity:{} {}&quot;, rootEntityClass, e.getMessage());</span>
+<span class="fc" id="L229">            }</span>
+        }
+<span class="fc" id="L231">        return rootEntity;</span>
+    }
+
+    // Instantiates an object of a given class.
+    private DeviceEntity instantiateObject(final Class&lt;? extends DeviceEntity&gt; clazz) {
+<span class="fc" id="L236">        DeviceEntity object = null;</span>
+        try {
+<span class="fc" id="L238">            object = clazz.newInstance();</span>
+<span class="nc" id="L239">        } catch (final InstantiationException e) {</span>
+<span class="nc" id="L240">            log.warn(&quot;Failed to instantiate object of type a {} {}&quot;, clazz, e.getMessage());</span>
+<span class="nc" id="L241">            log.debug(&quot;Failed to instantiate object of type a {}:&quot;, clazz, e);</span>
+<span class="nc" id="L242">        } catch (final IllegalAccessException e) {</span>
+<span class="nc" id="L243">            log.warn(&quot;Failed to instantiate object of type b {} {}&quot;, clazz, e.getMessage());</span>
+<span class="nc" id="L244">            log.debug(&quot;Failed to instantiate object of type b {}:&quot;, clazz, e);</span>
+<span class="pc" id="L245">        }</span>
+<span class="fc" id="L246">        return object;</span>
+    }
+
+
+    // Return the table entry index from an OID.
+    private String getTableEntryIdentifier(final OID oid, final int length) {
+<span class="fc" id="L252">        final int[] rawOid = oid.getValue();</span>
+<span class="fc" id="L253">        final StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L254">        final int startIndex = rawOid.length - length;</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        for (int i = startIndex; i &lt; rawOid.length; i++) {</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">            if (i &gt; startIndex) {</span>
+<span class="fc" id="L257">                sb.append('.');</span>
+            }
+<span class="fc" id="L259">            sb.append(rawOid[i]);</span>
+        }
+<span class="fc" id="L261">        return sb.toString();</span>
+    }
+
+    // Returns the parent OID of an OID.
+    private OID getParentOid(final OID oid) {
+<span class="fc" id="L266">        return getAncestorOid(oid, 1);</span>
+    }
+
+    private OID getAncestorOid(final OID oid, final int generationCount) {
+<span class="fc" id="L270">        final int[] rawOid = oid.getValue();</span>
+<span class="fc" id="L271">        final int levels = oid.size();</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if (levels &lt;= generationCount) {</span>
+<span class="fc" id="L273">            log.debug(&quot;Unexpected OID Ancestor {} {}&quot;, oid, generationCount);</span>
+<span class="fc" id="L274">            return null;</span>
+        }
+
+<span class="fc" id="L277">        return new OID(rawOid, 0, levels - generationCount);</span>
+    }
+
+    // Determine the OID of the class that contains the variable with the OID
+    private OID getContainingClassOid(final OID oid) {
+        // Keep trying parent Ids until we get a match in the registry
+<span class="fc" id="L283">        OID parentOid = getParentOid(oid);</span>
+<span class="fc bfc" id="L284" title="All 4 branches covered.">        while (parentOid != null &amp;&amp; oidRegistry.getClass(parentOid) == null) {</span>
+<span class="fc" id="L285">            parentOid = getParentOid(parentOid);</span>
+        }
+<span class="fc" id="L287">        log.trace(&quot;&lt;&lt;&lt; getContainingClassOid {}&quot;, parentOid);</span>
+<span class="fc" id="L288">        return parentOid;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

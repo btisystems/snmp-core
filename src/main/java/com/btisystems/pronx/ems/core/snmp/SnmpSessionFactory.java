@@ -31,11 +31,8 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(SnmpSessionFactory.class);
 
-    private ISnmpConfigurationFactory configurationFactory;
+    private final ISnmpConfigurationFactory configurationFactory;
     private Session defaultSnmpInterface;
-
-    public SnmpSessionFactory() {
-    }
     
     public SnmpSessionFactory(final ISnmpConfigurationFactory defaultConfigurationFactory) {
         this.configurationFactory = defaultConfigurationFactory;
@@ -45,7 +42,7 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
     public ISnmpSession createSession(final ISnmpConfiguration configuration, final String ipAddress) throws IOException {
         LOG.debug(">>> createSession address:{}", ipAddress);
         final Address address = getAddress(ipAddress, configuration.getPort());
-        final Session snmpInterface = configuration.createSnmpSession(new DefaultUdpTransportMapping());
+        final Session snmpInterface = getDefaultSnmpInterface();
         final Target target = configuration.createTarget(address);
         return new SnmpSession(configuration, snmpInterface, target, address);
     }
@@ -69,7 +66,7 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
         throw new UnsupportedOperationException("Alternative configuration factory not supported.");
     }
 
-    private Address getAddress(final String transportAddress, final int port) {
+    private static Address getAddress(final String transportAddress, final int port) {
         String address = transportAddress;
         String transport = "udp";
         final int colon = address.indexOf(':');
@@ -87,5 +84,17 @@ public class SnmpSessionFactory implements ISnmpSessionFactory {
             return new TcpAddress(address);
         }
         throw new IllegalArgumentException("Unknown transport " + transport);
+    }
+
+        private Session getDefaultSnmpInterface() throws IOException {
+            synchronized (configurationFactory) {
+                if (defaultSnmpInterface == null) {
+                    final ISnmpConfiguration defaultSnmpConfiguration = configurationFactory.getConfiguration(AccessType.READ_WRITE);
+                    defaultSnmpInterface =  defaultSnmpConfiguration.createSnmpSession(new DefaultUdpTransportMapping());
+                }
+                LOG.debug("Using default SnmpInterface!");
+            }
+
+        return defaultSnmpInterface;
     }
 }

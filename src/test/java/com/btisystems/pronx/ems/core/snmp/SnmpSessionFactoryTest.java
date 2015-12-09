@@ -58,11 +58,9 @@ public class SnmpSessionFactoryTest
     }
 
     @Test
-    public void shouldCreateSession() throws IOException  {
-        expect(defaultConfigurationFactory.getConfiguration(ISnmpConfigurationFactory.AccessType.READ_WRITE)).andReturn(defaultConfiguration);
+    public void shouldCreateSession() throws IOException {
+        expectSessionInteractions();
         expect(defaultConfiguration.createTarget(isA(Address.class))).andReturn(target);
-        expect(defaultConfiguration.createSnmpSession(isA(TransportMapping.class))).andReturn(snmpInterface);
-        expect(defaultConfiguration.getPort()).andReturn(161);
         replayAll();
 
         final ISnmpSession session = factory.createSession(LOCALHOST, "community");
@@ -79,11 +77,9 @@ public class SnmpSessionFactoryTest
 
 
     @Test
-    public void shouldUseExplicitPort() throws IOException  {
-        expect(defaultConfiguration.createSnmpSession(isA(TransportMapping.class))).andReturn(snmpInterface);
-        final Capture<Address> addressCapture = new Capture<Address>();
-        expect(defaultConfiguration.createTarget(capture(addressCapture))).andReturn(target);
-        expect(defaultConfiguration.getPort()).andReturn(161);
+    public void shouldUseExplicitPort() throws IOException {
+        expectSessionInteractions();
+        final Capture<Address> addressCapture = expectCreateTarget();
 
         replayAll();
 
@@ -96,11 +92,9 @@ public class SnmpSessionFactoryTest
     }
 
     @Test
-    public void shouldAcceptExplicitUdpProtocol() throws IOException  {
-        expect(defaultConfiguration.createSnmpSession(isA(TransportMapping.class))).andReturn(snmpInterface);
-        final Capture<Address> addressCapture = new Capture<Address>();
-        expect(defaultConfiguration.createTarget(capture(addressCapture))).andReturn(target);
-        expect(defaultConfiguration.getPort()).andReturn(161);
+    public void shouldAcceptExplicitUdpProtocol() throws IOException {
+        expectSessionInteractions();
+        final Capture<Address> addressCapture = expectCreateTarget();
 
         replayAll();
 
@@ -113,11 +107,9 @@ public class SnmpSessionFactoryTest
     }
 
     @Test
-    public void shouldAcceptTcpProtocol() throws IOException  {
-        expect(defaultConfiguration.createSnmpSession(isA(TransportMapping.class))).andReturn(snmpInterface);
-        final Capture<Address> addressCapture = new Capture<Address>();
-        expect(defaultConfiguration.createTarget(capture(addressCapture))).andReturn(target);
-        expect(defaultConfiguration.getPort()).andReturn(161);
+    public void shouldAcceptTcpProtocol() throws IOException {
+        expectSessionInteractions();
+        final Capture<Address> addressCapture = expectCreateTarget();
 
         replayAll();
 
@@ -128,7 +120,7 @@ public class SnmpSessionFactoryTest
         final TcpAddress address = (TcpAddress) addressCapture.getValue();
         assertEquals(161, address.getPort());
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotAcceptInvalidProtocol() throws IOException  {
         expect(defaultConfiguration.getPort()).andReturn(161);
@@ -153,5 +145,17 @@ public class SnmpSessionFactoryTest
         verify(defaultConfiguration);
         verify(snmpInterface);
         verify(target);
+    }
+
+    private Capture<Address> expectCreateTarget() {
+        final Capture<Address> result = new Capture<>();
+        expect(defaultConfiguration.createTarget(capture(result))).andReturn(target);
+        return result;
+    }
+
+    private void expectSessionInteractions() throws IOException {
+        expect(defaultConfigurationFactory.getConfiguration(ISnmpConfigurationFactory.AccessType.READ_WRITE)).andReturn(defaultConfiguration).atLeastOnce();
+        expect(defaultConfiguration.createSnmpSession(isA(TransportMapping.class))).andReturn(snmpInterface);
+        expect(defaultConfiguration.getPort()).andReturn(161);
     }
 }

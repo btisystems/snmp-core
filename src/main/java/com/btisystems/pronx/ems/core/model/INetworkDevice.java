@@ -15,11 +15,12 @@
 package com.btisystems.pronx.ems.core.model;
 
 import com.btisystems.pronx.ems.core.snmp.IVariableBindingHandler;
+import java.io.Serializable;
 
 /**
  * Manages the creation and population of entities for a discovered device.
  */
-public interface INetworkDevice extends IVariableBindingHandler {
+public interface INetworkDevice extends IVariableBindingHandler, Serializable {
 
     /**
      * @return  the root entity containing the tree of managed objects

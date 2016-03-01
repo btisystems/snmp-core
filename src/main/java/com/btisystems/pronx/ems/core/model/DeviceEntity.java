@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -50,8 +51,13 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
      */
     public static final String COLON = ":";
     private static final Logger LOG = LoggerFactory.getLogger(DeviceEntity.class);
-    private final Set<PropertyChangeListener> changeListeners = new HashSet<>();
+    private transient Set<PropertyChangeListener> changeListeners = new HashSet<>();
 
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        changeListeners = new HashSet<>();
+    }
+    
     /**
      * Gets children.
      *
@@ -333,4 +339,6 @@ public abstract class DeviceEntity implements IDeviceEntity, Serializable {
     Set<PropertyChangeListener> _getChangeListeners() {
         return changeListeners;
     }
+    
+    
 }

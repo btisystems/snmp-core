@@ -31,7 +31,7 @@ snmp-core,com.btisystems.pronx.ems.core.model,I_Device,0,16,0,0,0,6,0,6,0,6
 snmp-core,com.btisystems.pronx.ems.core.model,DeviceEntityDescription,7,45,0,0,1,11,1,5,1,5
 snmp-core,com.btisystems.pronx.ems.core.model,DeviceEntityDescription.FieldDescription,30,24,0,0,2,9,2,4,2,4
 snmp-core,com.btisystems.pronx.ems.core.model,ClassRegistry,25,371,5,31,8,82,7,29,2,16
-snmp-core,com.btisystems.pronx.ems.core.model,DeviceEntity,21,463,6,26,5,102,6,42,0,32
+snmp-core,com.btisystems.pronx.ems.core.model,DeviceEntity,29,463,6,26,8,102,7,42,1,32
 snmp-core,com.btisystems.pronx.ems.core.model,NetworkDevice,76,365,10,30,18,96,10,26,0,16
 snmp-core,com.btisystems.pronx.ems.core.model,AbstractRootEntity,94,262,0,10,17,56,1,19,1,14
 snmp-core,com.btisystems.pronx.ems.core.model,DeviceEntityDescription.FieldType,5,143,0,0,0,14,1,3,1,3
